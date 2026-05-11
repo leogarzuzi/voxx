@@ -29,7 +29,7 @@ export function AdmissoesMesChart({ data }: AdmissoesMesChartProps) {
           <YAxis allowDecimals={false} />
 
           <Tooltip
-            formatter={(value: number) => [value, "Admissões"]}
+           formatter={(value) => [`${value}`, "Admissões"]}
           />
 
           <Bar

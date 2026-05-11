@@ -25,10 +25,23 @@ export function AtestadosMesChart({
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
+
           <XAxis dataKey="mes" />
+
           <YAxis allowDecimals={false} />
-          <Tooltip formatter={(value: number) => [value, "Atestados"]} />
-          <Bar dataKey="total" fill="#7c3aed" radius={[6, 6, 0, 0]} />
+
+          <Tooltip
+            formatter={(value) => [
+              value,
+              "Atestados",
+            ]}
+          />
+
+          <Bar
+            dataKey="total"
+            fill="#7c3aed"
+            radius={[6, 6, 0, 0]}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

@@ -37,7 +37,7 @@ export function TipoDesligamentoChart({ data }: TipoDesligamentoChartProps) {
             ))}
           </Pie>
 
-          <Tooltip formatter={(value: number) => [value, "Desligamentos"]} />
+          <Tooltip formatter={(value) => [`${value}`, "Desligamentos"]} />
           <Legend />
         </PieChart>
       </ResponsiveContainer>

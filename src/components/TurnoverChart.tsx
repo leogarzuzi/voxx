@@ -19,7 +19,6 @@ interface TurnoverChartProps {
 }
 
 export function TurnoverChart({ data }: TurnoverChartProps) {
-  // ALTERE AQUI A META DO TURNOVER
   const metaTurnover = 5;
 
   return (
@@ -30,7 +29,6 @@ export function TurnoverChart({ data }: TurnoverChartProps) {
           margin={{ top: 20, right: 30, left: 10, bottom: 10 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
-
           <XAxis dataKey="mes" />
 
           <YAxis
@@ -41,7 +39,7 @@ export function TurnoverChart({ data }: TurnoverChartProps) {
           />
 
           <Tooltip
-            formatter={(value: number) => [`${value}%`, "Turnover"]}
+            formatter={(value) => [`${value}%`, "Turnover"]}
           />
 
           <ReferenceLine

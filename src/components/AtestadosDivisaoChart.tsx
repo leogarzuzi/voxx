@@ -39,7 +39,7 @@ export function AtestadosDivisaoChart({
           />
 
           <Tooltip
-            formatter={(value: number) => [value, "Atestados"]}
+            formatter={(value) => [`${value}`, "Atestados"]}
           />
 
           <Bar
