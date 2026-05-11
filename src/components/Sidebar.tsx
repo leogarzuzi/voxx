@@ -16,13 +16,8 @@ export function Sidebar() {
       <div className="flex items-center justify-between p-6">
         {!collapsed && (
           <div>
-            <h1 className="text-2xl font-bold tracking-wide">
-              VOXX
-            </h1>
-
-            <p className="mt-1 text-sm text-blue-100">
-              Sistema de RH
-            </p>
+            <h1 className="text-2xl font-bold tracking-wide">VOXX</h1>
+            <p className="mt-1 text-sm text-blue-100">Sistema de RH</p>
           </div>
         )}
 
@@ -35,9 +30,6 @@ export function Sidebar() {
       </div>
 
       <nav className="mt-6 space-y-1 px-4">
-
-        {/* DASHBOARD */}
-
         <button
           onClick={() => setDashboardOpen(!dashboardOpen)}
           className="flex w-full items-center justify-between rounded-lg bg-blue-700 px-4 py-3 font-medium hover:bg-blue-600"
@@ -54,7 +46,6 @@ export function Sidebar() {
 
         {!collapsed && dashboardOpen && (
           <div className="ml-4 mt-1 space-y-1">
-
             <Link
               className="block rounded-lg px-4 py-2 text-sm hover:bg-blue-700"
               href="/dashboard"
@@ -85,49 +76,28 @@ export function Sidebar() {
           </div>
         )}
 
-        {/* OPERAÇÕES */}
-
         {!collapsed && (
-          <>
-            <div className="mt-6 px-4 text-xs font-semibold uppercase tracking-wider text-blue-200">
-              Operações
+          <div className="mt-6">
+            <div className="px-4 text-xs font-semibold uppercase tracking-wider text-blue-200">
+              Ferramentas
             </div>
 
             <Link
-              className="block rounded-lg px-4 py-3 hover:bg-blue-700"
-              href="/admitir"
+              className="mt-2 block rounded-lg px-4 py-3 hover:bg-blue-700"
+              href="/analise-folha"
             >
-              Admitir
+              Analisar folha de pagamento
             </Link>
+          </div>
+        )}
 
-            <Link
-              className="block rounded-lg px-4 py-3 hover:bg-blue-700"
-              href="/desligar"
-            >
-              Desligar
-            </Link>
-
-            <Link
-              className="block rounded-lg px-4 py-3 hover:bg-blue-700"
-              href="/transferir"
-            >
-              Transferir
-            </Link>
-
-            <Link
-              className="block rounded-lg px-4 py-3 hover:bg-blue-700"
-              href="/permutar"
-            >
-              Permutar
-            </Link>
-
-            <Link
-              className="block rounded-lg px-4 py-3 hover:bg-blue-700"
-              href="/alteracao-ch"
-            >
-              Alteração CH
-            </Link>
-          </>
+        {collapsed && (
+          <Link
+            className="block rounded-lg px-4 py-3 text-center hover:bg-blue-700"
+            href="/analise-folha"
+          >
+            F
+          </Link>
         )}
       </nav>
     </aside>
