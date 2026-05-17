@@ -1,6 +1,6 @@
 import { google } from "googleapis";
 import { createClient } from "@supabase/supabase-js";
-import path from "path";
+
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,7 @@ export async function GET() {
     );
 
     const auth = new google.auth.GoogleAuth({
-      keyFile: path.resolve(process.cwd(), "scripts/credentials.json"),
+      credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON || "{}"),
       scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
     });
 
@@ -64,8 +64,8 @@ export async function GET() {
           }));
 
         todosAtestados = [...todosAtestados, ...atestados];
-      } catch {
-        console.log(`Aba ${mes} não encontrada. Pulando...`);
+      } catch (error) {
+          console.log(`Erro ao ler aba ${mes}:`, error);
       }
     }
 
