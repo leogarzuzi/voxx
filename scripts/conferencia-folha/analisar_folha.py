@@ -30,6 +30,21 @@ def carregar_ferias(fopag):
     except:
         return set()
 
+def carregar_desligados(fopag):
+    try:
+        df = pd.read_excel(fopag, sheet_name="DESLIGADOS")
+        df.columns = [str(col).strip().upper() for col in df.columns]
+
+        if "MATRICULA" not in df.columns:
+            return set()
+
+        df = df[df["MATRICULA"].notna()].copy()
+        df["MATRICULA_LIMPA"] = df["MATRICULA"].apply(utils_folha.limpar_matricula)
+
+        return set(df["MATRICULA_LIMPA"])
+
+    except:
+        return set()
 
 def ler_aba_fopag(fopag, nome_aba):
     df = pd.read_excel(fopag, sheet_name=nome_aba)
@@ -50,7 +65,12 @@ def ler_aba_fopag(fopag, nome_aba):
     return df
 
 
-def verificar_enviado_nao_pago(fopag_tratada, previa_filtrada, ferias_set):
+def verificar_enviado_nao_pago(
+    fopag_tratada,
+    previa_filtrada,
+    ferias_set,
+    desligados_set
+):
     erros = []
 
     previa_chaves = set(
@@ -70,8 +90,14 @@ def verificar_enviado_nao_pago(fopag_tratada, previa_filtrada, ferias_set):
             continue
 
         if matricula not in matriculas_na_previa:
-            tipo_erro = "MATRICULA_NAO_CONSTA_NA_PREVIA"
-            detalhe = "Matrícula enviada na FOPAG, mas não existe na prévia da sede."
+
+            if matricula in desligados_set:
+                tipo_erro = "MATRICULA_NAO_CONSTA_NA_PREVIA(DESLIGADO)"
+                detalhe = "Matrícula enviada, mas colaborador consta como desligado."
+
+            else:
+                tipo_erro = "MATRICULA_NAO_CONSTA_NA_PREVIA"
+                detalhe = "Matrícula enviada na FOPAG, mas não existe na prévia da sede."
 
         elif (matricula, rubrica) not in previa_chaves:
             if (
@@ -150,6 +176,8 @@ def main():
 
     ferias_set = carregar_ferias(fopag)
     print(f"Colaboradores em férias: {len(ferias_set)}")
+    desligados_set = carregar_desligados(fopag)
+    print(f"Colaboradores desligados: {len(desligados_set)}")
 
     previa["MATRICULA_LIMPA"] = previa["MATRICULA"].apply(utils_folha.limpar_matricula)
     previa["RUBRICA_LIMPA"] = previa["RUBRICA"].apply(utils_folha.normalizar_rubrica)
@@ -174,7 +202,8 @@ def main():
     erros_enviado = verificar_enviado_nao_pago(
         fopag_tratada,
         previa_filtrada,
-        ferias_set
+        ferias_set,
+        desligados_set
     )
 
     erros_pago = verificar_pago_nao_enviado(
@@ -191,18 +220,43 @@ def main():
     if erros:
         erros_df = pd.DataFrame(erros)
 
+        resumo_tipo = (
+            erros_df.groupby("TIPO_ERRO")
+            .size()
+            .reset_index(name="TOTAL")
+            .sort_values("TOTAL", ascending=False)
+        )
+
+        resumo_aba = (
+            erros_df.groupby("ABA_FOPAG")
+            .size()
+            .reset_index(name="TOTAL")
+            .sort_values("TOTAL", ascending=False)
+        )
+
+        resumo_geral = pd.DataFrame([
+            {"INDICADOR": "Competência analisada", "TOTAL": COMPETENCIA_ANALISE},
+            {"INDICADOR": "Linhas na prévia", "TOTAL": len(previa_filtrada)},
+            {"INDICADOR": "Lançamentos FOPAG", "TOTAL": len(fopag_tratada)},
+            {"INDICADOR": "Colaboradores em férias", "TOTAL": len(ferias_set)},
+            {"INDICADOR": "Colaboradores desligados", "TOTAL": len(desligados_set)},
+            {"INDICADOR": "Total de divergências", "TOTAL": len(erros_df)},
+        ])
+
         PASTA_OUTPUT.mkdir(exist_ok=True)
 
         caminho_saida = PASTA_OUTPUT / f"resultado_conferencia_{COMPETENCIA_ANALISE.replace('/', '-')}.xlsx"
 
-        erros_df.to_excel(caminho_saida, index=False)
+        with pd.ExcelWriter(caminho_saida, engine="openpyxl") as writer:
+            resumo_geral.to_excel(writer, sheet_name="RESUMO_GERAL", index=False)
+            resumo_tipo.to_excel(writer, sheet_name="RESUMO_TIPO_ERRO", index=False)
+            resumo_aba.to_excel(writer, sheet_name="RESUMO_POR_ABA", index=False)
+            erros_df.to_excel(writer, sheet_name="ERROS_DETALHADOS", index=False)
 
         print("\nRelatório gerado em:")
         print(caminho_saida)
     else:
         print("\nNenhum erro encontrado.")
 
-
 if __name__ == "__main__":
     main()
-    
