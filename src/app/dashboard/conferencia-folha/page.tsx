@@ -99,7 +99,7 @@ export default function ConferenciaFolhaPage() {
     label: string;
     sublabel?: string;
     file: File | null;
-    inputRef: React.RefObject<HTMLInputElement>;
+    inputRef: React.RefObject<HTMLInputElement | null>;
     onFile: (f: File | null) => void;
     isDrag: boolean;
     onDragEnter: () => void;
