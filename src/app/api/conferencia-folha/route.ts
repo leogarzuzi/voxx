@@ -328,7 +328,7 @@ export async function POST(request: NextRequest) {
         COMPETENCIA: competencia,
         ABA_FOPAG: abaEsperada,
         MATRICULA_FORMATADA: formatarMatricula(linha.MATRICULA_LIMPA),
-        NOME: mapaNomes.get(matricula) || "ND",
+        NOME: mapaNomes.get(linha.MATRICULA_LIMPA) || "ND",
         RUBRICA_ESPERADA: rubrica,
         DETALHE: "Rubrica paga na prévia, mas não encontrada na FOPAG.",
       });
