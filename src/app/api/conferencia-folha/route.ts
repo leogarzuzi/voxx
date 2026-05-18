@@ -216,14 +216,24 @@ export async function POST(request: NextRequest) {
       sheetToJson(previaWorkbook, abaPrevia)
     );
 
+    const mapaNomes = new Map(
+      previaOriginal.map((row) => [
+        limparMatricula(row.MATRICULA),
+        row.NOME || "ND",
+      ])
+    );
+
     const previa = previaOriginal
-      .map((row) => ({
-        ...row,
-        MATRICULA_LIMPA: limparMatricula(row.MATRICULA),
-        RUBRICA_LIMPA: normalizarRubrica(row.RUBRICA),
-        COMPETENCIA_LIMPA: normalizarCompetencia(row.COMPETENCIA),
-        } as Record<string, any>))
-        .filter((row) => row.COMPETENCIA_LIMPA === competencia);
+      .map(
+        (row) =>
+          ({
+            ...row,
+            MATRICULA_LIMPA: limparMatricula(row.MATRICULA),
+            RUBRICA_LIMPA: normalizarRubrica(row.RUBRICA),
+            COMPETENCIA_LIMPA: normalizarCompetencia(row.COMPETENCIA),
+          } as Record<string, any>)
+      )
+      .filter((row) => row.COMPETENCIA_LIMPA === competencia);
 
     const abasParaLer = [...ABAS_DUPLA, ...ABAS_SIMPLES];
 
@@ -253,13 +263,6 @@ export async function POST(request: NextRequest) {
       previa.map((row) => row.MATRICULA_LIMPA)
     );
 
-    const mapaNomes = new Map(
-      previa.map((row) => [
-        row.MATRICULA_LIMPA,
-        row.NOME || row["NOME"] || row["COLUNA C"] || "ND",
-      ])
-    );
-
     const erros: Record<string, any>[] = [];
 
     for (const linha of fopagTratada) {
@@ -270,23 +273,18 @@ export async function POST(request: NextRequest) {
         continue;
       }
 
-      let tipoErro = "";
       let detalhe = "";
 
       if (!matriculasNaPrevia.has(matricula)) {
         if (desligadosSet.has(matricula)) {
-          tipoErro = "MATRICULA_NAO_CONSTA_NA_PREVIA(DESLIGADO)";
           detalhe = "Matrícula enviada, mas colaborador consta como desligado.";
         } else {
-          tipoErro = "MATRICULA_NAO_CONSTA_NA_PREVIA";
           detalhe = "Matrícula enviada na FOPAG, mas não existe na prévia da sede.";
         }
       } else if (!previaChaves.has(`${matricula}|${rubrica}`)) {
         if (feriasSet.has(matricula) && ABAS_DUPLA.includes(linha.ABA_FOPAG)) {
-          tipoErro = "ENVIADO_(NÃO_CONSTA_NA_PRÉVIA)_CONSTA_FERIAS";
           detalhe = "Rubrica enviada, mas colaborador está de férias na competência.";
         } else {
-          tipoErro = "ENVIADO_(NÃO_CONSTA_NA_PRÉVIA)";
           detalhe = "Rubrica enviada na FOPAG, mas não foi encontrada na prévia.";
         }
       } else {
@@ -334,12 +332,12 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const resumoTipo = Object.entries(
+    const resumoDetalhe = Object.entries(
       erros.reduce<Record<string, number>>((acc, erro) => {
-        acc[erro.TIPO_ERRO] = (acc[erro.TIPO_ERRO] || 0) + 1;
+        acc[erro.DETALHE] = (acc[erro.DETALHE] || 0) + 1;
         return acc;
       }, {})
-    ).map(([TIPO_ERRO, TOTAL]) => ({ TIPO_ERRO, TOTAL }));
+    ).map(([DETALHE, TOTAL]) => ({ DETALHE, TOTAL }));
 
     const resumoAba = Object.entries(
       erros.reduce<Record<string, number>>((acc, erro) => {
@@ -362,7 +360,7 @@ export async function POST(request: NextRequest) {
     const wb = XLSX.utils.book_new();
 
     criarAbaEstilizada(wb, resumoGeral, "RESUMO_GERAL");
-    criarAbaEstilizada(wb, resumoTipo, "RESUMO_TIPO_ERRO");
+    criarAbaEstilizada(wb, resumoDetalhe, "RESUMO_DETALHE");
     criarAbaEstilizada(wb, resumoAba, "RESUMO_POR_ABA");
     criarAbaEstilizada(wb, erros, "ERROS_DETALHADOS");
 
