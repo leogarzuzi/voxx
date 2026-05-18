@@ -222,8 +222,8 @@ export async function POST(request: NextRequest) {
         MATRICULA_LIMPA: limparMatricula(row.MATRICULA),
         RUBRICA_LIMPA: normalizarRubrica(row.RUBRICA),
         COMPETENCIA_LIMPA: normalizarCompetencia(row.COMPETENCIA),
-      }))
-      .filter((row) => row.COMPETENCIA_LIMPA === competencia);
+        } as Record<string, any>))
+        .filter((row) => row.COMPETENCIA_LIMPA === competencia);
 
     const abasParaLer = [...ABAS_DUPLA, ...ABAS_SIMPLES];
 
