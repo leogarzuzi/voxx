@@ -241,7 +241,7 @@ export async function POST(request: NextRequest) {
             MATRICULA_LIMPA: limparMatricula(row.MATRICULA),
             CONTRATO: contrato,
             RUBRICA_ESPERADA: RUBRICAS[aba][contrato],
-          };
+          } as Record<string, any>;
         });
     });
 
