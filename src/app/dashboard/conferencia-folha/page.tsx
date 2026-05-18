@@ -103,7 +103,7 @@ export default function ConferenciaFolhaPage() {
     }, 600);
     }
 
-    
+
   const UploadCard = ({
     label,
     sublabel,
@@ -328,7 +328,7 @@ export default function ConferenciaFolhaPage() {
               onDragLeave={() => setFopagDrag(false)}
             />
             <UploadCard
-              label="Prévia"
+              label="PRÉVIA"
               sublabel="Arquivo de conferência"
               file={previa}
               inputRef={previaRef}

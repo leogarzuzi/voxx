@@ -253,6 +253,13 @@ export async function POST(request: NextRequest) {
       previa.map((row) => row.MATRICULA_LIMPA)
     );
 
+    const mapaNomes = new Map(
+      previa.map((row) => [
+        row.MATRICULA_LIMPA,
+        row.NOME || row["NOME"] || row["COLUNA C"] || "ND",
+      ])
+    );
+
     const erros: Record<string, any>[] = [];
 
     for (const linha of fopagTratada) {
@@ -290,7 +297,7 @@ export async function POST(request: NextRequest) {
         COMPETENCIA: competencia,
         ABA_FOPAG: linha.ABA_FOPAG,
         MATRICULA_FORMATADA: formatarMatricula(matricula),
-        NOME: linha.NOME ?? "",
+        NOME: mapaNomes.get(matricula) || "ND",
         RUBRICA_ESPERADA: rubrica,
         DETALHE: detalhe,
       });
@@ -321,7 +328,7 @@ export async function POST(request: NextRequest) {
         COMPETENCIA: competencia,
         ABA_FOPAG: abaEsperada,
         MATRICULA_FORMATADA: formatarMatricula(linha.MATRICULA_LIMPA),
-        NOME: linha.NOME ?? "",
+        NOME: mapaNomes.get(matricula) || "ND",
         RUBRICA_ESPERADA: rubrica,
         DETALHE: "Rubrica paga na prévia, mas não encontrada na FOPAG.",
       });
