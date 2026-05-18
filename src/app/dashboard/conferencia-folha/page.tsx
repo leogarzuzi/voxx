@@ -62,11 +62,19 @@ export default function ConferenciaFolhaPage() {
     });
 
     if (!response.ok) {
-      setLoading(false);
-      setProgresso(0);
-      setMensagem("Erro ao gerar relatório.");
-      return;
-    }
+    const erro = await response.json();
+
+    setLoading(false);
+    setProgresso(0);
+
+    setMensagem(
+      erro?.error
+        ? `Erro ao gerar relatório: ${erro.error}`
+        : "Erro ao gerar relatório."
+    );
+
+    return;
+  }
 
     setProgresso(100);
     const blob = await response.blob();
