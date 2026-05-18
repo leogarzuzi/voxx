@@ -287,7 +287,6 @@ export async function POST(request: NextRequest) {
       }
 
       erros.push({
-        TIPO_ERRO: tipoErro,
         COMPETENCIA: competencia,
         ABA_FOPAG: linha.ABA_FOPAG,
         MATRICULA_FORMATADA: formatarMatricula(matricula),
@@ -319,7 +318,6 @@ export async function POST(request: NextRequest) {
       if (existeNaFopag) continue;
 
       erros.push({
-        TIPO_ERRO: "PAGO_NA_PREVIA(NÃO_CONSTA_NO_ENVIO_DO_GAZOLLA)",
         COMPETENCIA: competencia,
         ABA_FOPAG: abaEsperada,
         MATRICULA_FORMATADA: formatarMatricula(linha.MATRICULA_LIMPA),
