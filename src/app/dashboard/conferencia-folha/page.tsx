@@ -99,15 +99,9 @@ export default function ConferenciaFolhaPage() {
     setTimeout(() => {
       setLoading(false);
       setProgresso(0);
-      setMensagem("Relatório gerado e baixado com sucesso.");
+      setMensagem(null);
     }, 600);
-  }
-    setTimeout(() => {
-      setLoading(false);
-      setProgresso(0);
-      setMensagem("Relatório gerado e baixado com sucesso.");
-    }, 700);
-    
+
   const UploadCard = ({
     label,
     sublabel,
