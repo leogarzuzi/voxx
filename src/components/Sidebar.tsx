@@ -84,7 +84,7 @@ export function Sidebar() {
 
             <Link
               className="mt-2 block rounded-lg px-4 py-3 hover:bg-blue-700"
-              href="/analise-folha"
+              href="/dashboard/conferencia-folha"
             >
               Analisar folha de pagamento
             </Link>
@@ -94,7 +94,7 @@ export function Sidebar() {
         {collapsed && (
           <Link
             className="block rounded-lg px-4 py-3 text-center hover:bg-blue-700"
-            href="/analise-folha"
+            href="/dashboard/conferencia-folha"
           >
             F
           </Link>
