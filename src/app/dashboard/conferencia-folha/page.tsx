@@ -101,7 +101,9 @@ export default function ConferenciaFolhaPage() {
       setProgresso(0);
       setMensagem(null);
     }, 600);
+    }
 
+    
   const UploadCard = ({
     label,
     sublabel,
