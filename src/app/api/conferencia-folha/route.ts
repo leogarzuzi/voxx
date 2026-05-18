@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import * as XLSX from "xlsx";
+import * as XLSX from "xlsx-js-style";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -29,6 +29,14 @@ const ABAS_SIMPLES = ["GRAT PLT", "GRAT ROT", "GRAT CTI ESP"];
 
 function limparMatricula(valor: any) {
   return String(valor ?? "").replace(/\D/g, "");
+}
+
+function formatarMatricula(valor: any) {
+  const limpa = limparMatricula(valor).padStart(8, "0");
+
+  if (limpa.length !== 8) return limpa;
+
+  return `${limpa[0]}.${limpa.slice(1, 4)}.${limpa.slice(4, 7)}-${limpa[7]}`;
 }
 
 function identificarContrato(pref: any) {
@@ -103,8 +111,72 @@ function acharAbaPrevia(workbook: XLSX.WorkBook) {
   if (workbook.SheetNames.includes("PREVIA")) return "PREVIA";
   if (workbook.SheetNames.includes("HMRG")) return "HMRG";
 
-  return workbook.SheetNames.find((nome) => nome.toUpperCase() !== "DINAMICA")
-    || workbook.SheetNames[0];
+  return (
+    workbook.SheetNames.find((nome) => nome.toUpperCase() !== "DINAMICA") ||
+    workbook.SheetNames[0]
+  );
+}
+
+function estilizarPlanilha(sheet: XLSX.WorkSheet) {
+  if (!sheet["!ref"]) return;
+
+  const range = XLSX.utils.decode_range(sheet["!ref"]);
+
+  sheet["!rows"] = [];
+
+  for (let R = range.s.r; R <= range.e.r; R++) {
+    sheet["!rows"][R] = { hpx: 35 };
+
+    for (let C = range.s.c; C <= range.e.c; C++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+      const cell = sheet[cellAddress];
+
+      if (!cell) continue;
+
+      const isHeader = R === 0;
+
+      cell.s = {
+        font: {
+          name: "Calibri",
+          sz: isHeader ? 14 : 11,
+          bold: isHeader,
+          color: { rgb: "000000" },
+        },
+        fill: isHeader
+          ? {
+              fgColor: { rgb: "D9EAF7" },
+            }
+          : undefined,
+        alignment: {
+          horizontal: "center",
+          vertical: "center",
+          wrapText: true,
+        },
+        border: {
+          top: { style: "thin", color: { rgb: "D9D9D9" } },
+          bottom: { style: "thin", color: { rgb: "D9D9D9" } },
+          left: { style: "thin", color: { rgb: "D9D9D9" } },
+          right: { style: "thin", color: { rgb: "D9D9D9" } },
+        },
+      };
+    }
+  }
+}
+
+function criarAbaEstilizada(
+  wb: XLSX.WorkBook,
+  dados: Record<string, any>[],
+  nomeAba: string
+) {
+  const ws = XLSX.utils.json_to_sheet(dados);
+
+  estilizarPlanilha(ws);
+
+  ws["!cols"] = Object.keys(dados[0] || {}).map(() => ({
+    wch: 24,
+  }));
+
+  XLSX.utils.book_append_sheet(wb, ws, nomeAba.substring(0, 31));
 }
 
 export async function POST(request: NextRequest) {
@@ -116,21 +188,33 @@ export async function POST(request: NextRequest) {
     const competencia = String(formData.get("competencia") || "05/2026");
 
     if (!fopagFile || !previaFile) {
-      return Response.json({ success: false, error: "Envie FOPAG e PREVIA." }, { status: 400 });
+      return Response.json(
+        { success: false, error: "Envie FOPAG e PREVIA." },
+        { status: 400 }
+      );
     }
 
     const fopagBuffer = Buffer.from(await fopagFile.arrayBuffer());
     const previaBuffer = Buffer.from(await previaFile.arrayBuffer());
 
-    const fopagWorkbook = XLSX.read(fopagBuffer, { type: "buffer", cellDates: true });
-    const previaWorkbook = XLSX.read(previaBuffer, { type: "buffer", cellDates: true });
+    const fopagWorkbook = XLSX.read(fopagBuffer, {
+      type: "buffer",
+      cellDates: true,
+    });
+
+    const previaWorkbook = XLSX.read(previaBuffer, {
+      type: "buffer",
+      cellDates: true,
+    });
 
     const abaPrevia = acharAbaPrevia(previaWorkbook);
 
     const feriasSet = carregarSetMatriculas(fopagWorkbook, "FERIAS");
     const desligadosSet = carregarSetMatriculas(fopagWorkbook, "DESLIGADOS");
 
-    const previaOriginal = normalizarColunas(sheetToJson(previaWorkbook, abaPrevia));
+    const previaOriginal = normalizarColunas(
+      sheetToJson(previaWorkbook, abaPrevia)
+    );
 
     const previa = previaOriginal
       .map((row) => ({
@@ -165,7 +249,9 @@ export async function POST(request: NextRequest) {
       previa.map((row) => `${row.MATRICULA_LIMPA}|${row.RUBRICA_LIMPA}`)
     );
 
-    const matriculasNaPrevia = new Set(previa.map((row) => row.MATRICULA_LIMPA));
+    const matriculasNaPrevia = new Set(
+      previa.map((row) => row.MATRICULA_LIMPA)
+    );
 
     const erros: Record<string, any>[] = [];
 
@@ -190,10 +276,10 @@ export async function POST(request: NextRequest) {
         }
       } else if (!previaChaves.has(`${matricula}|${rubrica}`)) {
         if (feriasSet.has(matricula) && ABAS_DUPLA.includes(linha.ABA_FOPAG)) {
-          tipoErro = "ENVIADO_NAO_PAGO(FERIAS)";
+          tipoErro = "ENVIADO_(NÃO_CONSTA_NA_PRÉVIA)_CONSTA_FERIAS";
           detalhe = "Rubrica enviada, mas colaborador está de férias na competência.";
         } else {
-          tipoErro = "ENVIADO_NAO_PAGO";
+          tipoErro = "ENVIADO_(NÃO_CONSTA_NA_PRÉVIA)";
           detalhe = "Rubrica enviada na FOPAG, mas não foi encontrada na prévia.";
         }
       } else {
@@ -204,9 +290,7 @@ export async function POST(request: NextRequest) {
         TIPO_ERRO: tipoErro,
         COMPETENCIA: competencia,
         ABA_FOPAG: linha.ABA_FOPAG,
-        PREF: linha.PREF ?? "",
-        MATRICULA: linha.MATRICULA ?? "",
-        MATRICULA_LIMPA: matricula,
+        MATRICULA_FORMATADA: formatarMatricula(matricula),
         NOME: linha.NOME ?? "",
         RUBRICA_ESPERADA: rubrica,
         DETALHE: detalhe,
@@ -235,12 +319,10 @@ export async function POST(request: NextRequest) {
       if (existeNaFopag) continue;
 
       erros.push({
-        TIPO_ERRO: "PAGO_NAO_ENVIADO",
+        TIPO_ERRO: "PAGO_NA_PREVIA(NÃO_CONSTA_NO_ENVIO_DO_GAZOLLA)",
         COMPETENCIA: competencia,
         ABA_FOPAG: abaEsperada,
-        PREF: linha.PREFIXO ?? "",
-        MATRICULA: linha.MATRICULA ?? "",
-        MATRICULA_LIMPA: linha.MATRICULA_LIMPA,
+        MATRICULA_FORMATADA: formatarMatricula(linha.MATRICULA_LIMPA),
         NOME: linha.NOME ?? "",
         RUBRICA_ESPERADA: rubrica,
         DETALHE: "Rubrica paga na prévia, mas não encontrada na FOPAG.",
@@ -274,17 +356,24 @@ export async function POST(request: NextRequest) {
 
     const wb = XLSX.utils.book_new();
 
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(resumoGeral), "RESUMO_GERAL");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(resumoTipo), "RESUMO_TIPO_ERRO");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(resumoAba), "RESUMO_POR_ABA");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(erros), "ERROS_DETALHADOS");
+    criarAbaEstilizada(wb, resumoGeral, "RESUMO_GERAL");
+    criarAbaEstilizada(wb, resumoTipo, "RESUMO_TIPO_ERRO");
+    criarAbaEstilizada(wb, resumoAba, "RESUMO_POR_ABA");
+    criarAbaEstilizada(wb, erros, "ERROS_DETALHADOS");
 
-    const output = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+    const output = XLSX.write(wb, {
+      type: "buffer",
+      bookType: "xlsx",
+    });
 
     return new Response(output, {
       headers: {
-        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "Content-Disposition": `attachment; filename="resultado_conferencia_${competencia.replace("/", "-")}.xlsx"`,
+        "Content-Type":
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Content-Disposition": `attachment; filename="resultado_conferencia_${competencia.replace(
+          "/",
+          "-"
+        )}.xlsx"`,
       },
     });
   } catch (error) {
