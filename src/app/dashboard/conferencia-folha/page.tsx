@@ -56,10 +56,19 @@ export default function ConferenciaFolhaPage() {
     formData.append("previa", previa);
     formData.append("competencia", competencia);
 
-    const response = await fetch("/api/conferencia-folha", {
-      method: "POST",
-      body: formData,
-    });
+   let response: Response;
+
+    try {
+      response = await fetch("/api/conferencia-folha", {
+        method: "POST",
+        body: formData,
+      });
+    } catch (error) {
+      setLoading(false);
+      setProgresso(0);
+      setMensagem(`Erro de conexão: ${String(error)}`);
+      return;
+    }
 
     if (!response.ok) {
     const erro = await response.json();
@@ -93,7 +102,12 @@ export default function ConferenciaFolhaPage() {
       setMensagem("Relatório gerado e baixado com sucesso.");
     }, 600);
   }
-
+    setTimeout(() => {
+      setLoading(false);
+      setProgresso(0);
+      setMensagem("Relatório gerado e baixado com sucesso.");
+    }, 700);
+    
   const UploadCard = ({
     label,
     sublabel,
