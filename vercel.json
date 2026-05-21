@@ -1,0 +1,20 @@
+{
+  "crons": [
+    {
+      "path": "/api/sync-colaboradores",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/sync-admissoes",
+      "schedule": "5 8 * * *"
+    },
+    {
+      "path": "/api/sync-desligamentos",
+      "schedule": "10 8 * * *"
+    },
+    {
+      "path": "/api/sync-atestados",
+      "schedule": "15 8 * * *"
+    }
+  ]
+}
