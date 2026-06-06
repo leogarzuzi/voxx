@@ -78,7 +78,7 @@ export default function LoginPage() {
           src="/logo-voxx.png"
           alt=""
           aria-hidden="true"
-          className="w-[720px] max-w-[90vw] opacity-[0.04]"
+          className="w-[720px] max-w-[90vw] opacity-[0.15]"
         />
       </div>
 
@@ -88,7 +88,7 @@ export default function LoginPage() {
             <img
               src="/logo-voxx.png"
               alt="VOXX"
-              className="w-40 h-40 object-contain mb-2"
+              className="w-60 h-60 object-contain mb-2"
             />
 
             <p className="text-gray-500 text-sm text-center font-medium">
