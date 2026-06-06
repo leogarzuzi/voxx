@@ -73,12 +73,21 @@ export default function LoginPage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 px-4">
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+      <div className="pointer-events-none absolute -top-20 -left-28 z-0 opacity-[0.10]">
         <img
           src="/logo-simbolo.png"
           alt=""
           aria-hidden="true"
-          className="w-[1500x] max-w-[90vw] opacity-[0.15]"
+          className="w-[620px] max-w-none"
+        />
+      </div>
+
+      <div className="pointer-events-none absolute bottom-8 right-10 z-0 opacity-[0.28]">
+        <img
+          src="/logo-riosaude.png"
+          alt=""
+          aria-hidden="true"
+          className="w-[360px] max-w-[38vw]"
         />
       </div>
 
