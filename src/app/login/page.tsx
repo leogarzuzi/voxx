@@ -75,10 +75,10 @@ export default function LoginPage() {
     <div className="relative min-h-screen overflow-hidden flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 px-4">
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
         <img
-          src="/logo-voxx.png"
+          src="/logo-simbolo.png"
           alt=""
           aria-hidden="true"
-          className="w-[720px] max-w-[90vw] opacity-[0.15]"
+          className="w-[1500x] max-w-[90vw] opacity-[0.15]"
         />
       </div>
 
@@ -88,7 +88,7 @@ export default function LoginPage() {
             <img
               src="/logo-voxx.png"
               alt="VOXX"
-              className="w-60 h-60 object-contain mb-2"
+              className="w-48 h-48 object-contain mb-2"
             />
 
             <p className="text-gray-500 text-sm text-center font-medium">
