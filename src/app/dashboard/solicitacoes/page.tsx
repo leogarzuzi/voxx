@@ -18,7 +18,8 @@ export default function SolicitacoesPage() {
   const [solicitacaoSelecionada, setSolicitacaoSelecionada] = useState<number | null>(null);
   const [perfilSelecionado, setPerfilSelecionado] = useState("");
 
-  async function carregarSolicitacoes() {
+async function carregarSolicitacoes() {
+  try {
     setLoading(true);
 
     const { data, error } = await supabase
@@ -27,15 +28,19 @@ export default function SolicitacoesPage() {
       .order("criado_em", { ascending: false });
 
     if (error) {
-      console.error(error);
-      setLoading(false);
+      console.error("Erro ao carregar solicitações:", error);
+      alert("Erro ao carregar solicitações.");
       return;
     }
 
     setSolicitacoes(data || []);
+  } catch (erro) {
+    console.error("Erro inesperado:", erro);
+    alert("Erro inesperado ao carregar solicitações.");
+  } finally {
     setLoading(false);
   }
-
+}
   async function recusarSolicitacao(id: number) {
     const { error } = await supabase
       .from("solicitacoes_acesso")
