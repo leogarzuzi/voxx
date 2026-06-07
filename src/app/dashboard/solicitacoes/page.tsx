@@ -14,6 +14,8 @@ type Solicitacao = {
 export default function SolicitacoesPage() {
   const [solicitacoes, setSolicitacoes] = useState<Solicitacao[]>([]);
   const [loading, setLoading] = useState(true);
+  const [solicitacaoSelecionada, setSolicitacaoSelecionada] = useState<number | null>(null);
+  const [perfilSelecionado, setPerfilSelecionado] = useState("");
 
   async function carregarSolicitacoes() {
     setLoading(true);
@@ -36,7 +38,7 @@ export default function SolicitacoesPage() {
 async function recusarSolicitacao(id: number) {
   const { error } = await supabase
     .from("solicitacoes_acesso")
-    .update({ status: "recusada" })
+    .update({ status: "Recusada" })
     .eq("id", id);
 
   if (error) {
@@ -94,8 +96,16 @@ async function recusarSolicitacao(id: number) {
                   <td className="px-5 py-4 text-gray-600">{item.email}</td>
 
                   <td className="px-5 py-4">
-                    <span className="rounded-full bg-yellow-50 px-3 py-1 text-xs font-medium text-yellow-700 border border-yellow-200">
-                      {item.status}
+                    <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium border ${
+                        item.status === "pendente"
+                        ? "bg-yellow-50 text-yellow-700 border-yellow-200"
+                        : item.status === "recusada"
+                        ? "bg-red-50 text-red-700 border-red-200"
+                        : "bg-green-50 text-green-700 border-green-200"
+                    }`}
+                    >
+                    {item.status}
                     </span>
                   </td>
 
@@ -104,8 +114,14 @@ async function recusarSolicitacao(id: number) {
                   </td>
 
                   <td className="px-5 py-4 text-right">
-                    <button className="mr-2 rounded-lg bg-green-600 px-3 py-2 text-xs font-semibold text-white hover:bg-green-700">
-                      Aprovar
+                    <button
+                    onClick={() => {
+                        setSolicitacaoSelecionada(item.id);
+                        setPerfilSelecionado("");
+                    }}
+                    className="mr-2 rounded-lg bg-green-600 px-3 py-2 text-xs font-semibold text-white hover:bg-green-700"
+                    >
+                    Aprovar
                     </button>
 
                     <button
@@ -121,6 +137,56 @@ async function recusarSolicitacao(id: number) {
           </tbody>
         </table>
       </div>
+      {solicitacaoSelecionada && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+    <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+      <h2 className="text-lg font-bold text-gray-800">
+        Aprovar solicitação
+      </h2>
+
+      <p className="mt-1 text-sm text-gray-500">
+        Escolha o perfil do usuário.
+      </p>
+
+      <div className="mt-5">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Perfil
+        </label>
+
+        <select
+          value={perfilSelecionado}
+          onChange={(e) => setPerfilSelecionado(e.target.value)}
+          className="w-full h-11 rounded-xl border border-gray-300 px-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">Selecione...</option>
+          <option value="admin">Admin</option>
+          <option value="gerente">Gerente</option>
+        </select>
+      </div>
+
+      <div className="mt-6 flex gap-3">
+        <button
+          type="button"
+          onClick={() => {
+            setSolicitacaoSelecionada(null);
+            setPerfilSelecionado("");
+          }}
+          className="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          disabled={!perfilSelecionado}
+          className="flex-1 rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+        >
+          Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }
