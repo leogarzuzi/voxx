@@ -56,29 +56,34 @@ async function carregarSolicitacoes() {
     carregarSolicitacoes();
   }
 
-  async function aprovarSolicitacao() {
-  if (!solicitacaoSelecionada || !perfilSelecionado) {
-    return;
-  }
+      async function aprovarSolicitacao() {
+      if (!solicitacaoSelecionada || !perfilSelecionado) {
+        return;
+      }
 
-  const response = await fetch("/api/aprovar-solicitacao", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      solicitacaoId: solicitacaoSelecionada,
-      perfil: perfilSelecionado,
-    }),
-  });
+      const response = await fetch("/api/aprovar-solicitacao", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          solicitacaoId: solicitacaoSelecionada,
+          perfil: perfilSelecionado,
+        }),
+      });
 
-  const resultado = await response.json();
+      const resultado = await response.json();
 
-  alert(JSON.stringify(resultado));
+      alert(JSON.stringify(resultado));
 
-  setSolicitacaoSelecionada(null);
-  setPerfilSelecionado("");
-}
+      setSolicitacaoSelecionada(null);
+      setPerfilSelecionado("");
+    }
+
+  useEffect(() => {
+    carregarSolicitacoes();
+  }, []);
+
   return (
     <div className="p-8">
       <h1 className="text-2xl font-bold text-gray-800">
