@@ -109,7 +109,7 @@ export default function LoginPage() {
             <form onSubmit={handleLogin} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  E-mail
+                  E-mail <span className="text-red-500">*</span>
                 </label>
 
                 <input
@@ -124,7 +124,7 @@ export default function LoginPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Senha
+                  Senha <span className="text-red-500">*</span>
                 </label>
 
                 <div className="relative">
@@ -159,7 +159,7 @@ export default function LoginPage() {
             <form onSubmit={handlePrimeiroAcesso} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  E-mail institucional
+                  E-mail <span className="text-red-500">*</span>
                 </label>
 
                 <input
@@ -174,7 +174,7 @@ export default function LoginPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Criar senha
+                  Criar senha <span className="text-red-500">*</span>
                 </label>
 
                 <div className="relative">
@@ -240,7 +240,7 @@ export default function LoginPage() {
           )}
 
           <p className="mt-6 text-center text-xs text-gray-400">
-            VOXX RH Hospitalar • v1.0
+            VOXX • v1.0
           </p>
         </div>
       </div>
