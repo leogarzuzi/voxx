@@ -83,7 +83,7 @@ async function handlePrimeiroAcesso(e: React.FormEvent) {
   const { error } = await supabase.from("solicitacoes_acesso").insert({
     nome,
     email,
-    status: "pendente",
+    status: "Pendente",
   });
 
   setLoading(false);
