@@ -11,6 +11,8 @@ export default function LoginPage() {
 
   const [modoTela, setModoTela] = useState<ModoTela>("login");
   const [email, setEmail] = useState("");
+  const [nome, setNome] = useState("");
+  const [confirmarEmail, setConfirmarEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -60,16 +62,23 @@ export default function LoginPage() {
     setMensagem("E-mail de redefinição enviado.");
   }
 
-  function handlePrimeiroAcesso(e: React.FormEvent) {
-    e.preventDefault();
+    async function handlePrimeiroAcesso(e: React.FormEvent) {
+      e.preventDefault();
 
-    if (!email || !senha) {
-      setMensagem("Preencha e-mail e senha para solicitar o primeiro acesso.");
-      return;
+      setMensagem("");
+
+      if (!nome || !email || !confirmarEmail) {
+        setMensagem("Preencha todos os campos.");
+        return;
+      }
+
+      if (email !== confirmarEmail) {
+        setMensagem("Os e-mails informados não coincidem.");
+        return;
+      }
+
+      setMensagem("Solicitação enviada com sucesso.");
     }
-
-    setMensagem("Solicitação de primeiro acesso enviada para aprovação.");
-  }
 
   return (
     <div className="relative min-h-screen overflow-hidden flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 px-4">
@@ -109,7 +118,7 @@ export default function LoginPage() {
             <form onSubmit={handleLogin} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  E-mail <span className="text-red-500">*</span>
+                  E-mail: <span className="text-red-500">*</span>
                 </label>
 
                 <input
@@ -124,7 +133,7 @@ export default function LoginPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Senha <span className="text-red-500">*</span>
+                  Senha: <span className="text-red-500">*</span>
                 </label>
 
                 <div className="relative">
@@ -157,24 +166,54 @@ export default function LoginPage() {
             </form>
           ) : (
             <form onSubmit={handlePrimeiroAcesso} className="space-y-5">
+<div>
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    Nome completo: <span className="text-red-500">*</span>
+  </label>
+
+  <input
+    required
+    type="text"
+    placeholder="Digite seu nome completo"
+    className="w-full h-11 px-4 rounded-xl border border-gray-300 shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+    value={nome}
+    onChange={(e) => setNome(e.target.value)}
+  />
+</div>
+
+<div>
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+                E-mail: <span className="text-red-500">*</span>
+              </label>
+
+              <input
+                required
+                type="email"
+                placeholder="seuemail@exemplo.com"
+                className="w-full h-11 px-4 rounded-xl border border-gray-300 shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Confirmar e-mail: <span className="text-red-500">*</span>
+              </label>
+
+              <input
+                required
+                type="email"
+                placeholder="Digite novamente seu e-mail"
+                className="w-full h-11 px-4 rounded-xl border border-gray-300 shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={confirmarEmail}
+                onChange={(e) => setConfirmarEmail(e.target.value)}
+              />
+            </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  E-mail <span className="text-red-500">*</span>
-                </label>
-
-                <input
-                  required
-                  type="email"
-                  placeholder="seuemail@exemplo.com"
-                  className="w-full h-11 px-4 rounded-xl border border-gray-300 shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Criar senha <span className="text-red-500">*</span>
+                  Criar senha: <span className="text-red-500">*</span>
                 </label>
 
                 <div className="relative">
@@ -223,7 +262,7 @@ export default function LoginPage() {
               }}
               className="h-10 rounded-xl border border-blue-200 bg-white text-blue-700 shadow-sm transition hover:bg-blue-50 active:scale-[0.97] active:shadow-inner"
             >
-              {modoTela === "login" ? "Primeiro acesso" : "Voltar"}
+              {modoTela === "login" ? "Solicitar acesso" : "Voltar"}
             </button>
           </div>
 
