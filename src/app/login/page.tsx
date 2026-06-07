@@ -62,24 +62,48 @@ export default function LoginPage() {
     setMensagem("E-mail de redefinição enviado.");
   }
 
-    async function handlePrimeiroAcesso(e: React.FormEvent) {
-      e.preventDefault();
+async function handlePrimeiroAcesso(e: React.FormEvent) {
+  e.preventDefault();
 
-      setMensagem("");
+  setLoading(true);
+  setMensagem("");
 
-      if (!nome || !email || !confirmarEmail) {
-        setMensagem("Preencha todos os campos.");
-        return;
-      }
+  if (!nome || !email || !confirmarEmail) {
+    setMensagem("Preencha todos os campos.");
+    setLoading(false);
+    return;
+  }
 
-      if (email !== confirmarEmail) {
-        setMensagem("Os e-mails informados não coincidem.");
-        return;
-      }
+  if (email !== confirmarEmail) {
+    setMensagem("Os e-mails informados não coincidem.");
+    setLoading(false);
+    return;
+  }
 
-      setMensagem("Solicitação enviada com sucesso.");
+  const { error } = await supabase.from("solicitacoes_acesso").insert({
+    nome,
+    email,
+    status: "pendente",
+  });
+
+  setLoading(false);
+
+  if (error) {
+    if (error.code === "23505") {
+      setMensagem("Já existe uma solicitação para este e-mail.");
+      return;
     }
 
+    setMensagem("Erro ao enviar solicitação. Tente novamente.");
+    return;
+  }
+
+  setNome("");
+  setEmail("");
+  setConfirmarEmail("");
+
+  setMensagem("Solicitação enviada com sucesso. Aguarde a aprovação.");
+}
   return (
     <div className="relative min-h-screen overflow-hidden flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 px-4">
       <div className="pointer-events-none absolute -top-20 -left-28 z-0 opacity-[0.10]">
@@ -211,36 +235,11 @@ export default function LoginPage() {
               />
             </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Criar senha: <span className="text-red-500">*</span>
-                </label>
-
-                <div className="relative">
-                  <input
-                    required
-                    type={mostrarSenha ? "text" : "password"}
-                    placeholder="Crie uma senha"
-                    className="w-full h-11 px-4 pr-16 rounded-xl border border-gray-300 shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    value={senha}
-                    onChange={(e) => setSenha(e.target.value)}
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => setMostrarSenha(!mostrarSenha)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-blue-700 hover:underline"
-                  >
-                    {mostrarSenha ? "Ocultar" : "Ver"}
-                  </button>
-                </div>
-              </div>
-
               <button
                 type="submit"
                 className="w-full h-11 rounded-xl bg-blue-700 text-white font-semibold shadow-lg shadow-blue-200 transition hover:bg-blue-800 active:scale-[0.98] active:shadow-inner"
               >
-                Solicitar acesso
+                {loading ? "Enviando..." : "Solicitar acesso"}
               </button>
             </form>
           )}
