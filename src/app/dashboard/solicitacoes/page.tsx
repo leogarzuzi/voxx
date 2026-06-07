@@ -33,6 +33,21 @@ export default function SolicitacoesPage() {
     setLoading(false);
   }
 
+async function recusarSolicitacao(id: number) {
+  const { error } = await supabase
+    .from("solicitacoes_acesso")
+    .update({ status: "recusada" })
+    .eq("id", id);
+
+  if (error) {
+    alert("Erro ao recusar solicitação.");
+    console.error(error);
+    return;
+  }
+
+  carregarSolicitacoes();
+}
+
   useEffect(() => {
     carregarSolicitacoes();
   }, []);
@@ -43,9 +58,6 @@ export default function SolicitacoesPage() {
         Solicitações de acesso
       </h1>
 
-      <p className="mt-1 text-sm text-gray-500">
-        Aprove ou recuse os pedidos de acesso ao VOXX.
-      </p>
 
       <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
         <table className="w-full text-sm">
@@ -96,8 +108,11 @@ export default function SolicitacoesPage() {
                       Aprovar
                     </button>
 
-                    <button className="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-700">
-                      Recusar
+                    <button
+                    onClick={() => recusarSolicitacao(item.id)}
+                    className="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-700"
+                    >
+                    Recusar
                     </button>
                   </td>
                 </tr>
