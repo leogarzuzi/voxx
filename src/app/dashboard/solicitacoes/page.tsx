@@ -52,33 +52,28 @@ export default function SolicitacoesPage() {
   }
 
   async function aprovarSolicitacao() {
-    if (!solicitacaoSelecionada || !perfilSelecionado) {
-      return;
-    }
-
-    const { error } = await supabase
-      .from("solicitacoes_acesso")
-      .update({
-        status: "Aprovada",
-        perfil: perfilSelecionado,
-      })
-      .eq("id", solicitacaoSelecionada);
-
-    if (error) {
-      alert("Erro ao aprovar solicitação.");
-      console.error(error);
-      return;
-    }
-
-    setSolicitacaoSelecionada(null);
-    setPerfilSelecionado("");
-    carregarSolicitacoes();
+  if (!solicitacaoSelecionada || !perfilSelecionado) {
+    return;
   }
 
-  useEffect(() => {
-    carregarSolicitacoes();
-  }, []);
+  const response = await fetch("/api/aprovar-solicitacao", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      solicitacaoId: solicitacaoSelecionada,
+      perfil: perfilSelecionado,
+    }),
+  });
 
+  const resultado = await response.json();
+
+  alert(JSON.stringify(resultado));
+
+  setSolicitacaoSelecionada(null);
+  setPerfilSelecionado("");
+}
   return (
     <div className="p-8">
       <h1 className="text-2xl font-bold text-gray-800">
