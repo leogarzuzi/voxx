@@ -97,7 +97,7 @@ export default function LoginPage() {
             <img
               src="/logo-voxx.png"
               alt="VOXX"
-              className="w-48 h-48 object-contain mb-2"
+              className="w-64 h-64 object-contain mb-2"
             />
 
             <p className="text-gray-500 text-sm text-center font-medium">
