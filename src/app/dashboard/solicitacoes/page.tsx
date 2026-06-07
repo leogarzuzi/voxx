@@ -8,6 +8,7 @@ type Solicitacao = {
   nome: string;
   email: string;
   status: string;
+  perfil?: string | null;
   criado_em: string;
 };
 
@@ -35,20 +36,44 @@ export default function SolicitacoesPage() {
     setLoading(false);
   }
 
-async function recusarSolicitacao(id: number) {
-  const { error } = await supabase
-    .from("solicitacoes_acesso")
-    .update({ status: "Recusada" })
-    .eq("id", id);
+  async function recusarSolicitacao(id: number) {
+    const { error } = await supabase
+      .from("solicitacoes_acesso")
+      .update({ status: "Recusada" })
+      .eq("id", id);
 
-  if (error) {
-    alert("Erro ao recusar solicitação.");
-    console.error(error);
-    return;
+    if (error) {
+      alert("Erro ao recusar solicitação.");
+      console.error(error);
+      return;
+    }
+
+    carregarSolicitacoes();
   }
 
-  carregarSolicitacoes();
-}
+  async function aprovarSolicitacao() {
+    if (!solicitacaoSelecionada || !perfilSelecionado) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from("solicitacoes_acesso")
+      .update({
+        status: "Aprovada",
+        perfil: perfilSelecionado,
+      })
+      .eq("id", solicitacaoSelecionada);
+
+    if (error) {
+      alert("Erro ao aprovar solicitação.");
+      console.error(error);
+      return;
+    }
+
+    setSolicitacaoSelecionada(null);
+    setPerfilSelecionado("");
+    carregarSolicitacoes();
+  }
 
   useEffect(() => {
     carregarSolicitacoes();
@@ -60,7 +85,6 @@ async function recusarSolicitacao(id: number) {
         Solicitações de acesso
       </h1>
 
-
       <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left text-gray-600">
@@ -68,6 +92,7 @@ async function recusarSolicitacao(id: number) {
               <th className="px-5 py-3 font-semibold">Nome</th>
               <th className="px-5 py-3 font-semibold">E-mail</th>
               <th className="px-5 py-3 font-semibold">Status</th>
+              <th className="px-5 py-3 font-semibold">Perfil</th>
               <th className="px-5 py-3 font-semibold">Data</th>
               <th className="px-5 py-3 font-semibold text-right">Ações</th>
             </tr>
@@ -76,13 +101,13 @@ async function recusarSolicitacao(id: number) {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} className="px-5 py-6 text-center text-gray-500">
+                <td colSpan={6} className="px-5 py-6 text-center text-gray-500">
                   Carregando solicitações...
                 </td>
               </tr>
             ) : solicitacoes.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-5 py-6 text-center text-gray-500">
+                <td colSpan={6} className="px-5 py-6 text-center text-gray-500">
                   Nenhuma solicitação encontrada.
                 </td>
               </tr>
@@ -93,20 +118,26 @@ async function recusarSolicitacao(id: number) {
                     {item.nome}
                   </td>
 
-                  <td className="px-5 py-4 text-gray-600">{item.email}</td>
+                  <td className="px-5 py-4 text-gray-600">
+                    {item.email}
+                  </td>
 
                   <td className="px-5 py-4">
                     <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium border ${
-                        item.status === "pendente"
-                        ? "bg-yellow-50 text-yellow-700 border-yellow-200"
-                        : item.status === "recusada"
-                        ? "bg-red-50 text-red-700 border-red-200"
-                        : "bg-green-50 text-green-700 border-green-200"
-                    }`}
+                      className={`rounded-full px-3 py-1 text-xs font-medium border ${
+                        item.status === "Pendente"
+                          ? "bg-yellow-50 text-yellow-700 border-yellow-200"
+                          : item.status === "Recusada"
+                          ? "bg-red-50 text-red-700 border-red-200"
+                          : "bg-green-50 text-green-700 border-green-200"
+                      }`}
                     >
-                    {item.status}
+                      {item.status}
                     </span>
+                  </td>
+
+                  <td className="px-5 py-4 text-gray-600">
+                    {item.perfil ? item.perfil : "-"}
                   </td>
 
                   <td className="px-5 py-4 text-gray-500">
@@ -114,22 +145,30 @@ async function recusarSolicitacao(id: number) {
                   </td>
 
                   <td className="px-5 py-4 text-right">
-                    <button
-                    onClick={() => {
-                        setSolicitacaoSelecionada(item.id);
-                        setPerfilSelecionado("");
-                    }}
-                    className="mr-2 rounded-lg bg-green-600 px-3 py-2 text-xs font-semibold text-white hover:bg-green-700"
-                    >
-                    Aprovar
-                    </button>
+                    {item.status === "Pendente" ? (
+                      <>
+                        <button
+                          onClick={() => {
+                            setSolicitacaoSelecionada(item.id);
+                            setPerfilSelecionado("");
+                          }}
+                          className="mr-2 rounded-lg bg-green-600 px-3 py-2 text-xs font-semibold text-white hover:bg-green-700"
+                        >
+                          Aprovar
+                        </button>
 
-                    <button
-                    onClick={() => recusarSolicitacao(item.id)}
-                    className="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-700"
-                    >
-                    Recusar
-                    </button>
+                        <button
+                          onClick={() => recusarSolicitacao(item.id)}
+                          className="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-700"
+                        >
+                          Recusar
+                        </button>
+                      </>
+                    ) : (
+                      <span className="text-xs text-gray-400">
+                        Finalizada
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))
@@ -137,56 +176,58 @@ async function recusarSolicitacao(id: number) {
           </tbody>
         </table>
       </div>
+
       {solicitacaoSelecionada && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-    <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
-      <h2 className="text-lg font-bold text-gray-800">
-        Aprovar solicitação
-      </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <h2 className="text-lg font-bold text-gray-800">
+              Aprovar solicitação
+            </h2>
 
-      <p className="mt-1 text-sm text-gray-500">
-        Escolha o perfil do usuário.
-      </p>
+            <p className="mt-1 text-sm text-gray-500">
+              Escolha o perfil do usuário.
+            </p>
 
-      <div className="mt-5">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Perfil
-        </label>
+            <div className="mt-5">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Perfil
+              </label>
 
-        <select
-          value={perfilSelecionado}
-          onChange={(e) => setPerfilSelecionado(e.target.value)}
-          className="w-full h-11 rounded-xl border border-gray-300 px-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Selecione...</option>
-          <option value="admin">Admin</option>
-          <option value="gerente">Gerente</option>
-        </select>
-      </div>
+              <select
+                value={perfilSelecionado}
+                onChange={(e) => setPerfilSelecionado(e.target.value)}
+                className="w-full h-11 rounded-xl border border-gray-300 px-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Selecione...</option>
+                <option value="Admin">Admin</option>
+                <option value="Gerente">Gerente</option>
+              </select>
+            </div>
 
-      <div className="mt-6 flex gap-3">
-        <button
-          type="button"
-          onClick={() => {
-            setSolicitacaoSelecionada(null);
-            setPerfilSelecionado("");
-          }}
-          className="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-        >
-          Cancelar
-        </button>
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setSolicitacaoSelecionada(null);
+                  setPerfilSelecionado("");
+                }}
+                className="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
 
-        <button
-          type="button"
-          disabled={!perfilSelecionado}
-          className="flex-1 rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
-        >
-          Confirmar
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+              <button
+                type="button"
+                onClick={aprovarSolicitacao}
+                disabled={!perfilSelecionado}
+                className="flex-1 rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
