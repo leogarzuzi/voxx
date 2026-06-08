@@ -1,5 +1,4 @@
 import { supabase } from "@/lib/supabase";
-import { Sidebar } from "@/components/Sidebar";
 import { DivisionChart } from "@/components/DivisionChart";
 import { AdmissoesMesChart } from "@/components/AdmissoesMesChart";
 import { classificarDivisao } from "@/lib/classificarDivisao";
@@ -84,10 +83,7 @@ export default async function DashboardAdmissoesPage() {
   );
 
   return (
-    <div className="flex">
-      <Sidebar />
-
-      <main className="min-h-screen flex-1 bg-slate-50 p-8">
+      <main className="min-h-screen bg-slate-50 p-8">
         <div>
           <h1 className="text-3xl font-bold text-blue-700">
             Dashboard de Admissões
@@ -191,6 +187,5 @@ export default async function DashboardAdmissoesPage() {
           </div>
         </section>
       </main>
-    </div>
   );
 }

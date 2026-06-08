@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
-  const [dashboardOpen, setDashboardOpen] = useState(true);
+  const [dashboardOpen, setDashboardOpen] = useState(false);
 
   return (
     <aside
@@ -30,8 +30,9 @@ export function Sidebar() {
       </div>
 
       <nav className="mt-6 space-y-1 px-4">
-        <button
-          onClick={() => setDashboardOpen(!dashboardOpen)}
+        <Link
+          href="/inicio/dashboard/visao-geral"
+          onClick={() => setDashboardOpen(true)}
           className="flex w-full items-center justify-between rounded-lg bg-blue-700 px-4 py-3 font-medium hover:bg-blue-600"
         >
           {!collapsed && (
@@ -42,34 +43,34 @@ export function Sidebar() {
           )}
 
           {collapsed && <span>D</span>}
-        </button>
+        </Link>
 
         {!collapsed && dashboardOpen && (
           <div className="ml-4 mt-1 space-y-1">
             <Link
               className="block rounded-lg px-4 py-2 text-sm hover:bg-blue-700"
-              href="/dashboard"
+              href="/inicio/dashboard/visao-geral"
             >
               Visão Geral
             </Link>
 
             <Link
               className="block rounded-lg px-4 py-2 text-sm hover:bg-blue-700"
-              href="/dashboard/admissoes"
+              href="/inicio/dashboard/admissoes"
             >
               Admissões
             </Link>
 
             <Link
               className="block rounded-lg px-4 py-2 text-sm hover:bg-blue-700"
-              href="/dashboard/desligamentos"
+              href="/inicio/dashboard/desligamentos"
             >
               Desligamentos
             </Link>
 
             <Link
               className="block rounded-lg px-4 py-2 text-sm hover:bg-blue-700"
-              href="/dashboard/atestados"
+              href="/inicio/dashboard/atestados"
             >
               Atestados
             </Link>
@@ -77,24 +78,18 @@ export function Sidebar() {
         )}
 
         {!collapsed && (
-          <div className="mt-6">
-            <div className="px-4 text-xs font-semibold uppercase tracking-wider text-blue-200">
-              Ferramentas
-            </div>
-
-            <Link
-              className="mt-2 block rounded-lg px-4 py-3 hover:bg-blue-700"
-              href="/dashboard/conferencia-folha"
-            >
-              Analisar folha de pagamento
-            </Link>
-          </div>
+          <Link
+            className="block rounded-lg px-4 py-3 hover:bg-blue-700"
+            href="/inicio/conferencia-folha"
+          >
+            Analisar folha de pagamento
+          </Link>
         )}
 
         {collapsed && (
           <Link
             className="block rounded-lg px-4 py-3 text-center hover:bg-blue-700"
-            href="/dashboard/conferencia-folha"
+            href="/inicio/conferencia-folha"
           >
             F
           </Link>

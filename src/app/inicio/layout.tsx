@@ -48,10 +48,10 @@ export default function DashboardLayout({
         return;
       }
 
-      const rotaSolicitacoes = pathname.startsWith("/dashboard/solicitacoes");
+      const rotaSolicitacoes = pathname.startsWith("/inicio/solicitacoes");
 
       if (rotaSolicitacoes && usuario.perfil !== "Admin") {
-        router.push("/dashboard");
+        router.push("/inicio");
         return;
       }
 
@@ -123,7 +123,7 @@ export default function DashboardLayout({
                   type="button"
                   onClick={() => {
                     setMenuAberto(false);
-                    router.push("/dashboard/perfil");
+                    router.push("/inicio/perfil");
                   }}
                   className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50"
                 >
@@ -134,7 +134,7 @@ export default function DashboardLayout({
                   type="button"
                   onClick={() => {
                     setMenuAberto(false);
-                    router.push("/dashboard/alterar-senha");
+                    router.push("/inicio/alterar-senha");
                   }}
                   className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50"
                 >

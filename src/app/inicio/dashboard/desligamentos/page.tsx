@@ -1,5 +1,4 @@
 import { supabase } from "@/lib/supabase";
-import { Sidebar } from "@/components/Sidebar";
 import { DivisionChart } from "@/components/DivisionChart";
 import { DesligamentosMesChart } from "@/components/DesligamentosMesChart";
 import { TipoDesligamentoChart } from "@/components/TipoDesligamentoChart";
@@ -120,9 +119,6 @@ export default async function DashboardDesligamentosPage() {
   }));
 
   return (
-    <div className="flex">
-      <Sidebar />
-
       <main className="min-h-screen flex-1 bg-slate-50 p-8">
         <div>
           <h1 className="text-3xl font-bold text-blue-700">
@@ -263,6 +259,5 @@ export default async function DashboardDesligamentosPage() {
           </div>
         </section>
       </main>
-    </div>
   );
 }

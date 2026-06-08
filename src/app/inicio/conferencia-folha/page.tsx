@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Sidebar } from "@/components/Sidebar";
 
 export default function ConferenciaFolhaPage() {
   const [fopag, setFopag] = useState<File | null>(null);
@@ -225,10 +224,10 @@ export default function ConferenciaFolhaPage() {
   );
 
   return (
-    <div className="flex min-h-screen text-slate-900" style={{ backgroundColor: "#f1f5f9" }}>
-      <Sidebar />
-
-      <main className="flex min-h-screen flex-1 flex-col p-8">
+    <main
+      className="flex min-h-screen flex-col p-8 text-slate-900"
+      style={{ backgroundColor: "#f1f5f9" }}
+    >
         {/* Header */}
         <div className="mb-8 flex items-start justify-between">
           <div>
@@ -425,6 +424,5 @@ export default function ConferenciaFolhaPage() {
           )}
         </div>
       </main>
-    </div>
   );
 }

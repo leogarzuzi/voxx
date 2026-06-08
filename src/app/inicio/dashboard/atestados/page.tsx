@@ -2,7 +2,6 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 import { supabase } from "@/lib/supabase";
-import { Sidebar } from "@/components/Sidebar";
 import { AtestadosDivisaoChart } from "@/components/AtestadosDivisaoChart";
 import { AtestadosMesChart } from "@/components/AtestadosMesChart";
 import { classificarDivisao } from "@/lib/classificarDivisao";
@@ -181,10 +180,7 @@ export default async function DashboardAtestadosPage() {
     .sort((a, b) => b.total - a.total);
 
   return (
-    <div className="flex">
-      <Sidebar />
-
-      <main className="min-h-screen flex-1 bg-slate-50 p-8">
+      <main className="min-h-screen bg-slate-50 p-8">
         <div>
           <h1 className="text-3xl font-bold text-blue-700">
             Dashboard de Atestados
@@ -360,6 +356,5 @@ export default async function DashboardAtestadosPage() {
           </div>
         </section>
       </main>
-    </div>
   );
 }
