@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+
+type UsuarioSistema = {
+  perfil: string;
+};
 
 export default function DashboardLayout({
   children,
@@ -10,22 +14,43 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [verificando, setVerificando] = useState(true);
 
   useEffect(() => {
-    async function verificarLogin() {
-      const { data } = await supabase.auth.getSession();
+    async function verificarAcesso() {
+      const { data: sessionData } = await supabase.auth.getSession();
 
-      if (!data.session) {
+      if (!sessionData.session?.user?.email) {
         router.push("/login");
+        return;
+      }
+
+      const email = sessionData.session.user.email;
+
+      const { data: usuario, error } = await supabase
+        .from("usuarios")
+        .select("perfil")
+        .eq("email", email)
+        .single<UsuarioSistema>();
+
+      if (error || !usuario) {
+        router.push("/login");
+        return;
+      }
+
+      const rotaSolicitacoes = pathname.startsWith("/dashboard/solicitacoes");
+
+      if (rotaSolicitacoes && usuario.perfil !== "Admin") {
+        router.push("/dashboard");
         return;
       }
 
       setVerificando(false);
     }
 
-    verificarLogin();
-  }, [router]);
+    verificarAcesso();
+  }, [router, pathname]);
 
   if (verificando) {
     return (
