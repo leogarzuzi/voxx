@@ -50,7 +50,7 @@ export async function POST(request: Request) {
           nome: solicitacao.nome,
           perfil,
         },
-        redirectTo: "https://voxx-beryl.vercel.app/login",
+        redirectTo: "https://voxx-beryl.vercel.app/definir-senha",
       });
 
     if (erroConvite) {
