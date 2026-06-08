@@ -2,7 +2,6 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 import { supabase } from "@/lib/supabase";
 import { PrefixChart } from "@/components/PrefixChart";
-import { Sidebar } from "@/components/Sidebar";
 import { DivisionChart } from "@/components/DivisionChart";
 import { classificarDivisao } from "@/lib/classificarDivisao";
 import { TurnoverChart } from "@/components/TurnoverChart";
@@ -156,10 +155,7 @@ export default async function DashboardPage() {
       : 0;
 
   return (
-    <div className="flex">
-      <Sidebar />
-
-      <main className="min-h-screen flex-1 bg-slate-50 p-8">
+    <main className="min-h-screen bg-slate-50 p-8">
         <div>
           <h1 className="text-3xl font-bold text-blue-700">
             Dashboard RH
@@ -297,6 +293,5 @@ export default async function DashboardPage() {
   </div>
 </section>
       </main>
-    </div>
   );
 }
