@@ -13,37 +13,40 @@ export default function DefinirSenhaPage() {
   const [verificando, setVerificando] = useState(true);
   const [mensagem, setMensagem] = useState("");
 
-    useEffect(() => {
-      console.log("URL:", window.location.href);
-      console.log("HASH:", window.location.hash);
+  useEffect(() => {
+    async function verificarSessao() {
+      setMensagem("");
 
-      async function verificarSessao() {
-        await new Promise((resolve) => setTimeout(resolve, 800));
+      const url = new URL(window.location.href);
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const searchParams = url.searchParams;
 
-        const { data } = await supabase.auth.getSession();
+      const type =
+        hashParams.get("type") ||
+        searchParams.get("type") ||
+        searchParams.get("next");
 
-        console.log("SESSION:", data.session);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        if (!data.session) {
-          router.replace("/login");
-          return;
-        }
+      const { data } = await supabase.auth.getSession();
 
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const type = hashParams.get("type");
-
-        console.log("TYPE:", type);
-
-        if (type !== "invite" && type !== "recovery") {
-          router.replace("/dashboard");
-          return;
-        }
-
+      if (!data.session) {
+        setMensagem("Link inválido ou expirado. Solicite uma nova redefinição de senha.");
         setVerificando(false);
+        return;
       }
 
-      verificarSessao();
-    }, [router]);
+      if (type !== "invite" && type !== "recovery" && type !== null) {
+        router.replace("/dashboard");
+        return;
+      }
+
+      setVerificando(false);
+    }
+
+    verificarSessao();
+  }, [router]);
+
   async function handleDefinirSenha(e: React.FormEvent) {
     e.preventDefault();
 
@@ -79,6 +82,8 @@ export default function DefinirSenhaPage() {
 
     setMensagem("Senha definida com sucesso.");
 
+    await supabase.auth.signOut();
+
     setTimeout(() => {
       router.push("/login");
     }, 1500);
@@ -88,6 +93,32 @@ export default function DefinirSenhaPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100">
         <p className="text-sm text-gray-500">Verificando acesso...</p>
+      </div>
+    );
+  }
+
+  if (mensagem.includes("Link inválido")) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 px-4">
+        <div className="w-full max-w-sm rounded-3xl bg-white p-8 shadow-2xl border border-blue-100 text-center">
+          <img
+            src="/logo-voxx.png"
+            alt="VOXX"
+            className="w-40 h-40 object-contain mx-auto mb-2"
+          />
+
+          <p className="text-red-600 text-sm mb-5">{mensagem}</p>
+
+          <button
+            type="button"
+            onClick={() => router.push("/login")}
+            className="w-full h-11 rounded-xl bg-blue-700 text-white font-semibold shadow-lg shadow-blue-200 transition hover:bg-blue-800 active:scale-[0.98]"
+          >
+            Voltar para o login
+          </button>
+
+          <p className="mt-6 text-center text-xs text-gray-400">VOXX • v1.0</p>
+        </div>
       </div>
     );
   }
@@ -107,9 +138,7 @@ export default function DefinirSenhaPage() {
           </p>
 
           <p className="mt-3 text-center text-sm text-gray-500 leading-relaxed">
-            Olá, seja bem-vindo(a) ao RH! Seu acesso ao VOXX foi aprovado.
-            <br />
-            Crie uma senha para concluir seu cadastro e acessar o sistema.
+            Crie uma nova senha para acessar o sistema.
           </p>
         </div>
 
