@@ -13,29 +13,37 @@ export default function DefinirSenhaPage() {
   const [verificando, setVerificando] = useState(true);
   const [mensagem, setMensagem] = useState("");
 
-  useEffect(() => {
-    async function verificarSessao() {
-    const { data } = await supabase.auth.getSession();
+    useEffect(() => {
+      console.log("URL:", window.location.href);
+      console.log("HASH:", window.location.hash);
 
-    if (!data.session) {
-      router.replace("/login");
-      return;
-    }
+      async function verificarSessao() {
+        await new Promise((resolve) => setTimeout(resolve, 800));
 
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const type = hashParams.get("type");
+        const { data } = await supabase.auth.getSession();
 
-    if (type !== "invite" && type !== "recovery") {
-      router.replace("/dashboard");
-      return;
-    }
+        console.log("SESSION:", data.session);
 
-    setVerificando(false);
-    }
+        if (!data.session) {
+          router.replace("/login");
+          return;
+        }
 
-    verificarSessao();
-  }, [router]);
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const type = hashParams.get("type");
 
+        console.log("TYPE:", type);
+
+        if (type !== "invite" && type !== "recovery") {
+          router.replace("/dashboard");
+          return;
+        }
+
+        setVerificando(false);
+      }
+
+      verificarSessao();
+    }, [router]);
   async function handleDefinirSenha(e: React.FormEvent) {
     e.preventDefault();
 
