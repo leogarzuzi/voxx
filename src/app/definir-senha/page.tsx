@@ -15,14 +15,22 @@ export default function DefinirSenhaPage() {
 
   useEffect(() => {
     async function verificarSessao() {
-      const { data } = await supabase.auth.getSession();
+    const { data } = await supabase.auth.getSession();
 
-      if (!data.session) {
-        router.replace("/login");
-        return;
-      }
+    if (!data.session) {
+      router.replace("/login");
+      return;
+    }
 
-      setVerificando(false);
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const type = hashParams.get("type");
+
+    if (type !== "invite" && type !== "recovery") {
+      router.replace("/dashboard");
+      return;
+    }
+
+    setVerificando(false);
     }
 
     verificarSessao();
