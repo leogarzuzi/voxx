@@ -39,28 +39,28 @@ export default function LoginPage() {
     router.push("/dashboard");
   }
 
-  async function handleResetSenha() {
-    if (!email) {
-      setMensagem("Digite seu e-mail para redefinir a senha.");
-      return;
+    async function handleResetSenha() {
+      if (!email) {
+        setMensagem("Digite seu e-mail para redefinir a senha.");
+        return;
+      }
+
+      setLoading(true);
+      setMensagem("");
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: "https://voxx-beryl.vercel.app/definir-senha",
+      });
+
+      setLoading(false);
+
+      if (error) {
+        setMensagem("Erro ao enviar e-mail de redefinição. Verifique o e-mail informado.");
+        return;
+      }
+
+      setMensagem("E-mail de redefinição enviado. Verifique sua caixa de entrada.");
     }
-
-    setLoading(true);
-    setMensagem("");
-
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "https://voxx-beryl.vercel.app/login",
-    });
-
-    setLoading(false);
-
-    if (error) {
-      setMensagem("Erro ao enviar e-mail.");
-      return;
-    }
-
-    setMensagem("E-mail de redefinição enviado.");
-  }
 
 async function handlePrimeiroAcesso(e: React.FormEvent) {
   e.preventDefault();
