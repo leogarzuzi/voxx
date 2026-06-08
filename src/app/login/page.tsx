@@ -94,7 +94,8 @@ async function handlePrimeiroAcesso(e: React.FormEvent) {
       return;
     }
 
-    setMensagem("Erro ao enviar solicitação. Tente novamente.");
+    setMensagem(`Erro: ${error.message}`);
+    console.log(error);
     return;
   }
 
