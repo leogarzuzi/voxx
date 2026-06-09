@@ -26,7 +26,7 @@ export default function PerfilPage() {
   useEffect(() => {
     async function carregarPerfil() {
       const { data: sessionData } = await supabase.auth.getSession(); // pega a sessão atual
-      const email = sessionData.session?.user?.email; // pega o e-mail logado
+      const email = sessionData.session?.user?.email?.trim().toLowerCase(); // pega o e-mail logado
 
       if (!email) {
         setLoading(false);

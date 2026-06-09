@@ -48,7 +48,7 @@ export default function DashboardLayout({
         return;
       }
 
-      const email = sessionData.session.user.email;
+      const email = sessionData.session.user.email?.trim().toLowerCase();
 
       setEmailUsuario(email); // guarda o e-mail para validar senha atual
 

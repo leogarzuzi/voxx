@@ -42,7 +42,7 @@ function IconeOlho({ aberto }: { aberto: boolean }) {
     setMensagem("");
 
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: email.trim().toLowerCase(), // normaliza email
       password: senha,
     });
 
@@ -91,7 +91,7 @@ async function handlePrimeiroAcesso(e: React.FormEvent) {
     return;
   }
 
-  if (email !== confirmarEmail) {
+  if (email.trim().toLowerCase() !== confirmarEmail.trim().toLowerCase()) {
     setMensagem("Os e-mails informados não coincidem.");
     setLoading(false);
     return;
@@ -99,7 +99,7 @@ async function handlePrimeiroAcesso(e: React.FormEvent) {
 
   const { error } = await supabase.from("solicitacoes_acesso").insert({
     nome,
-    email,
+    email: email.trim().toLowerCase(),
     status: "Pendente",
   });
 
