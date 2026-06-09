@@ -77,6 +77,10 @@ export default function PerfilPage() {
     }
 
     setMensagem("Perfil atualizado com sucesso.");
+
+    setTimeout(() => {
+      window.location.reload();
+    }, 700);
   }
 
   function formatarData(data: string) {
