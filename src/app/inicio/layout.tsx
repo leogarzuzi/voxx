@@ -315,13 +315,24 @@ async function handleAlterarSenha() {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Nova senha
           </label>
+          <div className="relative">
           <input
-            type="password"
+            type={mostrarNovaSenha ? "text" : "password"}
             placeholder="Digite a nova senha"
             value={novaSenha}
             onChange={(e) => setNovaSenha(e.target.value)}
-            className="w-full h-11 px-4 rounded-xl border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full h-11 px-4 pr-12 rounded-xl border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
+
+          <button
+            type="button"
+            onClick={() => setMostrarNovaSenha(!mostrarNovaSenha)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+          >
+            👁️
+          </button>
+        </div>
+
         </div>
             
         <div className="mt-2 grid grid-cols-1 gap-1">
@@ -335,13 +346,23 @@ async function handleAlterarSenha() {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Confirmar nova senha
           </label>
-          <input
-            type="password"
-            placeholder="Digite novamente a nova senha"
-            value={confirmarNovaSenha}
-            onChange={(e) => setConfirmarNovaSenha(e.target.value)}
-            className="w-full h-11 px-4 rounded-xl border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
+          <div className="relative">
+        <input
+          type={mostrarConfirmarSenha ? "text" : "password"}
+          placeholder="Digite novamente a nova senha"
+          value={confirmarNovaSenha}
+          onChange={(e) => setConfirmarNovaSenha(e.target.value)}
+          className="w-full h-11 px-4 pr-12 rounded-xl border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+
+        <button
+          type="button"
+          onClick={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+        >
+          👁️
+        </button>
+      </div>
         </div>
 
         <button
