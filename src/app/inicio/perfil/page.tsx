@@ -62,12 +62,16 @@ export default function PerfilPage() {
 
     setSalvando(true);
 
-    const { error } = await supabase
-      .from("usuarios")
-      .update({
-        nome_exibicao: nomeExibicao.trim(),
-      })
-      .eq("email", usuario.email);
+    const { data, error } = await supabase
+    .from("usuarios")
+    .update({
+      nome_exibicao: nomeExibicao.trim(),
+    })
+    .eq("email", usuario.email)
+    .select();
+
+    console.log("UPDATE:", data);
+    console.log("ERROR:", error);
 
     setSalvando(false);
 
