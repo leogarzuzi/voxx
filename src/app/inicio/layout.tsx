@@ -85,6 +85,20 @@ export default function DashboardLayout({
     router.push("/login");
   }
 
+function RequisitoSenha({
+  ok,
+  texto,
+}: {
+  ok: boolean;
+  texto: string;
+}) {
+  return (
+    <div className={`text-xs ${ok ? "text-green-600" : "text-gray-400"}`}>
+      {ok ? "✓" : "•"} {texto}
+    </div>
+  );
+}
+
   // valida os campos antes de trocar a senha
 async function handleAlterarSenha() {
   setMensagemSenha("");
@@ -277,6 +291,13 @@ async function handleAlterarSenha() {
             onChange={(e) => setNovaSenha(e.target.value)}
             className="w-full h-11 px-4 rounded-xl border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
+        </div>
+            
+        <div className="mt-2 grid grid-cols-1 gap-1">
+          <RequisitoSenha ok={novaSenha.length >= 8} texto="Mínimo de 8 caracteres" />
+          <RequisitoSenha ok={/[A-Z]/.test(novaSenha)} texto="Uma letra maiúscula" />
+          <RequisitoSenha ok={/[0-9]/.test(novaSenha)} texto="Um número" />
+          <RequisitoSenha ok={/[^A-Za-z0-9]/.test(novaSenha)} texto="Um caractere especial" />
         </div>
 
         <div>
