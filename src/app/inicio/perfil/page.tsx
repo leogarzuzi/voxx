@@ -63,12 +63,12 @@ export default function PerfilPage() {
     setSalvando(true);
 
     const { data, error } = await supabase
-    .from("usuarios")
-    .update({
-      nome_exibicao: nomeExibicao.trim(),
-    })
-    .eq("email", usuario.email)
-    .select();
+      .from("usuarios")
+      .update({
+        nome_exibicao: nomeExibicao.trim(),
+      })
+      .eq("email", usuario.email)
+      .select();
 
     console.log("UPDATE:", data);
     console.log("ERROR:", error);
@@ -80,7 +80,14 @@ export default function PerfilPage() {
       return;
     }
 
-  setMensagem("Perfil atualizado com sucesso.");
+    setUsuario({
+      ...usuario,
+      nome_exibicao: nomeExibicao.trim(),
+    });
+
+    setMensagem("Perfil atualizado com sucesso.");
+  }
+
   function formatarData(data: string) {
     return new Date(data).toLocaleDateString("pt-BR");
   }
@@ -221,5 +228,4 @@ export default function PerfilPage() {
       </div>
     </main>
   );
-}
 }
