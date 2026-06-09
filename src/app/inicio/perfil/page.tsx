@@ -23,7 +23,6 @@ export default function PerfilPage() {
   useEffect(() => {
     async function carregarPerfil() {
       const { data: sessionData } = await supabase.auth.getSession();
-
       const email = sessionData.session?.user?.email;
 
       if (!email) {
@@ -56,23 +55,19 @@ export default function PerfilPage() {
       return;
     }
 
-    if (!usuario?.email) {
+    if (!usuario?.id) {
       setMensagem("Usuário não encontrado.");
       return;
     }
 
     setSalvando(true);
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("usuarios")
       .update({
         nome_exibicao: nomeExibicao.trim(),
       })
-      .eq("id", usuario.id)
-      .select();
-
-    console.log("UPDATE:", data);
-    console.log("ERROR:", error);
+      .eq("id", usuario.id);
 
     setSalvando(false);
 
@@ -81,12 +76,11 @@ export default function PerfilPage() {
       return;
     }
 
-    setUsuario({
-      ...usuario,
-      nome_exibicao: nomeExibicao.trim(),
-    });
-
     setMensagem("Perfil atualizado com sucesso.");
+
+    setTimeout(() => {
+      window.location.reload();
+    }, 700);
   }
 
   function formatarData(data: string) {
