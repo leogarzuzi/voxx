@@ -62,8 +62,15 @@ export default function DefinirSenhaPage() {
       return;
     }
 
-    if (senha.length < 6) {
-      setMensagem("A senha deve ter pelo menos 6 caracteres.");
+    const temMinimo = senha.length >= 8; // mínimo de caracteres
+    const temMaiuscula = /[A-Z]/.test(senha); // letra maiúscula
+    const temNumero = /[0-9]/.test(senha); // número
+    const temEspecial = /[^A-Za-z0-9]/.test(senha); // caractere especial
+
+    if (!temMinimo || !temMaiuscula || !temNumero || !temEspecial) {
+      setMensagem(
+        "A senha deve ter pelo menos 8 caracteres, 1 letra maiúscula, 1 número e 1 caractere especial."
+      );
       return;
     }
 
@@ -87,6 +94,20 @@ export default function DefinirSenhaPage() {
     setTimeout(() => {
       router.push("/login");
     }, 1500);
+  }
+
+  function RequisitoSenha({
+    ok,
+    texto,
+  }: {
+    ok: boolean;
+    texto: string;
+  }) {
+    return (
+      <div className={`text-xs ${ok ? "text-green-600" : "text-gray-400"}`}>
+        {ok ? "✓" : "•"} {texto}
+      </div>
+    );
   }
 
   if (verificando) {
@@ -156,6 +177,14 @@ export default function DefinirSenhaPage() {
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
             />
+
+            <div className="mt-2 grid grid-cols-1 gap-1">
+              <RequisitoSenha ok={senha.length >= 8} texto="Mínimo de 8 caracteres" />
+              <RequisitoSenha ok={/[A-Z]/.test(senha)} texto="Uma letra maiúscula" />
+              <RequisitoSenha ok={/[0-9]/.test(senha)} texto="Um número" />
+              <RequisitoSenha ok={/[^A-Za-z0-9]/.test(senha)} texto="Um caractere especial" />
+            </div>
+
           </div>
 
           <div>
