@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
+import { PERFIS_CONFIG } from "@/lib/perfis";
 
 type UsuarioSistema = {
   nome: string;
@@ -64,9 +65,10 @@ export default function DashboardLayout({
         return;
       }
 
-      const rotaSolicitacoes = pathname.startsWith("/inicio/solicitacoes");
+      const rotaSolicitacoes = pathname.startsWith("/inicio/solicitacoes"); // rota protegida de solicitações
+      const permissoes = PERFIS_CONFIG[usuario.perfil as keyof typeof PERFIS_CONFIG]; // pega permissões do perfil
 
-      if (rotaSolicitacoes && usuario.perfil !== "Admin") {
+      if (rotaSolicitacoes && !permissoes?.solicitacoes) {
         router.push("/inicio");
         return;
       }
@@ -230,7 +232,7 @@ async function handleAlterarSenha() {
 
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
+      <Sidebar perfil={perfil} />
 
       <div className="relative min-h-screen flex-1">
         <div className="fixed top-4 right-4 z-50">
