@@ -25,6 +25,7 @@ export default function DashboardLayout({
   const [perfil, setPerfil] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
   const [menuAberto, setMenuAberto] = useState(false);
+  const [modalSenhaAberto, setModalSenhaAberto] = useState(false); // controla o modal de senha
 
   useEffect(() => {
     async function verificarAcesso() {
@@ -134,7 +135,7 @@ export default function DashboardLayout({
                   type="button"
                   onClick={() => {
                     setMenuAberto(false);
-                    router.push("/inicio/alterar-senha");
+                    setModalSenhaAberto(true); // abre o modal de alterar senha
                   }}
                   className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50"
                 >
@@ -152,6 +153,72 @@ export default function DashboardLayout({
             )}
           </div>
         </div>
+        {modalSenhaAberto && (
+  <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 px-4">
+    <div className="w-full max-w-md rounded-3xl bg-white p-7 shadow-2xl border border-gray-100">
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-gray-800">
+            Alterar senha
+          </h2>
+          <p className="mt-1 text-sm text-gray-500">
+            Informe sua senha atual e cadastre uma nova senha.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setModalSenhaAberto(false)}
+          className="rounded-full px-3 py-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="mt-6 space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Senha atual
+          </label>
+          <input
+            type="password"
+            placeholder="Digite sua senha atual"
+            className="w-full h-11 px-4 rounded-xl border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Nova senha
+          </label>
+          <input
+            type="password"
+            placeholder="Digite a nova senha"
+            className="w-full h-11 px-4 rounded-xl border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Confirmar nova senha
+          </label>
+          <input
+            type="password"
+            placeholder="Digite novamente a nova senha"
+            className="w-full h-11 px-4 rounded-xl border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        <button
+          type="button"
+          className="w-full h-11 rounded-xl bg-blue-700 text-white font-semibold shadow-lg shadow-blue-200 transition hover:bg-blue-800 active:scale-[0.98]"
+        >
+          Salvar nova senha
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
         {children}
       </div>
