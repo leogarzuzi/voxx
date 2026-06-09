@@ -14,20 +14,13 @@ export function Sidebar() {
       }`}
     >
       <div className="flex items-center justify-between p-6">
-        {!collapsed && (
-          <div className="flex items-center gap-3">
-            <img
-              src="/logo-simbolo.png"
-              alt="VOXX"
-              className="h-10 w-10 object-contain"
-            />
-
-            <div>
-              <h1 className="text-xl font-bold tracking-wide">VOXX</h1>
-              <p className="mt-0.5 text-xs text-blue-100">Sistema de RH</p>
-            </div>
-          </div>
-        )}
+        <Link href="/inicio" title="Ir para o início">
+          <img
+            src="/logo-simbolo.png"
+            alt="VOXX"
+            className="h-12 w-12 object-contain transition hover:scale-105"
+          />
+        </Link>
 
         <button
           onClick={() => setCollapsed(!collapsed)}
