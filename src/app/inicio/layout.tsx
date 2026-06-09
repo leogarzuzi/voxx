@@ -224,8 +224,12 @@ async function handleAlterarSenha() {
   
   if (verificando) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-500">
-        Verificando acesso...
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <img
+          src="/logo-simbolo.png"
+          alt="VOXX"
+          className="h-24 w-24 animate-pulse object-contain" // tamanho do logo
+        />
       </div>
     );
   }
