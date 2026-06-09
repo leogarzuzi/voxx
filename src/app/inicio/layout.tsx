@@ -80,6 +80,33 @@ export default function DashboardLayout({
     router.push("/login");
   }
 
+  // valida os campos antes de trocar a senha
+async function handleAlterarSenha() {
+  setMensagemSenha("");
+
+  if (!senhaAtual.trim()) {
+    setMensagemSenha("Informe sua senha atual.");
+    return;
+  }
+
+  if (!novaSenha.trim()) {
+    setMensagemSenha("Informe a nova senha.");
+    return;
+  }
+
+  if (novaSenha.length < 6) {
+    setMensagemSenha("A nova senha deve ter pelo menos 6 caracteres.");
+    return;
+  }
+
+  if (novaSenha !== confirmarNovaSenha) {
+    setMensagemSenha("As senhas não coincidem.");
+    return;
+  }
+
+  setMensagemSenha("Validação OK.");
+}
+  
   if (verificando) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-500">
@@ -222,10 +249,16 @@ export default function DashboardLayout({
 
         <button
           type="button"
+          onClick={handleAlterarSenha}
           className="w-full h-11 rounded-xl bg-blue-700 text-white font-semibold shadow-lg shadow-blue-200 transition hover:bg-blue-800 active:scale-[0.98]"
         >
           Salvar nova senha
         </button>
+        {mensagemSenha && (
+          <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-center">
+            {mensagemSenha}
+          </div>
+        )}
       </div>
     </div>
   </div>
