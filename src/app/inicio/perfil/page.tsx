@@ -19,6 +19,7 @@ export default function PerfilPage() {
   const [loading, setLoading] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState("");
+  const [avatarSelecionado, setAvatarSelecionado] = useState("avatar-01");
 
   useEffect(() => {
     async function carregarPerfil() {
@@ -39,6 +40,7 @@ export default function PerfilPage() {
       if (!error && data) {
         setUsuario(data);
         setNomeExibicao(data.nome_exibicao || data.nome.split(" ")[0]);
+        setAvatarSelecionado(data.avatar || "avatar-01");
       }
 
       setLoading(false);
@@ -66,6 +68,7 @@ export default function PerfilPage() {
       .from("usuarios")
       .update({
         nome_exibicao: nomeExibicao.trim(),
+        avatar: avatarSelecionado,
       })
       .eq("id", usuario.id);
 
@@ -112,28 +115,46 @@ export default function PerfilPage() {
         </p>
 
         <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-[260px_1fr]">
-          <section className="rounded-3xl bg-white p-6 shadow-sm border border-gray-100 flex flex-col items-center">
-            <div className="flex h-28 w-28 items-center justify-center rounded-full bg-blue-100 text-5xl">
-              🐼
+          <section className="rounded-3xl bg-white p-6 shadow-sm border border-gray-100">
+            <div className="flex flex-col items-center">
+              <img
+                src={`/avatars/${avatarSelecionado}.png`}
+                alt="Avatar selecionado"
+                className="h-28 w-28 rounded-full object-cover border-4 border-blue-100"
+              />
+
+              <p className="mt-4 text-sm font-semibold text-gray-700">
+                Avatar do perfil
+              </p>
+
+              <p className="mt-2 text-center text-xs text-gray-400">
+                Escolha o avatar que aparecerá ao lado do seu nome.
+              </p>
             </div>
 
-            <p className="mt-4 text-sm font-semibold text-gray-700">
-              Avatar do perfil
-            </p>
-
-            <p className="mt-2 text-center text-xs text-gray-400">
-              Em breve você poderá escolher um avatar personalizado.
-            </p>
-
-            <button
-              type="button"
-              disabled
-              className="mt-5 rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-400 cursor-not-allowed"
-            >
-              Alterar avatar
-            </button>
+            <div className="mt-6 grid grid-cols-5 gap-3">
+              {["avatar-01", "avatar-02", "avatar-03", "avatar-04", "avatar-05"].map(
+                (avatar) => (
+                  <button
+                    key={avatar}
+                    type="button"
+                    onClick={() => setAvatarSelecionado(avatar)}
+                    className={`rounded-full border-2 p-1 transition ${
+                      avatarSelecionado === avatar
+                        ? "border-blue-600 bg-blue-50"
+                        : "border-gray-200 hover:border-blue-300"
+                    }`}
+                  >
+                    <img
+                      src={`/avatars/${avatar}.png`}
+                      alt={avatar}
+                      className="h-10 w-10 rounded-full object-cover"
+                    />
+                  </button>
+                )
+              )}
+            </div>
           </section>
-
           <section className="rounded-3xl bg-white p-6 shadow-sm border border-gray-100">
             <div className="space-y-5">
               <div>

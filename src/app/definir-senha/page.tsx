@@ -37,7 +37,7 @@ export default function DefinirSenhaPage() {
       }
 
       if (type !== "invite" && type !== "recovery" && type !== null) {
-        router.replace("/dashboard");
+        router.replace("/inicio");
         return;
       }
 
