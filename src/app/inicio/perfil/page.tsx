@@ -80,13 +80,7 @@ export default function PerfilPage() {
       return;
     }
 
-    setMensagem("Perfil atualizado com sucesso.");
-
-    setTimeout(() => {
-      window.location.reload();
-    }, 700);
-  }
-
+  setMensagem("Perfil atualizado com sucesso.");
   function formatarData(data: string) {
     return new Date(data).toLocaleDateString("pt-BR");
   }
@@ -227,4 +221,5 @@ export default function PerfilPage() {
       </div>
     </main>
   );
+}
 }
