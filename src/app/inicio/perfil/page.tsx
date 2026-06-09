@@ -18,12 +18,14 @@ export default function PerfilPage() {
   const [loading, setLoading] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState("");
+  const [emailSessao, setEmailSessao] = useState("");
 
   useEffect(() => {
     async function carregarPerfil() {
       const { data: sessionData } = await supabase.auth.getSession();
 
       const email = sessionData.session?.user?.email;
+      setEmailSessao(email || "");
 
       if (!email) {
         setLoading(false);
@@ -67,7 +69,7 @@ export default function PerfilPage() {
       .update({
         nome_exibicao: nomeExibicao.trim(),
       })
-      .eq("email", usuario.email)
+      .eq("email", emailSessao)
       .select();
 
     console.log("UPDATE:", data);
