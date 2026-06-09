@@ -229,8 +229,7 @@ export default function ConferenciaFolhaPage() {
       style={{ backgroundColor: "#f1f5f9" }}
     >
         {/* Header */}
-        <div className="mb-8 flex items-start justify-between">
-          <div>
+        <div className="mb-8">
             <h1 className="text-2xl font-black text-slate-900" style={{ letterSpacing: "-0.04em" }}>
               Conferência de Folha
             </h1>
@@ -238,35 +237,8 @@ export default function ConferenciaFolhaPage() {
               Compare FOPAG e prévia e gere o relatório de divergências
             </p>
           </div>
+        
 
-          <div className="flex items-center gap-2">
-            <a
-              href="/modelos/modelo_fopag.xlsx"
-              download
-              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:border-slate-300 hover:shadow-md"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-              Modelo FOPAG
-            </a>
-
-            <button
-              type="button"
-              onClick={() => setMostrarInfo(!mostrarInfo)}
-              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:border-slate-300 hover:shadow-md"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-              Requisitos
-            </button>
-          </div>
-        </div>
 
         {/* Info box */}
         {mostrarInfo && (
@@ -298,6 +270,7 @@ export default function ConferenciaFolhaPage() {
         >
           {/* Competência compacta */}
           <div className="mb-6 flex items-center justify-between">
+
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
               Competência
             </p>
@@ -313,6 +286,25 @@ export default function ConferenciaFolhaPage() {
               ))}
             </select>
           </div>
+
+          {/* Ações */}
+            <div className="mb-6 flex gap-2">
+              <a
+                href="/modelos/modelo_fopag.xlsx"
+                download
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:border-slate-300"
+              >
+                Modelo FOPAG
+              </a>
+
+              <button
+                type="button"
+                onClick={() => setMostrarInfo(!mostrarInfo)}
+                className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:border-slate-300"
+              >
+                Requisitos
+              </button>
+            </div>
 
           {/* Upload cards */}
           <div className="flex flex-col gap-4">
