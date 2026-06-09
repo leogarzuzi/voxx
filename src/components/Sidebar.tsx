@@ -183,7 +183,7 @@ export function Sidebar({ perfil }: SidebarProps) {
             />
           </svg>
 
-          Analisar FOPAG
+          Analise FOPAG
         </Link>
       </nav>
     </aside>
