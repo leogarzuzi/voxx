@@ -21,7 +21,7 @@ export default function PerfilPage() {
   const [mensagem, setMensagem] = useState("");
   const [avatarSelecionado, setAvatarSelecionado] = useState("avatar-01");
 
-  const avatares = Array.from({ length: 5 }, (_, i) => `avatar-${String(i + 1).padStart(2, "0")}`); // quantidade de avatares disponíveis, so trocar o length
+  const avatares = Array.from({ length: 13 }, (_, i) => `avatar-${String(i + 1).padStart(2, "0")}`); // quantidade de avatares disponíveis, so trocar o length
 
   useEffect(() => {
     async function carregarPerfil() {
