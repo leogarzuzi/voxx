@@ -30,7 +30,7 @@ export function Sidebar({ perfil }: SidebarProps) {
         {/* solicitações - somente admin */}
         {podeVerSolicitacoes && (
           <Link
-            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition hover:bg-blue-700"
+            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
             href="/inicio/solicitacoes"
           >
             <svg
@@ -74,7 +74,7 @@ export function Sidebar({ perfil }: SidebarProps) {
         <button
           type="button"
           onClick={() => setDashboardOpen(!dashboardOpen)}
-          className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition hover:bg-blue-700"
+          className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
         >
           <span className="flex items-center gap-3">
             <svg
