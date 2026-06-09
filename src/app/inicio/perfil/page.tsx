@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 type Usuario = {
+  id: string;
   nome: string;
   nome_exibicao: string | null;
   email: string;
@@ -18,14 +19,12 @@ export default function PerfilPage() {
   const [loading, setLoading] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState("");
-  const [emailSessao, setEmailSessao] = useState("");
 
   useEffect(() => {
     async function carregarPerfil() {
       const { data: sessionData } = await supabase.auth.getSession();
 
       const email = sessionData.session?.user?.email;
-      setEmailSessao(email || "");
 
       if (!email) {
         setLoading(false);
@@ -34,7 +33,7 @@ export default function PerfilPage() {
 
       const { data, error } = await supabase
         .from("usuarios")
-        .select("nome, nome_exibicao, email, perfil, criado_em, avatar")
+        .select("id, nome, nome_exibicao, email, perfil, criado_em, avatar")
         .eq("email", email)
         .single<Usuario>();
 
@@ -69,7 +68,7 @@ export default function PerfilPage() {
       .update({
         nome_exibicao: nomeExibicao.trim(),
       })
-      .eq("email", emailSessao)
+      .eq("id", usuario.id)
       .select();
 
     console.log("UPDATE:", data);
