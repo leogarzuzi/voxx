@@ -204,22 +204,36 @@ async function handleAlterarSenha() {
             <button
               type="button"
               onClick={() => setMenuAberto(!menuAberto)}
-              className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-md border border-gray-200 hover:bg-gray-50 transition"
+              className="flex items-center gap-3 rounded-full bg-white px-5 py-3 text-base font-semibold text-gray-700 shadow-md border border-gray-200 hover:bg-gray-50 transition"
             >
               {avatar ? (
                 <img
                   src={`/avatars/${avatar}.png`}
                   alt="Avatar"
-                  className="h-7 w-7 rounded-full object-cover"
+                  className="h-9 w-9 rounded-full object-cover"
                 />
               ) : (
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
                   {nomeUsuario.charAt(0).toUpperCase()}
                 </div>
               )}
 
               <span>{nomeUsuario}</span>
-              <span className="text-gray-500">⌄</span>
+              <svg
+                className={`h-4 w-4 text-gray-500 transition ${
+                  menuAberto ? "rotate-90" : ""
+                }`}
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path
+                  d="M9 6l6 6-6 6"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </button>
 
             {menuAberto && (
