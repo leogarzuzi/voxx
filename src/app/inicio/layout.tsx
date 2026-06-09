@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
@@ -25,6 +25,7 @@ export default function DashboardLayout({
   const [perfil, setPerfil] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
   const [menuAberto, setMenuAberto] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null); // referencia do menu do usuario
   const [modalSenhaAberto, setModalSenhaAberto] = useState(false); // controla o modal de senha
   const [senhaAtual, setSenhaAtual] = useState(""); // senha atual digitada
   const [novaSenha, setNovaSenha] = useState(""); // nova senha
@@ -83,6 +84,23 @@ export default function DashboardLayout({
 
     verificarAcesso();
   }, [router, pathname]);
+  // fecha menu ao clicar fora
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node)
+      ) {
+        setMenuAberto(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -200,7 +218,7 @@ async function handleAlterarSenha() {
 
       <div className="relative min-h-screen flex-1">
         <div className="fixed top-4 right-4 z-50">
-          <div className="relative">
+          <div className="relative" ref={menuRef}>
             <button
               type="button"
               onClick={() => setMenuAberto(!menuAberto)}
