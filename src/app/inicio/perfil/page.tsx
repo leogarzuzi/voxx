@@ -21,10 +21,12 @@ export default function PerfilPage() {
   const [mensagem, setMensagem] = useState("");
   const [avatarSelecionado, setAvatarSelecionado] = useState("avatar-01");
 
+  const avatares = Array.from({ length: 20 }, (_, i) => `avatar-${String(i + 1).padStart(2, "0")}`); // quantidade de avatares disponíveis
+
   useEffect(() => {
     async function carregarPerfil() {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const email = sessionData.session?.user?.email;
+      const { data: sessionData } = await supabase.auth.getSession(); // pega a sessão atual
+      const email = sessionData.session?.user?.email; // pega o e-mail logado
 
       if (!email) {
         setLoading(false);
@@ -35,12 +37,12 @@ export default function PerfilPage() {
         .from("usuarios")
         .select("id, nome, nome_exibicao, email, perfil, criado_em, avatar")
         .eq("email", email)
-        .single<Usuario>();
+        .single<Usuario>(); // busca o usuário na tabela usuarios
 
       if (!error && data) {
         setUsuario(data);
-        setNomeExibicao(data.nome_exibicao || data.nome.split(" ")[0]);
-        setAvatarSelecionado(data.avatar || "avatar-01");
+        setNomeExibicao(data.nome_exibicao || data.nome.split(" ")[0]); // mostra nome salvo ou primeiro nome
+        setAvatarSelecionado(data.avatar || "avatar-01"); // mostra avatar salvo ou padrão
       }
 
       setLoading(false);
@@ -67,8 +69,8 @@ export default function PerfilPage() {
     const { error } = await supabase
       .from("usuarios")
       .update({
-        nome_exibicao: nomeExibicao.trim(),
-        avatar: avatarSelecionado,
+        nome_exibicao: nomeExibicao.trim(), // salva o nome de usuário
+        avatar: avatarSelecionado, // salva o avatar escolhido
       })
       .eq("id", usuario.id);
 
@@ -82,12 +84,12 @@ export default function PerfilPage() {
     setMensagem("Perfil atualizado com sucesso.");
 
     setTimeout(() => {
-      window.location.reload();
+      window.location.reload(); // recarrega para atualizar menu superior
     }, 700);
   }
 
   function formatarData(data: string) {
-    return new Date(data).toLocaleDateString("pt-BR");
+    return new Date(data).toLocaleDateString("pt-BR"); // formato brasileiro
   }
 
   if (loading) {
@@ -132,9 +134,9 @@ export default function PerfilPage() {
               </p>
             </div>
 
-            <div className="mt-6 grid grid-cols-5 gap-3">
-              {["avatar-01", "avatar-02", "avatar-03", "avatar-04", "avatar-05"].map(
-                (avatar) => (
+            <div className="mt-6 max-h-72 overflow-y-auto">
+              <div className="grid grid-cols-5 gap-3">
+                {avatares.map((avatar) => (
                   <button
                     key={avatar}
                     type="button"
@@ -151,10 +153,11 @@ export default function PerfilPage() {
                       className="h-10 w-10 rounded-full object-cover"
                     />
                   </button>
-                )
-              )}
+                ))}
+              </div>
             </div>
           </section>
+
           <section className="rounded-3xl bg-white p-6 shadow-sm border border-gray-100">
             <div className="space-y-5">
               <div>
