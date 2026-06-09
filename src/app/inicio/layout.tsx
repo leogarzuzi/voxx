@@ -313,8 +313,14 @@ async function handleAlterarSenha() {
           </div>
         </div>
         {modalSenhaAberto && (
-  <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 px-4">
-    <div className="w-full max-w-md rounded-3xl bg-white p-7 shadow-2xl border border-gray-100">
+          <div
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 px-4"
+            onMouseDown={() => setModalSenhaAberto(false)} // fecha clicando fora
+          >
+            <div
+              className="w-full max-w-md rounded-3xl bg-white p-7 shadow-2xl border border-gray-100"
+              onMouseDown={(e) => e.stopPropagation()} // impede fechar clicando dentro
+            >
       <div className="flex items-start justify-between">
         <div>
           <h2 className="text-xl font-bold text-gray-800">
