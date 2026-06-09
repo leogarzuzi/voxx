@@ -13,13 +13,14 @@ export function Sidebar() {
         collapsed ? "w-20" : "w-64"
       }`}
     >
-      <div className="flex items-center justify-between p-6">
+      <div className="flex justify-center py-6">
         <Link href="/inicio" title="Ir para o início">
           <img
             src="/logo-simbolo.png"
             alt="VOXX"
-            className="h-12 w-12 object-contain transition hover:scale-105"
+            className="h-16 w-16 object-contain transition hover:scale-105"
           />
+
         </Link>
 
         <button
