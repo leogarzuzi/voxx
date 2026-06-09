@@ -26,6 +26,11 @@ export default function DashboardLayout({
   const [avatar, setAvatar] = useState<string | null>(null);
   const [menuAberto, setMenuAberto] = useState(false);
   const [modalSenhaAberto, setModalSenhaAberto] = useState(false); // controla o modal de senha
+  const [senhaAtual, setSenhaAtual] = useState(""); // senha atual digitada
+  const [novaSenha, setNovaSenha] = useState(""); // nova senha
+  const [confirmarNovaSenha, setConfirmarNovaSenha] = useState(""); // confirmação da nova senha
+  const [salvandoSenha, setSalvandoSenha] = useState(false); // loading do botão
+  const [mensagemSenha, setMensagemSenha] = useState(""); // mensagem do modal
 
   useEffect(() => {
     async function verificarAcesso() {
@@ -183,6 +188,8 @@ export default function DashboardLayout({
           <input
             type="password"
             placeholder="Digite sua senha atual"
+            value={senhaAtual}
+            onChange={(e) => setSenhaAtual(e.target.value)}
             className="w-full h-11 px-4 rounded-xl border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
@@ -194,6 +201,8 @@ export default function DashboardLayout({
           <input
             type="password"
             placeholder="Digite a nova senha"
+            value={novaSenha}
+            onChange={(e) => setNovaSenha(e.target.value)}
             className="w-full h-11 px-4 rounded-xl border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
@@ -205,6 +214,8 @@ export default function DashboardLayout({
           <input
             type="password"
             placeholder="Digite novamente a nova senha"
+            value={confirmarNovaSenha}
+            onChange={(e) => setConfirmarNovaSenha(e.target.value)}
             className="w-full h-11 px-4 rounded-xl border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
