@@ -102,6 +102,22 @@ export default function DashboardLayout({
     };
   }, []);
 
+    // fecha menu e modal com ESC
+  useEffect(() => {
+    function handleEsc(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMenuAberto(false);
+        setModalSenhaAberto(false);
+      }
+    }
+
+    document.addEventListener("keydown", handleEsc);
+
+    return () => {
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, []);
+
   async function handleLogout() {
     await supabase.auth.signOut();
     router.push("/login");
