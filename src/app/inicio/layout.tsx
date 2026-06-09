@@ -99,8 +99,15 @@ async function handleAlterarSenha() {
     return;
   }
 
-  if (novaSenha.length < 6) {
-    setMensagemSenha("A nova senha deve ter pelo menos 6 caracteres.");
+  const temMinimo = novaSenha.length >= 8; // mínimo de caracteres
+  const temMaiuscula = /[A-Z]/.test(novaSenha); // letra maiúscula
+  const temNumero = /[0-9]/.test(novaSenha); // número
+  const temEspecial = /[^A-Za-z0-9]/.test(novaSenha); // caractere especial
+
+  if (!temMinimo || !temMaiuscula || !temNumero || !temEspecial) {
+    setMensagemSenha(
+      "A senha deve ter pelo menos 8 caracteres, 1 letra maiúscula, 1 número e 1 caractere especial."
+    );
     return;
   }
 
