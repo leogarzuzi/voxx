@@ -31,6 +31,9 @@ export default function DashboardLayout({
   const [confirmarNovaSenha, setConfirmarNovaSenha] = useState(""); // confirmação da nova senha
   const [salvandoSenha, setSalvandoSenha] = useState(false); // loading do botão
   const [mensagemSenha, setMensagemSenha] = useState(""); // mensagem do modal
+  const [emailUsuario, setEmailUsuario] = useState(""); // e-mail do usuário logado pra trocar a senha
+
+
 
   useEffect(() => {
     async function verificarAcesso() {
@@ -42,6 +45,8 @@ export default function DashboardLayout({
       }
 
       const email = sessionData.session.user.email;
+
+      setEmailUsuario(email); // guarda o e-mail para validar senha atual
 
       const { data: usuario, error } = await supabase
         .from("usuarios")
@@ -104,7 +109,40 @@ async function handleAlterarSenha() {
     return;
   }
 
-  setMensagemSenha("Validação OK.");
+  setSalvandoSenha(true); // inicia carregamento
+
+  const { error: loginError } = await supabase.auth.signInWithPassword({
+    email: emailUsuario,
+    password: senhaAtual,
+  }); // confere se a senha atual está certa
+
+  if (loginError) {
+    setSalvandoSenha(false);
+    setMensagemSenha("Senha atual incorreta.");
+    return;
+  }
+
+  const { error: updateError } = await supabase.auth.updateUser({
+    password: novaSenha,
+  }); // troca a senha
+
+  setSalvandoSenha(false);
+
+  if (updateError) {
+    setMensagemSenha("Erro ao alterar senha. Tente novamente.");
+    return;
+  }
+
+  setMensagemSenha("Senha alterada com sucesso.");
+
+  setSenhaAtual(""); // limpa senha atual
+  setNovaSenha(""); // limpa nova senha
+  setConfirmarNovaSenha(""); // limpa confirmação
+
+  setTimeout(() => {
+    setModalSenhaAberto(false); // fecha modal
+    setMensagemSenha(""); // limpa mensagem
+  }, 1200);
 }
   
   if (verificando) {
@@ -250,9 +288,10 @@ async function handleAlterarSenha() {
         <button
           type="button"
           onClick={handleAlterarSenha}
+          disabled={salvandoSenha}
           className="w-full h-11 rounded-xl bg-blue-700 text-white font-semibold shadow-lg shadow-blue-200 transition hover:bg-blue-800 active:scale-[0.98]"
         >
-          Salvar nova senha
+          {salvandoSenha ? "Salvando..." : "Salvar nova senha"}
         </button>
         {mensagemSenha && (
           <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-center">
