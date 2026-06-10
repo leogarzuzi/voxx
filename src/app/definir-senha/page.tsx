@@ -15,39 +15,49 @@ export default function DefinirSenhaPage() {
   const [verificando, setVerificando] = useState(true);
   const [mensagem, setMensagem] = useState("");
 
-  useEffect(() => {
-    async function verificarSessao() {
-      setMensagem("");
+useEffect(() => {
+  async function verificarSessao() {
+    setMensagem("");
 
-      const url = new URL(window.location.href);
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const searchParams = url.searchParams;
+    const url = new URL(window.location.href);
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const searchParams = url.searchParams;
 
-      const type =
-        hashParams.get("type") ||
-        searchParams.get("type") ||
-        searchParams.get("next");
+    const type =
+      hashParams.get("type") ||
+      searchParams.get("type") ||
+      searchParams.get("next");
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    const code = searchParams.get("code");
 
-      const { data } = await supabase.auth.getSession();
+    if (code) {
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
 
-      if (!data.session) {
+      if (error) {
         setMensagem("Link inválido ou expirado. Solicite uma nova redefinição de senha.");
         setVerificando(false);
         return;
       }
-
-      if (type !== "invite" && type !== "recovery" && type !== null) {
-        router.replace("/inicio");
-        return;
-      }
-
-      setVerificando(false);
     }
 
-    verificarSessao();
-  }, [router]);
+    const { data } = await supabase.auth.getSession();
+
+    if (!data.session) {
+      setMensagem("Link inválido ou expirado. Solicite uma nova redefinição de senha.");
+      setVerificando(false);
+      return;
+    }
+
+    if (type !== "invite" && type !== "recovery" && type !== null) {
+      router.replace("/inicio");
+      return;
+    }
+
+    setVerificando(false);
+  }
+
+  verificarSessao();
+}, [router]);
 
   async function handleDefinirSenha(e: React.FormEvent) {
     e.preventDefault();
