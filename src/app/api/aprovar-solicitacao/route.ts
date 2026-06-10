@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
+import { registrarAuditoria } from "@/lib/auditoria";
 
 const PERFIS_PERMITIDOS = ["Admin", "Gerente"];
 
@@ -125,6 +126,19 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
+
+    await registrarAuditoria({
+      usuarioEmail: user.email,
+      usuarioId: user.id,
+      acao: "APROVACAO_ACESSO",
+      modulo: "solicitacoes_acesso",
+      detalhes: {
+        solicitacaoId,
+        nomeAprovado: solicitacao.nome,
+        emailAprovado: emailNormalizado,
+        perfilConcedido: perfil,
+      },
+    });
 
     return NextResponse.json({
       sucesso: true,
