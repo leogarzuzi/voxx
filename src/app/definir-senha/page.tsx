@@ -23,6 +23,12 @@ useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const searchParams = url.searchParams;
 
+    const accessToken =
+      hashParams.get("access_token") || searchParams.get("access_token");
+
+    const refreshToken =
+      hashParams.get("refresh_token") || searchParams.get("refresh_token");
+
     const type =
       hashParams.get("type") ||
       searchParams.get("type") ||
@@ -30,7 +36,20 @@ useEffect(() => {
 
     const code = searchParams.get("code");
 
-    if (code) {
+    if (accessToken && refreshToken) {
+      const { error } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
+
+      if (error) {
+        setMensagem("Link inválido ou expirado. Solicite uma nova redefinição de senha.");
+        setVerificando(false);
+        return;
+      }
+
+      window.history.replaceState({}, document.title, "/definir-senha");
+    } else if (code) {
       const { error } = await supabase.auth.exchangeCodeForSession(code);
 
       if (error) {
@@ -38,6 +57,8 @@ useEffect(() => {
         setVerificando(false);
         return;
       }
+
+      window.history.replaceState({}, document.title, "/definir-senha");
     }
 
     const { data } = await supabase.auth.getSession();
