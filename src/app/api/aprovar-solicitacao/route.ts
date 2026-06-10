@@ -1,13 +1,49 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { createSupabaseServerClient } from "@/lib/supabaseServer";
+
+const PERFIS_PERMITIDOS = ["Admin", "Gerente"];
 
 export async function POST(request: Request) {
   try {
+    const supabase = await createSupabaseServerClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user?.email) {
+      return NextResponse.json(
+        { sucesso: false, mensagem: "Não autenticado." },
+        { status: 401 }
+      );
+    }
+
+    const { data: usuarioLogado, error: erroUsuarioLogado } = await supabase
+      .from("usuarios")
+      .select("perfil")
+      .eq("email", user.email.toLowerCase())
+      .single();
+
+    if (erroUsuarioLogado || usuarioLogado?.perfil !== "Admin") {
+      return NextResponse.json(
+        { sucesso: false, mensagem: "Sem permissão." },
+        { status: 403 }
+      );
+    }
+
     const { solicitacaoId, perfil } = await request.json();
 
     if (!solicitacaoId || !perfil) {
       return NextResponse.json(
         { sucesso: false, mensagem: "Dados incompletos." },
+        { status: 400 }
+      );
+    }
+
+    if (!PERFIS_PERMITIDOS.includes(perfil)) {
+      return NextResponse.json(
+        { sucesso: false, mensagem: "Perfil inválido." },
         { status: 400 }
       );
     }
@@ -44,8 +80,10 @@ export async function POST(request: Request) {
       );
     }
 
+    const emailNormalizado = solicitacao.email.trim().toLowerCase();
+
     const { error: erroConvite } =
-      await supabaseAdmin.auth.admin.inviteUserByEmail(solicitacao.email, {
+      await supabaseAdmin.auth.admin.inviteUserByEmail(emailNormalizado, {
         data: {
           nome: solicitacao.nome,
           perfil,
@@ -62,7 +100,7 @@ export async function POST(request: Request) {
 
     const { error: erroUsuario } = await supabaseAdmin.from("usuarios").insert({
       nome: solicitacao.nome,
-      email: solicitacao.email,
+      email: emailNormalizado,
       perfil,
     });
 
