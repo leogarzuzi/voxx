@@ -53,6 +53,7 @@ function IconeOlho({ aberto }: { aberto: boolean }) {
       return;
     }
 
+    router.refresh();
     router.push("/inicio");
   }
 

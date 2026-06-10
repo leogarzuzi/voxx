@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { DivisionChart } from "@/components/DivisionChart";
 import { DesligamentosMesChart } from "@/components/DesligamentosMesChart";
 import { TipoDesligamentoChart } from "@/components/TipoDesligamentoChart";
@@ -30,6 +30,8 @@ const meses = [
 ];
 
 export default async function DashboardDesligamentosPage() {
+  const supabase = await createSupabaseServerClient();
+
   const anoAtual = new Date().getFullYear();
   const mesAtual = new Date().getMonth();
 

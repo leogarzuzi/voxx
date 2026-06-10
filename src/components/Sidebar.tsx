@@ -15,7 +15,7 @@ export function Sidebar({ perfil }: SidebarProps) {
   return (
     <aside className="min-h-screen w-56 bg-blue-800 text-white">
       {/* logo do sistema */}
-      <div className="flex justify-center py-7">
+      <div className="flex justify-center py-4">
         <Link href="/inicio" title="Ir para o início">
           <img
             src="/logo-simbolo.png"
@@ -25,7 +25,7 @@ export function Sidebar({ perfil }: SidebarProps) {
         </Link>
       </div>
 
-      <nav className="mt-2 space-y-1 px-4">
+      <nav className="mt-0 space-y-1 px-4">
 
         {/* solicitações - somente admin */}
         {podeVerSolicitacoes && (

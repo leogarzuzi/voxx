@@ -1,12 +1,12 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-import { supabase } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { AtestadosDivisaoChart } from "@/components/AtestadosDivisaoChart";
 import { AtestadosMesChart } from "@/components/AtestadosMesChart";
 import { classificarDivisao } from "@/lib/classificarDivisao";
 
-async function buscarTodosAtestados() {
+async function buscarTodosAtestados(supabase: any) {
   const tamanhoPagina = 1000;
   let pagina = 0;
   let todos: any[] = [];
@@ -117,7 +117,9 @@ const ordemMeses = [
 ];
 
 export default async function DashboardAtestadosPage() {
-  const { data: atestados, error } = await buscarTodosAtestados();
+  const supabase = await createSupabaseServerClient();
+
+  const { data: atestados, error } = await buscarTodosAtestados(supabase);
 
   const { count: totalAtestados } = await supabase
     .from("atestados")

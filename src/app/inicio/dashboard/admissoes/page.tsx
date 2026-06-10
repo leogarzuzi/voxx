@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { DivisionChart } from "@/components/DivisionChart";
 import { AdmissoesMesChart } from "@/components/AdmissoesMesChart";
 import { classificarDivisao } from "@/lib/classificarDivisao";
@@ -29,6 +29,8 @@ const meses = [
 ];
 
 export default async function DashboardAdmissoesPage() {
+  const supabase = await createSupabaseServerClient();
+
   const anoAtual = new Date().getFullYear();
   const mesAtual = new Date().getMonth();
 

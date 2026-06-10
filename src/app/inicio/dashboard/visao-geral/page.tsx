@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-import { supabase } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { PrefixChart } from "@/components/PrefixChart";
 import { DivisionChart } from "@/components/DivisionChart";
 import { classificarDivisao } from "@/lib/classificarDivisao";
@@ -36,6 +36,8 @@ const meses = [
 ];
 
 export default async function DashboardPage() {
+  const supabase = await createSupabaseServerClient();
+
   const anoAtual = new Date().getFullYear();
   const mesAtual = new Date().getMonth();
 
@@ -260,7 +262,7 @@ export default async function DashboardPage() {
           <th className="py-3">Admitidos</th>
           <th className="py-3">Desligados</th>
           <th className="py-3">Ativos no fim do mês</th>
-          <th className="py-3">Turnover</th>
+           <th className="py-3">Turnover</th>
         </tr>
       </thead>
 
