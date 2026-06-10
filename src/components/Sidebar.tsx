@@ -8,9 +8,10 @@ type SidebarProps = {
 };
 
 export function Sidebar({ perfil }: SidebarProps) {
-  const [dashboardOpen, setDashboardOpen] = useState(false); // abre/fecha dashboard
+  const [dashboardOpen, setDashboardOpen] = useState(false);
 
-  const podeVerSolicitacoes = perfil === "Admin"; // somente admin vê solicitações
+  const podeVerSolicitacoes = perfil === "Admin";
+  const podeVerAuditoria = perfil === "Admin";
 
   return (
     <aside className="min-h-screen w-56 bg-blue-800 text-white">
@@ -26,7 +27,6 @@ export function Sidebar({ perfil }: SidebarProps) {
       </div>
 
       <nav className="mt-0 space-y-1 px-4">
-
         {/* solicitações - somente admin */}
         {podeVerSolicitacoes && (
           <Link
@@ -67,6 +67,36 @@ export function Sidebar({ perfil }: SidebarProps) {
             </svg>
 
             Solicitações
+          </Link>
+        )}
+
+        {/* auditoria - somente admin */}
+        {podeVerAuditoria && (
+          <Link
+            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+            href="/inicio/auditoria"
+          >
+            <svg
+              className="h-5 w-5 text-blue-100"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M9 11l2 2 4-4"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinejoin="round"
+              />
+            </svg>
+
+            Auditoria
           </Link>
         )}
 
