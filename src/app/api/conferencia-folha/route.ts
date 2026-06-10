@@ -1,6 +1,7 @@
   import { NextRequest } from "next/server";
   import * as XLSX from "xlsx-js-style";
   import { createSupabaseServerClient } from "@/lib/supabaseServer";
+  import { registrarAuditoria } from "@/lib/auditoria";
 
   export const runtime = "nodejs";
   export const dynamic = "force-dynamic";
@@ -395,6 +396,24 @@
       const output = XLSX.write(wb, {
         type: "buffer",
         bookType: "xlsx",
+      });
+
+      await registrarAuditoria({
+        usuarioEmail: user.email,
+        usuarioId: user.id,
+        acao: "CONFERENCIA_FOLHA_EXECUTADA",
+        modulo: "conferencia_folha",
+        detalhes: {
+          competencia,
+          abaPrevia,
+          linhasPrevia: previa.length,
+          lancamentosFopag: fopagTratada.length,
+          colaboradoresFerias: feriasSet.size,
+          colaboradoresDesligados: desligadosSet.size,
+          totalDivergencias: erros.length,
+          arquivoFopag: fopagFile.name,
+          arquivoPrevia: previaFile.name,
+        },
       });
 
       return new Response(output, {
