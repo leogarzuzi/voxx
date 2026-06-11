@@ -54,12 +54,35 @@ function resumirValores(valores: string[]) {
   return `${valores.slice(0, 3).join(", ")} +${valores.length - 3}`;
 }
 
+function formatarValorExcel(valor: string | number | null | undefined) {
+  if (valor === null || valor === undefined) {
+    return "";
+  }
+
+  const valorTexto = String(valor).replaceAll('"', '""');
+
+  return `"${valorTexto}"`;
+}
+
+function gerarNomeArquivoExcel() {
+  const agora = new Date();
+
+  const ano = agora.getFullYear();
+  const mes = String(agora.getMonth() + 1).padStart(2, "0");
+  const dia = String(agora.getDate()).padStart(2, "0");
+  const hora = String(agora.getHours()).padStart(2, "0");
+  const minuto = String(agora.getMinutes()).padStart(2, "0");
+
+  return `base-dados-voxx-${ano}-${mes}-${dia}-${hora}${minuto}.csv`;
+}
+
 export default function BaseDadosTabela() {
   const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
   const [busca, setBusca] = useState("");
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
   const [modoTodos, setModoTodos] = useState(false); // controla se carregou a base inteira
+  const [exportando, setExportando] = useState(false); // controla o botão de exportar
 
   const [filtrosAtivos, setFiltrosAtivos] = useState<FiltroAtivo[]>([]);
 
@@ -161,6 +184,96 @@ export default function BaseDadosTabela() {
   function carregarTodosColaboradores() {
     // carrega todos, respeitando busca e filtros ativos
     buscarColaboradores(busca, true, filtrosAtivos);
+  }
+
+  async function baixarExcel() {
+    setExportando(true);
+    setErro("");
+
+    const params = new URLSearchParams();
+
+    if (busca.trim()) {
+      params.set("busca", busca.trim());
+    }
+
+    // força exportar a base completa respeitando busca e filtros
+    params.set("todos", "1");
+
+    if (filtrosAtivos.length > 0) {
+      params.set(
+        "filtros",
+        JSON.stringify(
+          filtrosAtivos.map((filtro) => ({
+            campo: filtro.campo,
+            valores: filtro.valores,
+          }))
+        )
+      );
+    }
+
+    const response = await fetch(`/api/base-dados?${params.toString()}`, {
+      method: "GET",
+      cache: "no-store",
+    });
+
+    const resultado = await response.json();
+
+    if (!response.ok || !resultado.success) {
+      setErro(resultado.error || "Erro ao exportar base de dados.");
+      setExportando(false);
+      return;
+    }
+
+    const dados: Colaborador[] = resultado.colaboradores ?? [];
+
+    const cabecalho = [
+      "Pref.",
+      "Matrícula",
+      "Nome",
+      "Cargo/Função",
+      "CH",
+      "Exercício",
+      "CPF",
+      "PIS",
+      "Data nasc.",
+      "E-mail",
+      "Observação",
+    ];
+
+    const linhas = dados.map((colaborador) => [
+      colaborador.pref,
+      colaborador.matricula,
+      colaborador.nome,
+      colaborador.cargo,
+      colaborador.carga_horaria,
+      colaborador.exercicio,
+      colaborador.cpf,
+      colaborador.pis,
+      colaborador.data_nascimento,
+      colaborador.email,
+      colaborador.observacao,
+    ]);
+
+    const conteudoCsv = [
+      cabecalho.map(formatarValorExcel).join(";"),
+      ...linhas.map((linha) => linha.map(formatarValorExcel).join(";")),
+    ].join("\n");
+
+    // BOM ajuda o Excel a reconhecer acentos corretamente
+    const blob = new Blob(["\uFEFF" + conteudoCsv], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = gerarNomeArquivoExcel();
+    link.click();
+
+    URL.revokeObjectURL(url);
+
+    setExportando(false);
   }
 
   function abrirModalFiltro() {
@@ -416,14 +529,75 @@ export default function BaseDadosTabela() {
               )}
             </div>
 
-            <button
-              type="button"
-              onClick={carregarTodosColaboradores}
-              disabled={loading}
-              className="rounded-xl border px-4 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              Carregar todos
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={baixarExcel}
+                disabled={loading || exportando}
+                title="Exportar planilha"
+                aria-label="Exportar planilha"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#107C41] text-white shadow-sm shadow-green-700/25 transition hover:-translate-y-0.5 hover:bg-[#0f6f3b] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className={`h-5 w-5 ${exportando ? "animate-pulse" : ""}`}
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M6 3h8l4 4v14H6V3Z"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M14 3v4h4"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M8.5 10.5h7"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M8.5 13.5h7"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M8.5 16.5h7"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M11 10.5v6"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M13.5 10.5v6"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+
+              <button
+                type="button"
+                onClick={carregarTodosColaboradores}
+                disabled={loading}
+                className="rounded-xl border px-4 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Carregar todos
+              </button>
+            </div>
           </div>
 
           <div className="overflow-hidden rounded-xl border">
