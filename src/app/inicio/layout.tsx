@@ -35,10 +35,10 @@ export default function DashboardLayout({
   const [salvandoSenha, setSalvandoSenha] = useState(false); // loading do botão
   const [mensagemSenha, setMensagemSenha] = useState(""); // mensagem do modal
   const [emailUsuario, setEmailUsuario] = useState(""); // e-mail do usuário logado pra trocar a senha
-
   const [mostrarSenhaAtual, setMostrarSenhaAtual] = useState(false); // mostra/oculta senha atual
   const [mostrarNovaSenha, setMostrarNovaSenha] = useState(false); // mostra/oculta nova senha
   const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false); // mostra/oculta confirmação
+  const [carregandoRota, setCarregandoRota] = useState(false); // loading ao trocar de módulo
 
 
 
@@ -105,6 +105,12 @@ export default function DashboardLayout({
 
     verificarAcesso();
   }, [router, pathname]);
+
+  // remove o loading quando a nova rota terminar de carregar
+  useEffect(() => {
+    setCarregandoRota(false);
+  }, [pathname]);
+
   // fecha menu ao clicar fora
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -255,9 +261,22 @@ async function handleAlterarSenha() {
 
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <Sidebar perfil={perfil} />
+      <Sidebar
+        perfil={perfil}
+        onNavigate={() => setCarregandoRota(true)}
+      />
 
       <div className="relative min-h-screen flex-1">
+        {/* loading visual ao trocar de módulo */}
+        {carregandoRota && (
+          <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-900/20 backdrop-blur-[1.5px]">
+            <img
+              src="/logo-simbolo.png"
+              alt="Carregando VOXX"
+              className="h-20 w-20 animate-pulse object-contain drop-shadow-2xl"
+            />
+          </div>
+        )}
         <div className="fixed top-4 right-4 z-50">
           <div className="relative" ref={menuRef}>
             <button

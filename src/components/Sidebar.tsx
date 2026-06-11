@@ -1,29 +1,75 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 type SidebarProps = {
   perfil: string;
+  onNavigate?: () => void; // dispara o loading ao trocar de módulo
 };
 
-export function Sidebar({ perfil }: SidebarProps) {
-  const [dashboardOpen, setDashboardOpen] = useState(false);
+export function Sidebar({ perfil, onNavigate }: SidebarProps) {
+  const pathname = usePathname();
+
+  // abre/fecha o grupo Dashboard
+  const [dashboardOpen, setDashboardOpen] = useState(
+    pathname.startsWith("/inicio/dashboard")
+  );
 
   // permissões do menu lateral
   const podeVerSolicitacoes = perfil === "Admin";
   const podeVerAuditoria = perfil === "Admin";
   const podeVerUsuarios = perfil === "Admin";
 
+  // mantém o Dashboard aberto quando estiver em qualquer submódulo dele
+  useEffect(() => {
+    if (pathname.startsWith("/inicio/dashboard")) {
+      setDashboardOpen(true);
+    }
+  }, [pathname]);
+
+  // confere se uma rota está ativa
+  function rotaAtiva(href: string) {
+    return pathname === href || pathname.startsWith(`${href}/`);
+  }
+
+  // inicia loading somente se estiver indo para uma rota diferente
+  function iniciarNavegacao(href: string) {
+    if (!rotaAtiva(href)) {
+      onNavigate?.();
+    }
+  }
+
   // classe padrão dos itens principais do menu
-  const itemMenuClass =
-    "flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700";
+  function itemMenuClass(ativo: boolean) {
+    return `flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
+      ativo
+        ? "bg-blue-700 shadow-inner ring-1 ring-blue-300/40"
+        : "hover:bg-blue-700"
+    }`;
+  }
+
+  // classe padrão dos subitens do dashboard
+  function subItemMenuClass(ativo: boolean) {
+    return `block rounded-lg px-3 py-2 text-sm transition ${
+      ativo
+        ? "bg-blue-700 font-semibold text-white"
+        : "text-blue-50 hover:bg-blue-700"
+    }`;
+  }
+
+  const dashboardAtivo = pathname.startsWith("/inicio/dashboard");
 
   return (
     <aside className="min-h-screen w-56 bg-blue-800 text-white">
       {/* logo do sistema */}
       <div className="flex justify-center py-4">
-        <Link href="/inicio" title="Ir para o início">
+        <Link
+          href="/inicio"
+          title="Ir para o início"
+          onClick={() => iniciarNavegacao("/inicio")}
+        >
           <img
             src="/logo-simbolo.png"
             alt="VOXX"
@@ -35,7 +81,11 @@ export function Sidebar({ perfil }: SidebarProps) {
       <nav className="mt-0 space-y-1 px-4">
         {/* solicitações - somente admin */}
         {podeVerSolicitacoes && (
-          <Link className={itemMenuClass} href="/inicio/solicitacoes">
+          <Link
+            className={itemMenuClass(rotaAtiva("/inicio/solicitacoes"))}
+            href="/inicio/solicitacoes"
+            onClick={() => iniciarNavegacao("/inicio/solicitacoes")}
+          >
             <svg
               className="h-5 w-5 text-blue-100"
               viewBox="0 0 24 24"
@@ -75,7 +125,11 @@ export function Sidebar({ perfil }: SidebarProps) {
 
         {/* auditoria - somente admin */}
         {podeVerAuditoria && (
-          <Link className={itemMenuClass} href="/inicio/auditoria">
+          <Link
+            className={itemMenuClass(rotaAtiva("/inicio/auditoria"))}
+            href="/inicio/auditoria"
+            onClick={() => iniciarNavegacao("/inicio/auditoria")}
+          >
             <svg
               className="h-5 w-5 text-blue-100"
               viewBox="0 0 24 24"
@@ -102,7 +156,11 @@ export function Sidebar({ perfil }: SidebarProps) {
 
         {/* gestão de usuários - somente admin */}
         {podeVerUsuarios && (
-          <Link className={itemMenuClass} href="/inicio/usuarios">
+          <Link
+            className={itemMenuClass(rotaAtiva("/inicio/usuarios"))}
+            href="/inicio/usuarios"
+            onClick={() => iniciarNavegacao("/inicio/usuarios")}
+          >
             <svg
               className="h-5 w-5 text-blue-100"
               viewBox="0 0 24 24"
@@ -146,7 +204,11 @@ export function Sidebar({ perfil }: SidebarProps) {
         <button
           type="button"
           onClick={() => setDashboardOpen(!dashboardOpen)}
-          className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+          className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
+            dashboardAtivo
+              ? "bg-blue-700 shadow-inner ring-1 ring-blue-300/40"
+              : "hover:bg-blue-700"
+          }`}
         >
           <span className="flex items-center gap-3">
             <svg
@@ -190,29 +252,43 @@ export function Sidebar({ perfil }: SidebarProps) {
         {dashboardOpen && (
           <div className="ml-8 mt-1 space-y-1 border-l border-blue-600 pl-3">
             <Link
-              className="block rounded-lg px-3 py-2 text-sm text-blue-50 transition hover:bg-blue-700"
+              className={subItemMenuClass(
+                rotaAtiva("/inicio/dashboard/visao-geral")
+              )}
               href="/inicio/dashboard/visao-geral"
+              onClick={() => iniciarNavegacao("/inicio/dashboard/visao-geral")}
             >
               Visão Geral
             </Link>
 
             <Link
-              className="block rounded-lg px-3 py-2 text-sm text-blue-50 transition hover:bg-blue-700"
+              className={subItemMenuClass(
+                rotaAtiva("/inicio/dashboard/admissoes")
+              )}
               href="/inicio/dashboard/admissoes"
+              onClick={() => iniciarNavegacao("/inicio/dashboard/admissoes")}
             >
               Admissões
             </Link>
 
             <Link
-              className="block rounded-lg px-3 py-2 text-sm text-blue-50 transition hover:bg-blue-700"
+              className={subItemMenuClass(
+                rotaAtiva("/inicio/dashboard/desligamentos")
+              )}
               href="/inicio/dashboard/desligamentos"
+              onClick={() =>
+                iniciarNavegacao("/inicio/dashboard/desligamentos")
+              }
             >
               Desligamentos
             </Link>
 
             <Link
-              className="block rounded-lg px-3 py-2 text-sm text-blue-50 transition hover:bg-blue-700"
+              className={subItemMenuClass(
+                rotaAtiva("/inicio/dashboard/atestados")
+              )}
               href="/inicio/dashboard/atestados"
+              onClick={() => iniciarNavegacao("/inicio/dashboard/atestados")}
             >
               Atestados
             </Link>
@@ -220,7 +296,11 @@ export function Sidebar({ perfil }: SidebarProps) {
         )}
 
         {/* conferência de folha */}
-        <Link className={itemMenuClass} href="/inicio/conferencia-folha">
+        <Link
+          className={itemMenuClass(rotaAtiva("/inicio/conferencia-folha"))}
+          href="/inicio/conferencia-folha"
+          onClick={() => iniciarNavegacao("/inicio/conferencia-folha")}
+        >
           <svg
             className="h-5 w-5 text-blue-100"
             viewBox="0 0 24 24"
