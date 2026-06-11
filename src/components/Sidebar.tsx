@@ -10,8 +10,14 @@ type SidebarProps = {
 export function Sidebar({ perfil }: SidebarProps) {
   const [dashboardOpen, setDashboardOpen] = useState(false);
 
+  // permissões do menu lateral
   const podeVerSolicitacoes = perfil === "Admin";
   const podeVerAuditoria = perfil === "Admin";
+  const podeVerUsuarios = perfil === "Admin";
+
+  // classe padrão dos itens principais do menu
+  const itemMenuClass =
+    "flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700";
 
   return (
     <aside className="min-h-screen w-56 bg-blue-800 text-white">
@@ -29,10 +35,7 @@ export function Sidebar({ perfil }: SidebarProps) {
       <nav className="mt-0 space-y-1 px-4">
         {/* solicitações - somente admin */}
         {podeVerSolicitacoes && (
-          <Link
-            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
-            href="/inicio/solicitacoes"
-          >
+          <Link className={itemMenuClass} href="/inicio/solicitacoes">
             <svg
               className="h-5 w-5 text-blue-100"
               viewBox="0 0 24 24"
@@ -72,10 +75,7 @@ export function Sidebar({ perfil }: SidebarProps) {
 
         {/* auditoria - somente admin */}
         {podeVerAuditoria && (
-          <Link
-            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
-            href="/inicio/auditoria"
-          >
+          <Link className={itemMenuClass} href="/inicio/auditoria">
             <svg
               className="h-5 w-5 text-blue-100"
               viewBox="0 0 24 24"
@@ -100,11 +100,53 @@ export function Sidebar({ perfil }: SidebarProps) {
           </Link>
         )}
 
+        {/* gestão de usuários - somente admin */}
+        {podeVerUsuarios && (
+          <Link className={itemMenuClass} href="/inicio/usuarios">
+            <svg
+              className="h-5 w-5 text-blue-100"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <circle
+                cx="9"
+                cy="7"
+                r="4"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              <path
+                d="M23 21v-2a4 4 0 0 0-3-3.87"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M16 3.13a4 4 0 0 1 0 7.75"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+
+            Usuários
+          </Link>
+        )}
+
         {/* dashboard */}
         <button
           type="button"
           onClick={() => setDashboardOpen(!dashboardOpen)}
-          className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+          className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
         >
           <span className="flex items-center gap-3">
             <svg
@@ -178,10 +220,7 @@ export function Sidebar({ perfil }: SidebarProps) {
         )}
 
         {/* conferência de folha */}
-        <Link
-          className="mt-3 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition hover:bg-blue-700"
-          href="/inicio/conferencia-folha"
-        >
+        <Link className={itemMenuClass} href="/inicio/conferencia-folha">
           <svg
             className="h-5 w-5 text-blue-100"
             viewBox="0 0 24 24"
@@ -213,7 +252,7 @@ export function Sidebar({ perfil }: SidebarProps) {
             />
           </svg>
 
-          Analise FOPAG
+          Análise FOPAG
         </Link>
       </nav>
     </aside>

@@ -123,8 +123,8 @@ useEffect(() => {
 }, [router]);
 
   async function handleDefinirSenha(e: React.FormEvent) {
-    e.preventDefault();
-
+    e.preventDefault(); 
+    
     setMensagem("");
 
     if (!senha || !confirmarSenha) {
