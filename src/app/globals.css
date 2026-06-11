@@ -12,6 +12,12 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* ajuste global de escala do VOXX */
+/* 100% = tamanho padrão | 87.5% = mais compacto | 80% = bem menor */
+html {
+  font-size: 75.5%;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
