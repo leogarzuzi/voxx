@@ -3,6 +3,9 @@ import { createSupabaseServerClient } from "@/lib/supabaseServer";
 
 export const dynamic = "force-dynamic";
 
+const TAMANHO_LOTE = 1000; // limite seguro por busca
+const LIMITE_TOTAL = 10000; // trava para evitar busca infinita
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createSupabaseServerClient();
@@ -42,52 +45,97 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
 
     const busca = searchParams.get("busca")?.trim() || "";
+    const carregarTodos = searchParams.get("todos") === "1";
 
-    // consulta principal da base de colaboradores
-    let query = supabase
-      .from("colaboradores")
-      .select(
+    const termoBusca = busca.replaceAll(",", " ").trim();
+
+    // função base para montar a consulta
+    function montarQuery() {
+      let query = supabase
+        .from("colaboradores")
+        .select(
+          `
+          id,
+          pref,
+          matricula,
+          nome,
+          cargo,
+          carga_horaria,
+          exercicio,
+          cpf,
+          pis,
+          data_nascimento,
+          email,
+          observacao,
+          created_at
         `
-        id,
-        pref,
-        matricula,
-        nome,
-        cargo,
-        carga_horaria,
-        exercicio,
-        cpf,
-        pis,
-        data_nascimento,
-        email,
-        observacao,
-        created_at
-      `
-      )
-      .order("nome", { ascending: true })
-      .limit(100);
+        )
+        .order("nome", { ascending: true });
 
-    // busca rápida por campos principais
-    if (busca) {
-      const termo = busca.replaceAll(",", " ").trim();
+      // busca rápida por campos principais
+      if (termoBusca) {
+        query = query.or(
+          `nome.ilike.*${termoBusca}*,matricula.ilike.*${termoBusca}*,cpf.ilike.*${termoBusca}*,cargo.ilike.*${termoBusca}*,email.ilike.*${termoBusca}*`
+        );
+      }
 
-      query = query.or(
-        `nome.ilike.*${termo}*,matricula.ilike.*${termo}*,cpf.ilike.*${termo}*,cargo.ilike.*${termo}*,email.ilike.*${termo}*`
-      );
+      return query;
     }
 
-    const { data, error } = await query;
+    // modo normal: carrega só os primeiros 100 registros
+    if (!carregarTodos) {
+      const { data, error } = await montarQuery().limit(100);
 
-    if (error) {
-      return Response.json(
-        { success: false, error: error.message },
-        { status: 500 }
-      );
+      if (error) {
+        return Response.json(
+          { success: false, error: error.message },
+          { status: 500 }
+        );
+      }
+
+      return Response.json({
+        success: true,
+        colaboradores: data ?? [],
+        total: data?.length ?? 0,
+        modo: "limitado",
+      });
+    }
+
+    // modo teste: carrega todos em lotes de 1000
+    const colaboradores: any[] = [];
+
+    let inicio = 0;
+    let continuar = true;
+
+    while (continuar && colaboradores.length < LIMITE_TOTAL) {
+      const fim = inicio + TAMANHO_LOTE - 1;
+
+      const { data, error } = await montarQuery().range(inicio, fim);
+
+      if (error) {
+        return Response.json(
+          { success: false, error: error.message },
+          { status: 500 }
+        );
+      }
+
+      const lote = data ?? [];
+
+      colaboradores.push(...lote);
+
+      // se veio menos que 1000, acabou
+      if (lote.length < TAMANHO_LOTE) {
+        continuar = false;
+      }
+
+      inicio += TAMANHO_LOTE;
     }
 
     return Response.json({
       success: true,
-      colaboradores: data ?? [],
-      total: data?.length ?? 0,
+      colaboradores,
+      total: colaboradores.length,
+      modo: "todos",
     });
   } catch (error) {
     return Response.json(
