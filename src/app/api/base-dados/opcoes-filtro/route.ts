@@ -3,8 +3,8 @@ import { createSupabaseServerClient } from "@/lib/supabaseServer";
 
 export const dynamic = "force-dynamic";
 
-const TAMANHO_LOTE = 1000; // limite seguro por busca
-const LIMITE_TOTAL = 10000; // trava para evitar busca infinita
+const TAMANHO_LOTE = 1000;
+const LIMITE_TOTAL = 10000;
 
 const CAMPOS_PERMITIDOS: Record<string, string> = {
   pref: "pref",
@@ -63,11 +63,17 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
 
-    const busca = searchParams.get("busca")?.trim() || "";
-    const carregarTodos = searchParams.get("todos") === "1";
-    const filtrosParam = searchParams.get("filtros");
+    const campo = searchParams.get("campo") || "";
+    const coluna = CAMPOS_PERMITIDOS[campo];
 
-    const termoBusca = busca.replaceAll(",", " ").trim();
+    if (!coluna) {
+      return Response.json(
+        { success: false, error: "Campo inválido." },
+        { status: 400 }
+      );
+    }
+
+    const filtrosParam = searchParams.get("filtros");
 
     let filtros: FiltroBaseDados[] = [];
 
@@ -82,85 +88,42 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // função base para montar a consulta
-    function montarQuery() {
+    const valores: string[] = [];
+
+    let inicio = 0;
+    let continuar = true;
+
+    // busca em lotes para não ficar preso aos primeiros 1000 registros
+    while (continuar && valores.length < LIMITE_TOTAL) {
+      const fim = inicio + TAMANHO_LOTE - 1;
+
       let query = supabase
         .from("colaboradores")
-        .select(
-          `
-          id,
-          pref,
-          matricula,
-          nome,
-          cargo,
-          carga_horaria,
-          exercicio,
-          cpf,
-          pis,
-          data_nascimento,
-          email,
-          observacao,
-          created_at
-        `
-        )
-        .order("nome", { ascending: true });
+        .select(coluna)
+        .not(coluna, "is", null)
+        .order(coluna, { ascending: true })
+        .range(inicio, fim);
 
-      // busca rápida por campos principais
-      if (termoBusca) {
-        query = query.or(
-          `nome.ilike.*${termoBusca}*,matricula.ilike.*${termoBusca}*,cpf.ilike.*${termoBusca}*,cargo.ilike.*${termoBusca}*,email.ilike.*${termoBusca}*`
-        );
-      }
-
-      // filtros estilo Excel
+      // aplica os filtros já ativos, exceto o próprio campo que está sendo aberto
+      // exemplo: se já filtrei Cargo = Enfermeiro e estou abrindo CH,
+      // a lista de CH vem só dos Enfermeiros
       for (const filtro of filtros) {
-        const coluna = CAMPOS_PERMITIDOS[filtro.campo];
+        if (filtro.campo === campo) continue;
 
-        if (!coluna) {
-          continue;
-        }
+        const colunaFiltro = CAMPOS_PERMITIDOS[filtro.campo];
+
+        if (!colunaFiltro) continue;
 
         const valoresValidos = filtro.valores
           .map((valor) => String(valor).trim())
           .filter(Boolean);
 
         if (valoresValidos.length > 0) {
-          query = query.in(coluna, valoresValidos);
+          query = query.in(colunaFiltro, valoresValidos);
         }
       }
 
-      return query;
-    }
-
-    // modo normal: carrega só os primeiros 100 registros
-    if (!carregarTodos) {
-      const { data, error } = await montarQuery().limit(100);
-
-      if (error) {
-        return Response.json(
-          { success: false, error: error.message },
-          { status: 500 }
-        );
-      }
-
-      return Response.json({
-        success: true,
-        colaboradores: data ?? [],
-        total: data?.length ?? 0,
-        modo: "limitado",
-      });
-    }
-
-    // modo completo: carrega todos em lotes de 1000
-    const colaboradores: any[] = [];
-
-    let inicio = 0;
-    let continuar = true;
-
-    while (continuar && colaboradores.length < LIMITE_TOTAL) {
-      const fim = inicio + TAMANHO_LOTE - 1;
-
-      const { data, error } = await montarQuery().range(inicio, fim);
+      const { data, error } = await query;
 
       if (error) {
         return Response.json(
@@ -171,9 +134,18 @@ export async function GET(request: NextRequest) {
 
       const lote = data ?? [];
 
-      colaboradores.push(...lote);
+      for (const item of lote as any[]) {
+        const valor = item[coluna];
 
-      // se veio menos que 1000, acabou
+        if (valor !== null && valor !== undefined) {
+          const valorTratado = String(valor).trim();
+
+          if (valorTratado) {
+            valores.push(valorTratado);
+          }
+        }
+      }
+
       if (lote.length < TAMANHO_LOTE) {
         continuar = false;
       }
@@ -181,11 +153,16 @@ export async function GET(request: NextRequest) {
       inicio += TAMANHO_LOTE;
     }
 
+    const valoresUnicos = Array.from(new Set(valores)).sort((a, b) =>
+      a.localeCompare(b, "pt-BR")
+    );
+
     return Response.json({
       success: true,
-      colaboradores,
-      total: colaboradores.length,
-      modo: "todos",
+      campo,
+      coluna,
+      valores: valoresUnicos,
+      total: valoresUnicos.length,
     });
   } catch (error) {
     return Response.json(
