@@ -25,8 +25,7 @@ useEffect(() => {
     const searchParams = url.searchParams;
 
     // se o próprio Supabase mandou erro no link, bloqueia direto
-    const erroUrl =
-      hashParams.get("error") || searchParams.get("error");
+    const erroUrl = hashParams.get("error") || searchParams.get("error");
 
     if (erroUrl) {
       setMensagem(
@@ -36,20 +35,31 @@ useEffect(() => {
       return;
     }
 
+    // formato 1: tokens no hash da URL
     const accessToken =
       hashParams.get("access_token") || searchParams.get("access_token");
 
     const refreshToken =
       hashParams.get("refresh_token") || searchParams.get("refresh_token");
 
-    const tipoLink =
-      hashParams.get("type") || searchParams.get("type");
-
+    // formato 2: code na URL
     const code = searchParams.get("code");
+
+    // formato 3: token_hash vindo de template customizado do Supabase
+    const tokenHash =
+      searchParams.get("token_hash") ||
+      searchParams.get("token_hash".toUpperCase()) ||
+      searchParams.get("token");
+
+    // tipo do link: invite ou recovery
+    const tipoLink =
+      hashParams.get("type") ||
+      searchParams.get("type") ||
+      "recovery";
 
     let sessaoCriada = false;
 
-    // CASO 1: link antigo/padrão com access_token e refresh_token no #
+    // CASO 1: link com access_token e refresh_token
     if (accessToken && refreshToken) {
       const { error } = await supabase.auth.setSession({
         access_token: accessToken,
@@ -61,7 +71,7 @@ useEffect(() => {
       }
     }
 
-    // CASO 2: link novo do Supabase com ?code=
+    // CASO 2: link com code
     if (!sessaoCriada && code) {
       const { error } = await supabase.auth.exchangeCodeForSession(code);
 
@@ -70,9 +80,23 @@ useEffect(() => {
       }
     }
 
-    // IMPORTANTE:
-    // Mesmo se o exchangeCodeForSession der erro, ainda conferimos a sessão.
-    // Às vezes o middleware já processou o code antes da página carregar.
+    // CASO 3: link com token_hash/token
+    if (
+      !sessaoCriada &&
+      tokenHash &&
+      (tipoLink === "recovery" || tipoLink === "invite")
+    ) {
+      const { error } = await supabase.auth.verifyOtp({
+        token_hash: tokenHash,
+        type: tipoLink as "recovery" | "invite",
+      });
+
+      if (!error) {
+        sessaoCriada = true;
+      }
+    }
+
+    // confere se existe sessão depois de tentar todos os formatos
     const { data } = await supabase.auth.getSession();
 
     if (!data.session) {
@@ -83,12 +107,8 @@ useEffect(() => {
       return;
     }
 
-    // aceita link de convite, recuperação ou link sem type explícito
-    if (
-      tipoLink &&
-      tipoLink !== "invite" &&
-      tipoLink !== "recovery"
-    ) {
+    // aceita apenas convite e recuperação de senha
+    if (tipoLink !== "invite" && tipoLink !== "recovery") {
       router.replace("/inicio");
       return;
     }
