@@ -19,9 +19,22 @@ useEffect(() => {
   async function verificarSessao() {
     setMensagem("");
 
+    // pega os parâmetros do link vindo do Supabase
     const url = new URL(window.location.href);
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const searchParams = url.searchParams;
+
+    // se o próprio Supabase mandou erro no link, bloqueia direto
+    const erroUrl =
+      hashParams.get("error") || searchParams.get("error");
+
+    if (erroUrl) {
+      setMensagem(
+        "Link inválido ou expirado. Solicite uma nova redefinição de senha."
+      );
+      setVerificando(false);
+      return;
+    }
 
     const accessToken =
       hashParams.get("access_token") || searchParams.get("access_token");
@@ -29,50 +42,59 @@ useEffect(() => {
     const refreshToken =
       hashParams.get("refresh_token") || searchParams.get("refresh_token");
 
-    const type =
-      hashParams.get("type") ||
-      searchParams.get("type") ||
-      searchParams.get("next");
+    const tipoLink =
+      hashParams.get("type") || searchParams.get("type");
 
     const code = searchParams.get("code");
 
+    let sessaoCriada = false;
+
+    // CASO 1: link antigo/padrão com access_token e refresh_token no #
     if (accessToken && refreshToken) {
       const { error } = await supabase.auth.setSession({
         access_token: accessToken,
         refresh_token: refreshToken,
       });
 
-      if (error) {
-        setMensagem("Link inválido ou expirado. Solicite uma nova redefinição de senha.");
-        setVerificando(false);
-        return;
+      if (!error) {
+        sessaoCriada = true;
       }
-
-      window.history.replaceState({}, document.title, "/definir-senha");
-    } else if (code) {
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-      if (error) {
-        setMensagem("Link inválido ou expirado. Solicite uma nova redefinição de senha.");
-        setVerificando(false);
-        return;
-      }
-
-      window.history.replaceState({}, document.title, "/definir-senha");
     }
 
+    // CASO 2: link novo do Supabase com ?code=
+    if (!sessaoCriada && code) {
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+      if (!error) {
+        sessaoCriada = true;
+      }
+    }
+
+    // IMPORTANTE:
+    // Mesmo se o exchangeCodeForSession der erro, ainda conferimos a sessão.
+    // Às vezes o middleware já processou o code antes da página carregar.
     const { data } = await supabase.auth.getSession();
 
     if (!data.session) {
-      setMensagem("Link inválido ou expirado. Solicite uma nova redefinição de senha.");
+      setMensagem(
+        "Link inválido ou expirado. Solicite uma nova redefinição de senha."
+      );
       setVerificando(false);
       return;
     }
 
-    if (type !== "invite" && type !== "recovery" && type !== null) {
+    // aceita link de convite, recuperação ou link sem type explícito
+    if (
+      tipoLink &&
+      tipoLink !== "invite" &&
+      tipoLink !== "recovery"
+    ) {
       router.replace("/inicio");
       return;
     }
+
+    // limpa token/code da URL depois de validar a sessão
+    window.history.replaceState({}, document.title, "/definir-senha");
 
     setVerificando(false);
   }
