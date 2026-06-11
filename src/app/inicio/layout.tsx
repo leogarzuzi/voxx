@@ -10,6 +10,7 @@ type UsuarioSistema = {
   nome: string;
   nome_exibicao: string | null;
   perfil: string;
+  status: string; // verifica se esta ativo
   avatar: string | null;
 };
 
@@ -56,7 +57,7 @@ export default function DashboardLayout({
 
       const { data: usuario, error } = await supabase
         .from("usuarios")
-        .select("nome, nome_exibicao, perfil, avatar")
+        .select("nome, nome_exibicao, perfil, status, avatar")
         .eq("email", email)
         .single<UsuarioSistema>();
 
@@ -65,10 +66,28 @@ export default function DashboardLayout({
         return;
       }
 
-      const rotaSolicitacoes = pathname.startsWith("/inicio/solicitacoes"); // rota protegida de solicitações
-      const permissoes = PERFIS_CONFIG[usuario.perfil as keyof typeof PERFIS_CONFIG]; // pega permissões do perfil
+      // bloqueia usuário inativo antes de carregar qualquer tela do sistema
+      if (usuario.status !== "ativo") {
+        await supabase.auth.signOut(); // encerra a sessão mesmo que o login ainda exista no Supabase Auth
+        router.push("/login");
+        return;
+      }
 
+      // rotas protegidas por perfil
+      const rotaSolicitacoes = pathname.startsWith("/inicio/solicitacoes"); // somente Admin
+      const rotaAuditoria = pathname.startsWith("/inicio/auditoria"); // somente Admin
+
+      const permissoes =
+        PERFIS_CONFIG[usuario.perfil as keyof typeof PERFIS_CONFIG]; // pega permissões do perfil
+
+      // bloqueia Solicitações para quem não tem permissão
       if (rotaSolicitacoes && !permissoes?.solicitacoes) {
+        router.push("/inicio");
+        return;
+      }
+
+      // bloqueia Auditoria para quem não for Admin
+      if (rotaAuditoria && usuario.perfil !== "Admin") {
         router.push("/inicio");
         return;
       }
