@@ -21,6 +21,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
   const podeVerSolicitacoes = perfil === "Admin";
   const podeVerAuditoria = perfil === "Admin";
   const podeVerUsuarios = perfil === "Admin";
+  const podeVerBaseDados = ["Admin", "Gerente"].includes(perfil);
 
   // mantém o Dashboard aberto quando estiver em qualquer submódulo dele
   useEffect(() => {
@@ -199,6 +200,43 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
             Usuários
           </Link>
         )}
+
+{/* base de dados - admin e gerente */}
+{podeVerBaseDados && (
+  <Link
+    prefetch={false}
+    className={itemMenuClass(rotaAtiva("/inicio/base-dados"))}
+    href="/inicio/base-dados"
+    onClick={() => iniciarNavegacao("/inicio/base-dados")}
+  >
+    <svg
+      className="h-5 w-5 text-blue-100"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <ellipse
+        cx="12"
+        cy="5"
+        rx="8"
+        ry="3"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+    </svg>
+
+    Base de Dados
+  </Link>
+)}
 
         {/* dashboard */}
         <button
