@@ -14,8 +14,10 @@ type AuditoriaLog = {
 
 function formatarAcao(acao: string) {
   const mapa: Record<string, string> = {
-    APROVACAO_ACESSO: "Aprovação de acesso",
+    APROVACAO_ACESSO: "Acesso aprovado",
     CONFERENCIA_FOLHA_EXECUTADA: "Conferência de folha executada",
+    ADMISSAO_CRIADA: "Nova admissão cadastrada",
+    ADMISSAO_EDITADA: "Admissão editada",
   };
 
   return mapa[acao] || acao;
@@ -25,6 +27,7 @@ function formatarModulo(modulo: string) {
   const mapa: Record<string, string> = {
     solicitacoes_acesso: "Solicitações de acesso",
     conferencia_folha: "Conferência de folha",
+    admissao: "Admissão",
   };
 
   return mapa[modulo] || modulo;
@@ -38,6 +41,7 @@ function formatarDetalhes(detalhes: Record<string, any> | null) {
     nomeAprovado: "Nome aprovado",
     emailAprovado: "E-mail aprovado",
     perfilConcedido: "Perfil concedido",
+
     competencia: "Competência",
     abaPrevia: "Aba da prévia",
     linhasPrevia: "Linhas na prévia",
@@ -47,12 +51,62 @@ function formatarDetalhes(detalhes: Record<string, any> | null) {
     totalDivergencias: "Total de divergências",
     arquivoFopag: "Arquivo FOPAG",
     arquivoPrevia: "Arquivo prévia",
+
+    admissaoId: "ID da admissão",
+    nome: "Nome",
+    matricula: "Matrícula",
+    cargo: "Cargo",
+    baseDestino: "Base de destino",
+    camposAlterados: "Campos alterados",
   };
 
-  return Object.entries(detalhes).map(([chave, valor]) => ({
-    label: labels[chave] || chave,
-    valor: String(valor),
-  }));
+  const nomesCampos: Record<string, string> = {
+    pref: "Prefixo",
+    matricula: "Matrícula",
+    nome: "Nome",
+    cargo: "Cargo",
+    ch_edital: "CH do edital",
+    alteracao_ch: "Alteração de CH",
+    ch_final: "CH final",
+    sirg: "SIRG",
+    horario: "Horário",
+    exercicio: "Exercício",
+    data_nascimento: "Data de nascimento",
+    cpf: "CPF",
+    pis: "PIS",
+    edital: "Edital",
+    email: "E-mail",
+    registro_ponto: "Registro de ponto",
+    base_destino: "Base de destino",
+    enviar_email_colaborador: "Enviar e-mail ao colaborador",
+    observacao: "Observação",
+  };
+
+  const valoresBonitos: Record<string, string> = {
+    colaboradores: "Colaboradores",
+    gestao_rh: "Gestão RH",
+  };
+
+  return Object.entries(detalhes).map(([chave, valor]) => {
+    let valorFormatado = "";
+
+    if (Array.isArray(valor)) {
+      valorFormatado = valor.map((item) => nomesCampos[item] || item).join(", ");
+    } else if (typeof valor === "boolean") {
+      valorFormatado = valor ? "Sim" : "Não";
+    } else {
+      valorFormatado = String(valor ?? "");
+    }
+
+    if (chave === "baseDestino") {
+      valorFormatado = valoresBonitos[valorFormatado] || valorFormatado;
+    }
+
+    return {
+      label: labels[chave] || chave,
+      valor: valorFormatado,
+    };
+  });
 }
 
 export default function AuditoriaTabela() {
@@ -182,10 +236,14 @@ export default function AuditoriaTabela() {
               className="mt-1 h-10 w-full rounded-lg border px-3 text-sm"
             >
               <option value="">Todas</option>
-              <option value="APROVACAO_ACESSO">Aprovação de acesso</option>
+              <option value="APROVACAO_ACESSO">Acesso aprovado</option>
               <option value="CONFERENCIA_FOLHA_EXECUTADA">
                 Conferência de folha executada
               </option>
+              <option value="ADMISSAO_CRIADA">
+                Nova admissão cadastrada
+              </option>
+              <option value="ADMISSAO_EDITADA">Admissão editada</option>
             </select>
           </div>
 
@@ -203,6 +261,7 @@ export default function AuditoriaTabela() {
                 Solicitações de acesso
               </option>
               <option value="conferencia_folha">Conferência de folha</option>
+              <option value="admissao">Admissão</option>
             </select>
           </div>
         </div>

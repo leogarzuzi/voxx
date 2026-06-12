@@ -534,60 +534,34 @@ export default function BaseDadosTabela() {
                 type="button"
                 onClick={baixarExcel}
                 disabled={loading || exportando}
-                title="Exportar planilha"
-                aria-label="Exportar planilha"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#107C41] text-white shadow-sm shadow-green-700/25 transition hover:-translate-y-0.5 hover:bg-[#0f6f3b] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+                title="Baixar Excel"
+                aria-label="Baixar Excel"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-green-200 bg-green-50 text-green-700 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <svg
+                  className="h-5 w-5"
                   viewBox="0 0 24 24"
                   fill="none"
-                  className={`h-5 w-5 ${exportando ? "animate-pulse" : ""}`}
                   aria-hidden="true"
                 >
                   <path
-                    d="M6 3h8l4 4v14H6V3Z"
+                    d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z"
                     stroke="currentColor"
-                    strokeWidth="1.8"
+                    strokeWidth="2"
                     strokeLinejoin="round"
                   />
                   <path
-                    d="M14 3v4h4"
+                    d="M14 3v5h5"
                     stroke="currentColor"
-                    strokeWidth="1.8"
+                    strokeWidth="2"
                     strokeLinejoin="round"
                   />
                   <path
-                    d="M8.5 10.5h7"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M8.5 13.5h7"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M8.5 16.5h7"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M11 10.5v6"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M13.5 10.5v6"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
+                    d="M8.5 16l2.2-3-2.1-3h1.8l1.2 1.9L12.9 10h1.7l-2.1 3 2.2 3h-1.8l-1.3-2-1.3 2H8.5Z"
+                    fill="currentColor"
                   />
                 </svg>
-              </button>
+              </button> 
 
               <button
                 type="button"

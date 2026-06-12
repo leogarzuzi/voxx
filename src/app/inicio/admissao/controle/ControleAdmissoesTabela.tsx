@@ -107,6 +107,12 @@ function texto(valor: string | number | boolean | null | undefined) {
   return String(valor);
 }
 
+function textoHoras(valor: string | number | null | undefined) {
+  if (valor === null || valor === undefined || valor === "") return "-";
+
+  return `${valor} HORAS`;
+}
+
 function formatarData(valor: string | null | undefined) {
   if (!valor) return "-";
 
@@ -178,12 +184,13 @@ function statusClass(status: string | null | undefined) {
 }
 
 function validarCamposNumericos(formulario: FormularioAdmissao) {
+  const matricula = formulario.matricula.trim();
+
+  if (matricula && !/^40\d{6}$/.test(matricula)) {
+    return "Matrícula deve ter 8 dígitos e começar com 40. Ex: 40524579.";
+  }
+
   const campos = [
-    {
-      label: "Matrícula",
-      valor: formulario.matricula,
-      exemplo: "40524579",
-    },
     {
       label: "CH do edital",
       valor: formulario.ch_edital,
@@ -205,6 +212,82 @@ function validarCamposNumericos(formulario: FormularioAdmissao) {
   }
 
   return "";
+}
+
+function validarMaioridade(dataNascimento: string) {
+  if (!dataNascimento) return "";
+
+  const nascimento = new Date(`${dataNascimento}T00:00:00`);
+
+  if (Number.isNaN(nascimento.getTime())) {
+    return "Data de nascimento inválida.";
+  }
+
+  const hoje = new Date();
+  let idade = hoje.getFullYear() - nascimento.getFullYear();
+  const mes = hoje.getMonth() - nascimento.getMonth();
+
+  if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
+    idade -= 1;
+  }
+
+  if (idade < 18) {
+    return "O colaborador precisa ter pelo menos 18 anos.";
+  }
+
+  return "";
+}
+
+const CAMPOS_MAIUSCULOS: (keyof FormularioAdmissao)[] = [
+  "nome",
+  "cargo",
+  "edital",
+  "observacao",
+];
+
+function normalizarTextoMaiusculo(valor: string) {
+  return valor.toLocaleUpperCase("pt-BR");
+}
+
+function normalizarFormulario(formulario: FormularioAdmissao) {
+  return {
+    ...formulario,
+    nome: normalizarTextoMaiusculo(formulario.nome.trim()),
+    cargo: normalizarTextoMaiusculo(formulario.cargo.trim()),
+    edital: normalizarTextoMaiusculo(formulario.edital.trim()),
+    observacao: normalizarTextoMaiusculo(formulario.observacao.trim()),
+    email: formulario.email.trim().toLowerCase(),
+    pref: formulario.pref.trim(),
+    matricula: formulario.matricula.trim(),
+    ch_edital: formulario.ch_edital.trim(),
+    alteracao_ch: formulario.alteracao_ch.trim(),
+    cpf: formulario.cpf.trim(),
+    pis: formulario.pis.trim(),
+  };
+}
+
+function formatarValorExcel(valor: string | number | boolean | null | undefined) {
+  if (valor === null || valor === undefined) return "";
+
+  if (typeof valor === "boolean") {
+    return valor ? '"Sim"' : '"Não"';
+  }
+
+  const valorTexto = String(valor).replaceAll('"', '""');
+
+  return `"${valorTexto}"`;
+}
+
+function gerarNomeArquivoExcel() {
+  const agora = new Date();
+
+  const ano = agora.getFullYear();
+  const mes = String(agora.getMonth() + 1).padStart(2, "0");
+  const dia = String(agora.getDate()).padStart(2, "0");
+  const hora = String(agora.getHours()).padStart(2, "0");
+  const minuto = String(agora.getMinutes()).padStart(2, "0");
+
+  return `admissoes-voxx-${ano}-${mes}-${dia}-${hora}${minuto}.csv`;
 }
 
 type InputTextoProps = {
@@ -348,6 +431,7 @@ export default function ControleAdmissoesTabela() {
     useState<FormularioAdmissao>(FORM_INICIAL);
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
+  const [salvandoRapidoId, setSalvandoRapidoId] = useState<number | null>(null);
 
   const chFinalCalculada = calcularChFinal(
     formulario.ch_edital,
@@ -401,13 +485,35 @@ export default function ControleAdmissoesTabela() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (!modalAberto) return;
+
+    function handleEsc(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        fecharModal();
+      }
+    }
+
+    document.addEventListener("keydown", handleEsc);
+
+    return () => {
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [modalAberto]);
+
   function atualizarCampo(
     campo: keyof FormularioAdmissao,
     valor: string | boolean
   ) {
+    let valorTratado = valor;
+
+    if (typeof valor === "string" && CAMPOS_MAIUSCULOS.includes(campo)) {
+      valorTratado = normalizarTextoMaiusculo(valor);
+    }
+
     setFormulario((formularioAtual) => ({
       ...formularioAtual,
-      [campo]: valor,
+      [campo]: valorTratado,
     }));
   }
 
@@ -469,9 +575,17 @@ export default function ControleAdmissoesTabela() {
       return;
     }
 
+    const erroMaioridade = validarMaioridade(formulario.data_nascimento);
+
+    if (erroMaioridade) {
+      setErro(erroMaioridade);
+      return;
+    }
+
     setSalvando(true);
 
     const editando = Boolean(admissaoEditando);
+    const formularioNormalizado = normalizarFormulario(formulario);
 
     const response = await fetch("/api/admissao/controle", {
       method: editando ? "PUT" : "POST",
@@ -479,7 +593,7 @@ export default function ControleAdmissoesTabela() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        ...formulario,
+        ...formularioNormalizado,
         id: admissaoEditando?.id,
       }),
     });
@@ -500,6 +614,140 @@ export default function ControleAdmissoesTabela() {
     setSalvando(false);
     fecharModal();
     buscarAdmissoes(busca);
+  }
+
+  function montarFormularioDaAdmissao(admissao: AdmissaoControle): FormularioAdmissao {
+    return {
+      pref: admissao.pref || "",
+      matricula: admissao.matricula || "",
+      nome: admissao.nome || "",
+      cargo: admissao.cargo || "",
+      ch_edital: admissao.ch_edital || "",
+      alteracao_ch: admissao.alteracao_ch || "",
+      sirg: admissao.sirg === true,
+      horario: admissao.horario || "",
+      exercicio: admissao.exercicio || "",
+      data_nascimento: admissao.data_nascimento || "",
+      cpf: admissao.cpf || "",
+      pis: admissao.pis || "",
+      edital: admissao.edital || "",
+      email: admissao.email || "",
+      carta_banco: admissao.carta_banco === true,
+      acesso_ponto: admissao.acesso_ponto === true,
+      registro_ponto: admissao.registro_ponto || "",
+      base_destino: admissao.base_destino || "colaboradores",
+      enviar_email_colaborador: admissao.enviar_email_colaborador === true,
+      observacao: admissao.observacao || "",
+    };
+  }
+
+  async function atualizarCheckboxTabela(
+    admissao: AdmissaoControle,
+    campo: "carta_banco" | "acesso_ponto",
+    valor: boolean
+  ) {
+    setErro("");
+    setSucesso("");
+    setSalvandoRapidoId(admissao.id);
+
+    const formularioAtualizado = montarFormularioDaAdmissao(admissao);
+    formularioAtualizado[campo] = valor;
+
+    setAdmissoes((admissoesAtuais) =>
+      admissoesAtuais.map((item) =>
+        item.id === admissao.id ? { ...item, [campo]: valor } : item
+      )
+    );
+
+    const response = await fetch("/api/admissao/controle", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...normalizarFormulario(formularioAtualizado),
+        id: admissao.id,
+      }),
+    });
+
+    const resultado = await response.json();
+
+    if (!response.ok || !resultado.success) {
+      setErro(resultado.error || "Erro ao atualizar admissão.");
+      buscarAdmissoes(busca);
+    }
+
+    setSalvandoRapidoId(null);
+  }
+
+  function baixarExcel() {
+    const cabecalho = [
+      "Pref.",
+      "Matrícula",
+      "Nome",
+      "Cargo",
+      "CH Edital",
+      "Alteração CH",
+      "CH Final",
+      "SIRG",
+      "Horário",
+      "Exercício",
+      "Nascimento",
+      "CPF",
+      "PIS",
+      "Edital",
+      "E-mail",
+      "Carta Banco",
+      "Acesso Ponto",
+      "Registro",
+      "Base destino",
+      "Status SEDE",
+      "Status Base",
+      "Observação",
+    ];
+
+    const linhas = admissoes.map((admissao) => [
+      admissao.pref,
+      admissao.matricula,
+      admissao.nome,
+      admissao.cargo,
+      admissao.ch_edital,
+      admissao.alteracao_ch,
+      admissao.ch_final,
+      admissao.sirg,
+      admissao.horario,
+      formatarData(admissao.exercicio),
+      formatarData(admissao.data_nascimento),
+      admissao.cpf,
+      admissao.pis,
+      admissao.edital,
+      admissao.email,
+      admissao.carta_banco,
+      admissao.acesso_ponto,
+      admissao.registro_ponto,
+      baseDestinoLabel(admissao.base_destino),
+      admissao.status_sede,
+      admissao.status_script,
+      admissao.observacao,
+    ]);
+
+    const conteudoCsv = [
+      cabecalho.map(formatarValorExcel).join(";"),
+      ...linhas.map((linha) => linha.map(formatarValorExcel).join(";")),
+    ].join("\n");
+
+    const blob = new Blob(["﻿" + conteudoCsv], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = gerarNomeArquivoExcel();
+    link.click();
+
+    URL.revokeObjectURL(url);
   }
 
   function pesquisar(e: FormEvent) {
@@ -569,13 +817,45 @@ export default function ControleAdmissoesTabela() {
             >
               Limpar
             </button>
+
+            <button
+              type="button"
+              onClick={baixarExcel}
+              disabled={loading || admissoes.length === 0}
+              title="Baixar Excel"
+              aria-label="Baixar Excel"
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-green-200 bg-green-50 text-green-700 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <svg
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M14 3v5h5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M8.5 16l2.2-3-2.1-3h1.8l1.2 1.9L12.9 10h1.7l-2.1 3 2.2 3h-1.8l-1.3-2-1.3 2H8.5Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
           </form>
         </div>
 
         <div className="flex flex-wrap gap-2">
           <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-            {admissoes.length} admissão
-            {admissoes.length === 1 ? "" : "ões"}
+            {admissoes.length} {admissoes.length === 1 ? "admissão" : "admissões"}
           </span>
 
           <span className="rounded-full bg-yellow-50 px-3 py-1 text-xs font-semibold text-yellow-700">
@@ -590,7 +870,7 @@ export default function ControleAdmissoesTabela() {
         </div>
       </div>
 
-      {erro && (
+      {erro && !modalAberto && (
         <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {erro}
         </div>
@@ -608,11 +888,11 @@ export default function ControleAdmissoesTabela() {
         </div>
       ) : (
         <div className="w-full max-w-full overflow-x-auto rounded-xl border">
-          <table className="min-w-[2050px] text-center text-xs [&_td]:border-r [&_td]:border-slate-200/70 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-slate-200/70 [&_th:last-child]:border-r-0">
+          <table className="min-w-[2150px] text-center text-xs [&_td]:border-r [&_td]:border-slate-200/70 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-slate-200/70 [&_th:last-child]:border-r-0">
             <thead className="bg-slate-100">
               <tr className="border-b text-gray-600">
                 <th className="px-3 py-4 text-center">Ações</th>
-                <th className="px-3 py-4 text-center">Pref.</th>
+                <th className="px-3 py-4 text-center">Pref.</th>  
                 <th className="px-3 py-4 text-center">Matrícula</th>
                 <th className="px-3 py-4 text-center">Nome</th>
                 <th className="px-3 py-4 text-center">Cargo</th>
@@ -627,8 +907,8 @@ export default function ControleAdmissoesTabela() {
                 <th className="px-3 py-4 text-center">PIS</th>
                 <th className="px-3 py-4 text-center">Edital</th>
                 <th className="px-3 py-4 text-center">E-mail</th>
-                <th className="px-3 py-4 text-center">Carta Banco</th>
-                <th className="px-3 py-4 text-center">Acesso Ponto</th>
+                <th className="w-[80px] px-2 py-4 text-center">Carta Banco</th>
+                <th className="w-[80px] px-2 py-4 text-center">Acesso Ponto</th>
                 <th className="px-3 py-4 text-center">Registro</th>
                 <th className="px-3 py-4 text-center">Base destino</th>
                 <th className="px-3 py-4 text-center">Status SEDE</th>
@@ -670,16 +950,16 @@ export default function ControleAdmissoesTabela() {
                     {texto(admissao.cargo)}
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle text-gray-700">
-                    {texto(admissao.ch_edital)}
+                  <td className="min-w-[80px] px-3 py-4 text-center align-middle text-gray-700">
+                    {textoHoras(admissao.ch_edital)}
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle text-gray-700">
-                    {texto(admissao.alteracao_ch)}
+                  <td className="min-w-[80px] px-3 py-4 text-center align-middle text-gray-700">
+                    {textoHoras(admissao.alteracao_ch)}
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle font-semibold text-gray-800">
-                    {texto(admissao.ch_final)}
+                  <td className="min-w-[80px] px-3 py-4 text-center align-middle font-semibold text-gray-800">
+                    {textoHoras(admissao.ch_final)}
                   </td>
 
                   <td className="px-3 py-4 text-center align-middle text-gray-700">
@@ -714,12 +994,38 @@ export default function ControleAdmissoesTabela() {
                     {texto(admissao.email)}
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle text-gray-700">
-                    {texto(admissao.carta_banco)}
+                  <td className="w-[80px] px-2 py-4 text-center align-middle text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={admissao.carta_banco === true}
+                      disabled={salvandoRapidoId === admissao.id}
+                      onChange={(e) =>
+                        atualizarCheckboxTabela(
+                          admissao,
+                          "carta_banco",
+                          e.target.checked
+                        )
+                      }
+                      className="h-4 w-4 cursor-pointer disabled:cursor-not-allowed"
+                      aria-label="Carta banco"
+                    />
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle text-gray-700">
-                    {texto(admissao.acesso_ponto)}
+                  <td className="w-[80px] px-2 py-4 text-center align-middle text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={admissao.acesso_ponto === true}
+                      disabled={salvandoRapidoId === admissao.id}
+                      onChange={(e) =>
+                        atualizarCheckboxTabela(
+                          admissao,
+                          "acesso_ponto",
+                          e.target.checked
+                        )
+                      }
+                      className="h-4 w-4 cursor-pointer disabled:cursor-not-allowed"
+                      aria-label="Acesso ao ponto"
+                    />
                   </td>
 
                   <td className="px-3 py-4 text-center align-middle text-gray-700">
@@ -783,6 +1089,11 @@ export default function ControleAdmissoesTabela() {
           >
             <div className="flex items-start justify-between gap-4">
               <div>
+                {erro && (
+                  <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-700">
+                    {erro}
+                  </div>
+                )}
                 <h3 className="text-2xl font-bold text-gray-800">
                   {admissaoEditando ? "Editar admissão" : "Nova admissão"}
                 </h3>
@@ -818,7 +1129,7 @@ export default function ControleAdmissoesTabela() {
                 placeholder="Ex: 40524579"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                maxLength={12}
+                maxLength={8}
               />
 
               <InputTexto

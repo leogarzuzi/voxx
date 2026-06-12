@@ -260,13 +260,15 @@ async function handleAlterarSenha() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar
-        perfil={perfil}
-        onNavigate={() => setCarregandoRota(true)}
-      />
+    <div className="flex min-h-screen overflow-x-hidden bg-slate-50">
+      <div className="sticky top-0 h-screen shrink-0">
+        <Sidebar
+          perfil={perfil}
+          onNavigate={() => setCarregandoRota(true)}
+        />
+      </div>
 
-      <div className="relative min-h-screen flex-1">
+      <div className="relative min-h-screen min-w-0 flex-1 overflow-x-hidden">
         {/* loading visual ao trocar de módulo */}
         {carregandoRota && (
           <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-900/20 backdrop-blur-[1.5px]">

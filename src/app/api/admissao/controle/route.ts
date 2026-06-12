@@ -1,6 +1,11 @@
 import { NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { PERMISSOES, temPermissao } from "@/lib/perfis";
+import {
+    ACOES_AUDITORIA,
+    MODULOS_AUDITORIA,
+    registrarAuditoria,
+  } from "@/lib/auditoria";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +41,22 @@ function limparTexto(valor: unknown) {
   return texto || null;
 }
 
+function limparTextoMaiusculo(valor: unknown) {
+  const texto = limparTexto(valor);
+
+  if (!texto) return null;
+
+  return texto.toLocaleUpperCase("pt-BR");
+}
+
+function limparEmail(valor: unknown) {
+  const texto = limparTexto(valor);
+
+  if (!texto) return null;
+
+  return texto.toLowerCase();
+}
+
 function limparBooleano(valor: unknown) {
   return valor === true;
 }
@@ -59,6 +80,42 @@ function validarApenasNumeros(
 
   if (!/^\d+$/.test(valor)) {
     return `${label} deve conter apenas números. Ex: ${exemplo}.`;
+  }
+
+  return null;
+}
+
+function validarMatricula(matricula: string | null) {
+  if (!matricula) return null;
+
+  if (!/^40\d{6}$/.test(matricula)) {
+    return "Matrícula deve ter 8 dígitos e começar com 40. Ex: 40524579.";
+  }
+
+  return null;
+}
+
+function validarMaioridade(dataNascimento: string | null) {
+  if (!dataNascimento) return null;
+
+  const nascimento = new Date(`${dataNascimento}T00:00:00`);
+
+  if (Number.isNaN(nascimento.getTime())) {
+    return "Data de nascimento inválida.";
+  }
+
+  const hoje = new Date();
+
+  let idade = hoje.getFullYear() - nascimento.getFullYear();
+
+  const mes = hoje.getMonth() - nascimento.getMonth();
+
+  if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
+    idade -= 1;
+  }
+
+  if (idade < 18) {
+    return "O colaborador precisa ter pelo menos 18 anos.";
   }
 
   return null;
@@ -122,9 +179,15 @@ async function buscarUsuarioLogado() {
 
 function validarPayload(body: AdmissaoPayload) {
   const matricula = limparTexto(body.matricula);
-  const nome = limparTexto(body.nome);
+  const nome = limparTextoMaiusculo(body.nome);
+  const cargo = limparTextoMaiusculo(body.cargo);
   const chEdital = limparTexto(body.ch_edital);
   const alteracaoCh = limparTexto(body.alteracao_ch);
+  const dataNascimento = limparTexto(body.data_nascimento);
+  const edital = limparTextoMaiusculo(body.edital);
+  const observacao = limparTextoMaiusculo(body.observacao);
+  const horario = limparTextoMaiusculo(body.horario);
+  const registroPonto = limparTextoMaiusculo(body.registro_ponto);
 
   if (!nome) {
     return {
@@ -133,11 +196,7 @@ function validarPayload(body: AdmissaoPayload) {
     };
   }
 
-  const erroMatricula = validarApenasNumeros(
-    "Matrícula",
-    matricula,
-    "40524579"
-  );
+  const erroMatricula = validarMatricula(matricula);
 
   if (erroMatricula) {
     return {
@@ -172,14 +231,29 @@ function validarPayload(body: AdmissaoPayload) {
     };
   }
 
+  const erroMaioridade = validarMaioridade(dataNascimento);
+
+  if (erroMaioridade) {
+    return {
+      erro: erroMaioridade,
+      dados: null,
+    };
+  }
+
   return {
     erro: null,
     dados: {
       matricula,
       nome,
+      cargo,
       chEdital,
       alteracaoCh,
       chFinal: calcularChFinal(chEdital, alteracaoCh),
+      dataNascimento,
+      edital,
+      observacao,
+      horario,
+      registroPonto,
     },
   };
 }
@@ -308,8 +382,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { matricula, nome, chEdital, alteracaoCh, chFinal } =
-      validacao.dados;
+    const {
+      matricula,
+      nome,
+      cargo,
+      chEdital,
+      alteracaoCh,
+      chFinal,
+      dataNascimento,
+      edital,
+      observacao,
+      horario,
+      registroPonto,
+    } = validacao.dados;
 
     if (matricula) {
       const { data: admissaoExistente, error: erroBuscaDuplicidade } =
@@ -343,23 +428,23 @@ export async function POST(request: NextRequest) {
       pref: limparTexto(body.pref),
       matricula,
       nome,
-      cargo: limparTexto(body.cargo),
+      cargo,
 
       ch_edital: chEdital,
       alteracao_ch: alteracaoCh,
       ch_final: chFinal,
 
       sirg: limparBooleano(body.sirg),
-      horario: limparTexto(body.horario),
+      horario,
       exercicio: limparTexto(body.exercicio),
-      data_nascimento: limparTexto(body.data_nascimento),
+      data_nascimento: dataNascimento,
       cpf: limparTexto(body.cpf),
       pis: limparTexto(body.pis),
-      edital: limparTexto(body.edital),
-      email: limparTexto(body.email),
+      edital,
+      email: limparEmail(body.email),
       carta_banco: limparBooleano(body.carta_banco),
       acesso_ponto: limparBooleano(body.acesso_ponto),
-      registro_ponto: limparTexto(body.registro_ponto),
+      registro_ponto: registroPonto,
 
       base_destino: normalizarBaseDestino(body.base_destino),
 
@@ -367,7 +452,7 @@ export async function POST(request: NextRequest) {
         body.enviar_email_colaborador
       ),
 
-      observacao: limparTexto(body.observacao),
+      observacao,
 
       status_sede: "pendente",
       status_script: "pendente",
@@ -392,6 +477,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    await registrarAuditoria({
+      usuarioId: user!.id,
+      usuarioEmail: emailLogado,
+      acao: ACOES_AUDITORIA.ADMISSAO_CRIADA,
+      modulo: MODULOS_AUDITORIA.ADMISSAO,
+      detalhes: {
+        admissaoId: data.id,
+        nome: data.nome,
+        matricula: data.matricula,
+        cargo: data.cargo,
+        baseDestino: data.base_destino,
+      },
+    });
+    
     return Response.json({
       success: true,
       admissao: data,
@@ -442,8 +541,19 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const { matricula, nome, chEdital, alteracaoCh, chFinal } =
-      validacao.dados;
+    const {
+      matricula,
+      nome,
+      cargo,
+      chEdital,
+      alteracaoCh,
+      chFinal,
+      dataNascimento,
+      edital,
+      observacao,
+      horario,
+      registroPonto,
+    } = validacao.dados;
 
     if (matricula) {
       const { data: admissaoExistente, error: erroBuscaDuplicidade } =
@@ -472,29 +582,42 @@ export async function PUT(request: NextRequest) {
       }
     }
 
+    const { data: admissaoAntes, error: erroAdmissaoAntes } = await supabase
+      .from("admissoes_controle")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (erroAdmissaoAntes) {
+      return Response.json(
+        { success: false, error: erroAdmissaoAntes.message },
+        { status: 500 }
+      );
+    }
+
     const emailLogado = user!.email!.toLowerCase();
 
     const admissaoAtualizada = {
       pref: limparTexto(body.pref),
       matricula,
       nome,
-      cargo: limparTexto(body.cargo),
+      cargo,
 
       ch_edital: chEdital,
       alteracao_ch: alteracaoCh,
       ch_final: chFinal,
 
       sirg: limparBooleano(body.sirg),
-      horario: limparTexto(body.horario),
+      horario,
       exercicio: limparTexto(body.exercicio),
-      data_nascimento: limparTexto(body.data_nascimento),
+      data_nascimento: dataNascimento,
       cpf: limparTexto(body.cpf),
       pis: limparTexto(body.pis),
-      edital: limparTexto(body.edital),
-      email: limparTexto(body.email),
+      edital,
+      email: limparEmail(body.email),
       carta_banco: limparBooleano(body.carta_banco),
       acesso_ponto: limparBooleano(body.acesso_ponto),
-      registro_ponto: limparTexto(body.registro_ponto),
+      registro_ponto: registroPonto,
 
       base_destino: normalizarBaseDestino(body.base_destino),
 
@@ -502,7 +625,7 @@ export async function PUT(request: NextRequest) {
         body.enviar_email_colaborador
       ),
 
-      observacao: limparTexto(body.observacao),
+      observacao,
 
       atualizado_em: new Date().toISOString(),
       atualizado_por: user!.id,
@@ -521,6 +644,81 @@ export async function PUT(request: NextRequest) {
         { success: false, error: error.message },
         { status: 500 }
       );
+    }
+
+    const camposAuditaveis = [
+      "pref",
+      "matricula",
+      "nome",
+      "cargo",
+      "ch_edital",
+      "alteracao_ch",
+      "ch_final",
+      "sirg",
+      "horario",
+      "exercicio",
+      "data_nascimento",
+      "cpf",
+      "pis",
+      "edital",
+      "email",
+      "registro_ponto",
+      "base_destino",
+      "enviar_email_colaborador",
+      "observacao",
+    ];
+
+    const camposAlterados = camposAuditaveis.filter((campo) => {
+      const antes = admissaoAntes?.[campo] ?? null;
+      const depois = data?.[campo] ?? null;
+
+      return String(antes) !== String(depois);
+    });
+
+    if (camposAlterados.length > 0) {
+      const camposAuditaveis = [
+  "pref",
+  "matricula",
+  "nome",
+  "cargo",
+  "ch_edital",
+  "alteracao_ch",
+  "ch_final",
+  "sirg",
+  "horario",
+  "exercicio",
+  "data_nascimento",
+  "cpf",
+  "pis",
+  "edital",
+  "email",
+  "registro_ponto",
+  "base_destino",
+  "enviar_email_colaborador",
+  "observacao",
+];
+
+const camposAlterados = camposAuditaveis.filter((campo) => {
+  const antes = admissaoAntes?.[campo] ?? null;
+  const depois = data?.[campo] ?? null;
+
+  return String(antes) !== String(depois);
+});
+
+if (camposAlterados.length > 0) {
+  await registrarAuditoria({
+    usuarioId: user!.id,
+    usuarioEmail: emailLogado,
+    acao: ACOES_AUDITORIA.ADMISSAO_EDITADA,
+    modulo: MODULOS_AUDITORIA.ADMISSAO,
+    detalhes: {
+      admissaoId: data.id,
+      nome: data.nome,
+      matricula: data.matricula,
+      camposAlterados,
+    },
+  });
+}
     }
 
     return Response.json({
