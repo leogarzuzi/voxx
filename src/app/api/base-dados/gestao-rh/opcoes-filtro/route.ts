@@ -15,10 +15,6 @@ const CAMPOS_PERMITIDOS: Record<string, string> = {
   carga_horaria: "carga_horaria",
   exercicio: "exercicio",
   cpf: "cpf",
-  pis: "pis",
-  data_nascimento: "data_nascimento",
-  email: "email",
-  observacao: "observacao",
 };
 
 type FiltroBaseDados = {
@@ -51,14 +47,11 @@ export async function GET(request: NextRequest) {
       .eq("email", emailLogado)
       .single();
 
-    // segurança real da API: usuário ativo + permissão no perfis.ts
+    // somente usuário ativo com permissão de Gestão e RH pode acessar
     if (
       !usuarioLogado ||
       usuarioLogado.status !== "ativo" ||
-      !temPermissao(
-        usuarioLogado.perfil,
-        PERMISSOES.BASE_DADOS_COLABORADORES
-      )
+      !temPermissao(usuarioLogado.perfil, PERMISSOES.BASE_DADOS_GESTAO_RH)
     ) {
       return Response.json(
         { success: false, error: "Sem permissão." },
@@ -103,13 +96,13 @@ export async function GET(request: NextRequest) {
       const fim = inicio + TAMANHO_LOTE - 1;
 
       let query = supabase
-        .from("colaboradores")
+        .from("colaboradores_gestao_rh")
         .select(coluna)
         .not(coluna, "is", null)
         .order(coluna, { ascending: true })
         .range(inicio, fim);
 
-      // aplica os filtros ativos, exceto o próprio campo que está sendo aberto
+      // aplica filtros ativos, exceto o próprio campo aberto
       for (const filtro of filtros) {
         if (filtro.campo === campo) continue;
 

@@ -4,8 +4,8 @@ import { PERMISSOES, temPermissao } from "@/lib/perfis";
 
 export const dynamic = "force-dynamic";
 
-const TAMANHO_LOTE = 1000; // limite seguro por busca
-const LIMITE_TOTAL = 10000; // trava para evitar busca infinita
+const TAMANHO_LOTE = 1000;
+const LIMITE_TOTAL = 10000;
 
 const CAMPOS_PERMITIDOS: Record<string, string> = {
   pref: "pref",
@@ -15,10 +15,6 @@ const CAMPOS_PERMITIDOS: Record<string, string> = {
   carga_horaria: "carga_horaria",
   exercicio: "exercicio",
   cpf: "cpf",
-  pis: "pis",
-  data_nascimento: "data_nascimento",
-  email: "email",
-  observacao: "observacao",
 };
 
 type FiltroBaseDados = {
@@ -51,14 +47,11 @@ export async function GET(request: NextRequest) {
       .eq("email", emailLogado)
       .single();
 
-    // segurança real da API: usuário ativo + permissão no perfis.ts
+    // somente usuário ativo com permissão de Gestão e RH pode acessar
     if (
       !usuarioLogado ||
       usuarioLogado.status !== "ativo" ||
-      !temPermissao(
-        usuarioLogado.perfil,
-        PERMISSOES.BASE_DADOS_COLABORADORES
-      )
+      !temPermissao(usuarioLogado.perfil, PERMISSOES.BASE_DADOS_GESTAO_RH)
     ) {
       return Response.json(
         { success: false, error: "Sem permissão." },
@@ -87,10 +80,10 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // função base para montar a consulta
+    // monta a consulta principal
     function montarQuery() {
       let query = supabase
-        .from("colaboradores")
+        .from("colaboradores_gestao_rh")
         .select(
           `
           id,
@@ -101,10 +94,6 @@ export async function GET(request: NextRequest) {
           carga_horaria,
           exercicio,
           cpf,
-          pis,
-          data_nascimento,
-          email,
-          observacao,
           created_at
         `
         )
@@ -113,7 +102,7 @@ export async function GET(request: NextRequest) {
       // busca rápida por campos principais
       if (termoBusca) {
         query = query.or(
-          `nome.ilike.*${termoBusca}*,matricula.ilike.*${termoBusca}*,cpf.ilike.*${termoBusca}*,cargo.ilike.*${termoBusca}*,email.ilike.*${termoBusca}*`
+          `nome.ilike.*${termoBusca}*,matricula.ilike.*${termoBusca}*,cpf.ilike.*${termoBusca}*,cargo.ilike.*${termoBusca}*`
         );
       }
 
@@ -121,9 +110,7 @@ export async function GET(request: NextRequest) {
       for (const filtro of filtros) {
         const coluna = CAMPOS_PERMITIDOS[filtro.campo];
 
-        if (!coluna) {
-          continue;
-        }
+        if (!coluna) continue;
 
         const valoresValidos = filtro.valores
           .map((valor) => String(valor).trim())
@@ -137,7 +124,7 @@ export async function GET(request: NextRequest) {
       return query;
     }
 
-    // modo normal: carrega só os primeiros 100 registros
+    // modo normal: carrega até 100
     if (!carregarTodos) {
       const { data, error } = await montarQuery().limit(100);
 
@@ -156,7 +143,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // modo completo: carrega todos em lotes de 1000
+    // modo completo: carrega todos em lotes
     const colaboradores: any[] = [];
 
     let inicio = 0;
@@ -178,7 +165,6 @@ export async function GET(request: NextRequest) {
 
       colaboradores.push(...lote);
 
-      // se veio menos que 1000, acabou
       if (lote.length < TAMANHO_LOTE) {
         continuar = false;
       }

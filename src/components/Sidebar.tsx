@@ -3,6 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  PERMISSOES,
+  podeVerMenuBaseDados,
+  temPermissao,
+} from "@/lib/perfis";
 
 type SidebarProps = {
   perfil: string;
@@ -12,16 +17,66 @@ type SidebarProps = {
 export function Sidebar({ perfil, onNavigate }: SidebarProps) {
   const pathname = usePathname();
 
+  // abre/fecha o grupo Base de Dados
+  const [baseDadosOpen, setBaseDadosOpen] = useState(
+    pathname.startsWith("/inicio/base-dados")
+  );
+
   // abre/fecha o grupo Dashboard
   const [dashboardOpen, setDashboardOpen] = useState(
     pathname.startsWith("/inicio/dashboard")
   );
 
-  // permissões do menu lateral
-  const podeVerSolicitacoes = perfil === "Admin";
-  const podeVerAuditoria = perfil === "Admin";
-  const podeVerUsuarios = perfil === "Admin";
-  const podeVerBaseDados = ["Admin", "Gerente"].includes(perfil);
+  // permissões do menu lateral vindas do src/lib/perfis.ts
+  const podeVerSolicitacoes = temPermissao(
+    perfil,
+    PERMISSOES.SOLICITACOES
+  );
+
+  const podeVerAuditoria = temPermissao(perfil, PERMISSOES.AUDITORIA);
+
+  const podeVerUsuarios = temPermissao(perfil, PERMISSOES.USUARIOS);
+
+  const podeVerBaseDados = podeVerMenuBaseDados(perfil);
+
+  const podeVerBaseDadosColaboradores = temPermissao(
+    perfil,
+    PERMISSOES.BASE_DADOS_COLABORADORES
+  );
+
+  const podeVerBaseDadosGestaoRh = temPermissao(
+    perfil,
+    PERMISSOES.BASE_DADOS_GESTAO_RH
+  );
+
+  const podeVerDashboard = temPermissao(perfil, PERMISSOES.DASHBOARD);
+
+  const podeVerDashboardAdmissoes = temPermissao(
+    perfil,
+    PERMISSOES.ADMISSOES
+  );
+
+  const podeVerDashboardDesligamentos = temPermissao(
+    perfil,
+    PERMISSOES.DESLIGAMENTOS
+  );
+
+  const podeVerDashboardAtestados = temPermissao(
+    perfil,
+    PERMISSOES.ATESTADOS
+  );
+
+  const podeVerConferenciaFolha = temPermissao(
+    perfil,
+    PERMISSOES.CONFERENCIA_FOLHA
+  );
+
+  // mantém Base de Dados aberto quando estiver em qualquer submódulo dele
+  useEffect(() => {
+    if (pathname.startsWith("/inicio/base-dados")) {
+      setBaseDadosOpen(true);
+    }
+  }, [pathname]);
 
   // mantém o Dashboard aberto quando estiver em qualquer submódulo dele
   useEffect(() => {
@@ -51,7 +106,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
     }`;
   }
 
-  // classe padrão dos subitens do dashboard
+  // classe padrão dos subitens
   function subItemMenuClass(ativo: boolean) {
     return `block rounded-lg px-3 py-2 text-sm transition ${
       ativo
@@ -60,6 +115,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
     }`;
   }
 
+  const baseDadosAtivo = pathname.startsWith("/inicio/base-dados");
   const dashboardAtivo = pathname.startsWith("/inicio/dashboard");
 
   return (
@@ -80,7 +136,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
       </div>
 
       <nav className="mt-0 space-y-1 px-4">
-        {/* solicitações - somente admin */}
+        {/* solicitações */}
         {podeVerSolicitacoes && (
           <Link
             className={itemMenuClass(rotaAtiva("/inicio/solicitacoes"))}
@@ -124,7 +180,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
           </Link>
         )}
 
-        {/* auditoria - somente admin */}
+        {/* auditoria */}
         {podeVerAuditoria && (
           <Link
             className={itemMenuClass(rotaAtiva("/inicio/auditoria"))}
@@ -155,7 +211,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
           </Link>
         )}
 
-        {/* gestão de usuários - somente admin */}
+        {/* gestão de usuários */}
         {podeVerUsuarios && (
           <Link
             className={itemMenuClass(rotaAtiva("/inicio/usuarios"))}
@@ -201,177 +257,244 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
           </Link>
         )}
 
-{/* base de dados - admin e gerente */}
-{podeVerBaseDados && (
-  <Link
-    prefetch={false}
-    className={itemMenuClass(rotaAtiva("/inicio/base-dados"))}
-    href="/inicio/base-dados"
-    onClick={() => iniciarNavegacao("/inicio/base-dados")}
-  >
-    <svg
-      className="h-5 w-5 text-blue-100"
-      viewBox="0 0 24 24"
-      fill="none"
-    >
-      <ellipse
-        cx="12"
-        cy="5"
-        rx="8"
-        ry="3"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      <path
-        d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      <path
-        d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-    </svg>
+        {/* base de dados */}
+        {podeVerBaseDados && (
+          <>
+            <button
+              type="button"
+              onClick={() => setBaseDadosOpen(!baseDadosOpen)}
+              className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
+                baseDadosAtivo
+                  ? "bg-blue-700 shadow-inner ring-1 ring-blue-300/40"
+                  : "hover:bg-blue-700"
+              }`}
+            >
+              <span className="flex items-center gap-3">
+                <svg
+                  className="h-5 w-5 text-blue-100"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <ellipse
+                    cx="12"
+                    cy="5"
+                    rx="8"
+                    ry="3"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                  <path
+                    d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                  <path
+                    d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                </svg>
 
-    Base de Dados
-  </Link>
-)}
+                Base de Dados
+              </span>
+
+              <span
+                className={`text-xs text-blue-100 transition ${
+                  baseDadosOpen ? "rotate-90" : ""
+                }`}
+              >
+                ›
+              </span>
+            </button>
+
+            {baseDadosOpen && (
+              <div className="ml-8 mt-1 space-y-1 border-l border-blue-600 pl-3">
+                {podeVerBaseDadosColaboradores && (
+                  <Link
+                    prefetch={false}
+                    className={subItemMenuClass(
+                      rotaAtiva("/inicio/base-dados/colaboradores")
+                    )}
+                    href="/inicio/base-dados/colaboradores"
+                    onClick={() =>
+                      iniciarNavegacao("/inicio/base-dados/colaboradores")
+                    }
+                  >
+                    Colaboradores
+                  </Link>
+                )}
+
+                {podeVerBaseDadosGestaoRh && (
+                  <Link
+                    prefetch={false}
+                    className={subItemMenuClass(
+                      rotaAtiva("/inicio/base-dados/gestao-rh")
+                    )}
+                    href="/inicio/base-dados/gestao-rh"
+                    onClick={() =>
+                      iniciarNavegacao("/inicio/base-dados/gestao-rh")
+                    }
+                  >
+                    Gestão e RH
+                  </Link>
+                )}
+              </div>
+            )}
+          </>
+        )}
 
         {/* dashboard */}
-        <button
-          type="button"
-          onClick={() => setDashboardOpen(!dashboardOpen)}
-          className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
-            dashboardAtivo
-              ? "bg-blue-700 shadow-inner ring-1 ring-blue-300/40"
-              : "hover:bg-blue-700"
-          }`}
-        >
-          <span className="flex items-center gap-3">
+        {podeVerDashboard && (
+          <>
+            <button
+              type="button"
+              onClick={() => setDashboardOpen(!dashboardOpen)}
+              className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
+                dashboardAtivo
+                  ? "bg-blue-700 shadow-inner ring-1 ring-blue-300/40"
+                  : "hover:bg-blue-700"
+              }`}
+            >
+              <span className="flex items-center gap-3">
+                <svg
+                  className="h-5 w-5 text-blue-100"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <path
+                    d="M4 13h4v7H4v-7Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M10 4h4v16h-4V4Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M16 9h4v11h-4V9Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+
+                Dashboard
+              </span>
+
+              <span
+                className={`text-xs text-blue-100 transition ${
+                  dashboardOpen ? "rotate-90" : ""
+                }`}
+              >
+                ›
+              </span>
+            </button>
+
+            {/* opções do dashboard */}
+            {dashboardOpen && (
+              <div className="ml-8 mt-1 space-y-1 border-l border-blue-600 pl-3">
+                <Link
+                  className={subItemMenuClass(
+                    rotaAtiva("/inicio/dashboard/visao-geral")
+                  )}
+                  href="/inicio/dashboard/visao-geral"
+                  onClick={() =>
+                    iniciarNavegacao("/inicio/dashboard/visao-geral")
+                  }
+                >
+                  Visão Geral
+                </Link>
+
+                {podeVerDashboardAdmissoes && (
+                  <Link
+                    className={subItemMenuClass(
+                      rotaAtiva("/inicio/dashboard/admissoes")
+                    )}
+                    href="/inicio/dashboard/admissoes"
+                    onClick={() =>
+                      iniciarNavegacao("/inicio/dashboard/admissoes")
+                    }
+                  >
+                    Admissões
+                  </Link>
+                )}
+
+                {podeVerDashboardDesligamentos && (
+                  <Link
+                    className={subItemMenuClass(
+                      rotaAtiva("/inicio/dashboard/desligamentos")
+                    )}
+                    href="/inicio/dashboard/desligamentos"
+                    onClick={() =>
+                      iniciarNavegacao("/inicio/dashboard/desligamentos")
+                    }
+                  >
+                    Desligamentos
+                  </Link>
+                )}
+
+                {podeVerDashboardAtestados && (
+                  <Link
+                    className={subItemMenuClass(
+                      rotaAtiva("/inicio/dashboard/atestados")
+                    )}
+                    href="/inicio/dashboard/atestados"
+                    onClick={() =>
+                      iniciarNavegacao("/inicio/dashboard/atestados")
+                    }
+                  >
+                    Atestados
+                  </Link>
+                )}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* conferência de folha */}
+        {podeVerConferenciaFolha && (
+          <Link
+            className={itemMenuClass(rotaAtiva("/inicio/conferencia-folha"))}
+            href="/inicio/conferencia-folha"
+            onClick={() => iniciarNavegacao("/inicio/conferencia-folha")}
+          >
             <svg
               className="h-5 w-5 text-blue-100"
               viewBox="0 0 24 24"
               fill="none"
             >
               <path
-                d="M4 13h4v7H4v-7Z"
+                d="M6 3h9l3 3v15H6V3Z"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinejoin="round"
               />
               <path
-                d="M10 4h4v16h-4V4Z"
+                d="M15 3v4h4"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinejoin="round"
               />
               <path
-                d="M16 9h4v11h-4V9Z"
+                d="M8.5 12h7"
                 stroke="currentColor"
                 strokeWidth="2"
-                strokeLinejoin="round"
+                strokeLinecap="round"
+              />
+              <path
+                d="M8.5 16h5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
               />
             </svg>
 
-            Dashboard
-          </span>
-
-          <span
-            className={`text-xs text-blue-100 transition ${
-              dashboardOpen ? "rotate-90" : ""
-            }`}
-          >
-            ›
-          </span>
-        </button>
-
-        {/* opções do dashboard */}
-        {dashboardOpen && (
-          <div className="ml-8 mt-1 space-y-1 border-l border-blue-600 pl-3">
-            <Link
-              className={subItemMenuClass(
-                rotaAtiva("/inicio/dashboard/visao-geral")
-              )}
-              href="/inicio/dashboard/visao-geral"
-              onClick={() => iniciarNavegacao("/inicio/dashboard/visao-geral")}
-            >
-              Visão Geral
-            </Link>
-
-            <Link
-              className={subItemMenuClass(
-                rotaAtiva("/inicio/dashboard/admissoes")
-              )}
-              href="/inicio/dashboard/admissoes"
-              onClick={() => iniciarNavegacao("/inicio/dashboard/admissoes")}
-            >
-              Admissões
-            </Link>
-
-            <Link
-              className={subItemMenuClass(
-                rotaAtiva("/inicio/dashboard/desligamentos")
-              )}
-              href="/inicio/dashboard/desligamentos"
-              onClick={() =>
-                iniciarNavegacao("/inicio/dashboard/desligamentos")
-              }
-            >
-              Desligamentos
-            </Link>
-
-            <Link
-              className={subItemMenuClass(
-                rotaAtiva("/inicio/dashboard/atestados")
-              )}
-              href="/inicio/dashboard/atestados"
-              onClick={() => iniciarNavegacao("/inicio/dashboard/atestados")}
-            >
-              Atestados
-            </Link>
-          </div>
+            Análise FOPAG
+          </Link>
         )}
-
-        {/* conferência de folha */}
-        <Link
-          className={itemMenuClass(rotaAtiva("/inicio/conferencia-folha"))}
-          href="/inicio/conferencia-folha"
-          onClick={() => iniciarNavegacao("/inicio/conferencia-folha")}
-        >
-          <svg
-            className="h-5 w-5 text-blue-100"
-            viewBox="0 0 24 24"
-            fill="none"
-          >
-            <path
-              d="M6 3h9l3 3v15H6V3Z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M15 3v4h4"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M8.5 12h7"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-            <path
-              d="M8.5 16h5"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
-
-          Análise FOPAG
-        </Link>
       </nav>
     </aside>
   );
