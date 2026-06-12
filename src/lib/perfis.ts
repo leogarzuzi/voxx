@@ -2,6 +2,8 @@
 export const PERFIS = {
   ADMIN: "Admin",
   GERENTE: "Gerente",
+  ADMISSAO: "Admissão",
+  ATENDIMENTO: "Atendimento",
 } as const;
 
 export type Perfil = (typeof PERFIS)[keyof typeof PERFIS];
@@ -11,15 +13,30 @@ export const PERMISSOES = {
   SOLICITACOES: "solicitacoes",
   DASHBOARD: "dashboard",
   CONFERENCIA_FOLHA: "conferenciaFolha",
-  ADMISSOES: "admissoes",
+
+  // dashboards antigos
+  ADMISSOES_DASHBOARD: "admissoesDashboard",
   DESLIGAMENTOS: "desligamentos",
   ATESTADOS: "atestados",
+
+  // áreas administrativas
   AUDITORIA: "auditoria",
   USUARIOS: "usuarios",
 
   // base de dados
   BASE_DADOS_COLABORADORES: "baseDadosColaboradores",
   BASE_DADOS_GESTAO_RH: "baseDadosGestaoRh",
+
+  // módulo de admissão
+  ADMISSOES_VISUALIZAR: "admissoesVisualizar",
+  ADMISSOES_CRIAR: "admissoesCriar",
+  ADMISSOES_EDITAR: "admissoesEditar",
+  ADMISSOES_ENVIAR_SEDE: "admissoesEnviarSede",
+  ADMISSOES_SUBIR_BASE: "admissoesSubirBase",
+
+  // módulo novos admitidos
+  NOVOS_ADMITIDOS_VISUALIZAR: "novosAdmitidosVisualizar",
+  NOVOS_ADMITIDOS_EDITAR: "novosAdmitidosEditar",
 } as const;
 
 export type Permissao = (typeof PERMISSOES)[keyof typeof PERMISSOES];
@@ -29,59 +46,131 @@ type PerfilConfig = Record<Permissao, boolean>;
 // permissões de cada perfil
 export const PERFIS_CONFIG: Record<Perfil, PerfilConfig> = {
   Admin: {
-    solicitacoes: true, // pode aprovar acessos
-    dashboard: true, // acesso ao dashboard
-    conferenciaFolha: true, // acesso à conferência de folha
-    admissoes: true, // acesso às admissões
-    desligamentos: true, // acesso aos desligamentos
-    atestados: true, // acesso aos atestados
-    auditoria: true, // acesso aos logs de auditoria
-    usuarios: true, // gestão de usuários
+    solicitacoes: true,
+    dashboard: true,
+    conferenciaFolha: true,
 
-    // base de dados
-    baseDadosColaboradores: true, // todos os perfis oficiais atuais podem ver
-    baseDadosGestaoRh: true, // somente perfis liberados podem ver
+    admissoesDashboard: true,
+    desligamentos: true,
+    atestados: true,
+
+    auditoria: true,
+    usuarios: true,
+
+    baseDadosColaboradores: true,
+    baseDadosGestaoRh: true,
+
+    admissoesVisualizar: true,
+    admissoesCriar: true,
+    admissoesEditar: true,
+    admissoesEnviarSede: true,
+    admissoesSubirBase: true,
+
+    novosAdmitidosVisualizar: true,
+    novosAdmitidosEditar: true,
   },
 
   Gerente: {
-    solicitacoes: false, // não acessa solicitações
+    solicitacoes: false,
     dashboard: true,
     conferenciaFolha: true,
-    admissoes: true,
+
+    admissoesDashboard: true,
     desligamentos: true,
     atestados: true,
+
     auditoria: false,
     usuarios: false,
 
-    // base de dados
     baseDadosColaboradores: true,
     baseDadosGestaoRh: true,
+
+    admissoesVisualizar: true,
+    admissoesCriar: true,
+    admissoesEditar: true,
+    admissoesEnviarSede: true,
+    admissoesSubirBase: true,
+
+    novosAdmitidosVisualizar: true,
+    novosAdmitidosEditar: true,
+  },
+
+  Admissão: {
+    solicitacoes: false,
+    dashboard: false,
+    conferenciaFolha: false,
+
+    admissoesDashboard: false,
+    desligamentos: false,
+    atestados: false,
+
+    auditoria: false,
+    usuarios: false,
+
+    baseDadosColaboradores: true,
+    baseDadosGestaoRh: false,
+
+    admissoesVisualizar: true,
+    admissoesCriar: true,
+    admissoesEditar: true,
+    admissoesEnviarSede: true,
+    admissoesSubirBase: true,
+
+    novosAdmitidosVisualizar: true,
+    novosAdmitidosEditar: false,
+  },
+
+  Atendimento: {
+    solicitacoes: false,
+    dashboard: false,
+    conferenciaFolha: false,
+
+    admissoesDashboard: false,
+    desligamentos: false,
+    atestados: false,
+
+    auditoria: false,
+    usuarios: false,
+
+    baseDadosColaboradores: true,
+    baseDadosGestaoRh: false,
+
+    admissoesVisualizar: false,
+    admissoesCriar: false,
+    admissoesEditar: false,
+    admissoesEnviarSede: false,
+    admissoesSubirBase: false,
+
+    novosAdmitidosVisualizar: true,
+    novosAdmitidosEditar: true,
   },
 };
 
-// verifica se o perfil recebido existe no sistema
 export function perfilExiste(perfil: string | null | undefined): perfil is Perfil {
   if (!perfil) return false;
 
   return Object.values(PERFIS).includes(perfil as Perfil);
 }
 
-// função principal para validar permissões
 export function temPermissao(
   perfil: string | null | undefined,
   permissao: Permissao
 ) {
-  if (!perfilExiste(perfil)) {
-    return false;
-  }
+  if (!perfilExiste(perfil)) return false;
 
   return PERFIS_CONFIG[perfil][permissao] === true;
 }
 
-// usada para saber se aparece o menu pai "Base de Dados"
 export function podeVerMenuBaseDados(perfil: string | null | undefined) {
   return (
     temPermissao(perfil, PERMISSOES.BASE_DADOS_COLABORADORES) ||
     temPermissao(perfil, PERMISSOES.BASE_DADOS_GESTAO_RH)
+  );
+}
+
+export function podeVerMenuAdmissao(perfil: string | null | undefined) {
+  return (
+    temPermissao(perfil, PERMISSOES.ADMISSOES_VISUALIZAR) ||
+    temPermissao(perfil, PERMISSOES.NOVOS_ADMITIDOS_VISUALIZAR)
   );
 }

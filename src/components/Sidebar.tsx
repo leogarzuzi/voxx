@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   PERMISSOES,
+  podeVerMenuAdmissao,
   podeVerMenuBaseDados,
   temPermissao,
 } from "@/lib/perfis";
@@ -22,12 +23,17 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
     pathname.startsWith("/inicio/base-dados")
   );
 
+  // abre/fecha o grupo Admissão
+  const [admissaoOpen, setAdmissaoOpen] = useState(
+    pathname.startsWith("/inicio/admissao")
+  );
+
   // abre/fecha o grupo Dashboard
   const [dashboardOpen, setDashboardOpen] = useState(
     pathname.startsWith("/inicio/dashboard")
   );
 
-  // permissões do menu lateral vindas do src/lib/perfis.ts
+  // permissões do menu lateral
   const podeVerSolicitacoes = temPermissao(
     perfil,
     PERMISSOES.SOLICITACOES
@@ -39,34 +45,15 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
 
   const podeVerBaseDados = podeVerMenuBaseDados(perfil);
 
-  const podeVerBaseDadosColaboradores = temPermissao(
-    perfil,
-    PERMISSOES.BASE_DADOS_COLABORADORES
-  );
+  const podeVerAdmissao = podeVerMenuAdmissao(perfil);
 
-  const podeVerBaseDadosGestaoRh = temPermissao(
-    perfil,
-    PERMISSOES.BASE_DADOS_GESTAO_RH
-  );
+  const podeVerDashboard =
+    temPermissao(perfil, PERMISSOES.DASHBOARD) ||
+    temPermissao(perfil, PERMISSOES.ADMISSOES_DASHBOARD) ||
+    temPermissao(perfil, PERMISSOES.DESLIGAMENTOS) ||
+    temPermissao(perfil, PERMISSOES.ATESTADOS);
 
-  const podeVerDashboard = temPermissao(perfil, PERMISSOES.DASHBOARD);
-
-  const podeVerDashboardAdmissoes = temPermissao(
-    perfil,
-    PERMISSOES.ADMISSOES
-  );
-
-  const podeVerDashboardDesligamentos = temPermissao(
-    perfil,
-    PERMISSOES.DESLIGAMENTOS
-  );
-
-  const podeVerDashboardAtestados = temPermissao(
-    perfil,
-    PERMISSOES.ATESTADOS
-  );
-
-  const podeVerConferenciaFolha = temPermissao(
+  const podeVerAnaliseFopag = temPermissao(
     perfil,
     PERMISSOES.CONFERENCIA_FOLHA
   );
@@ -78,7 +65,14 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
     }
   }, [pathname]);
 
-  // mantém o Dashboard aberto quando estiver em qualquer submódulo dele
+  // mantém Admissão aberto quando estiver em qualquer submódulo dele
+  useEffect(() => {
+    if (pathname.startsWith("/inicio/admissao")) {
+      setAdmissaoOpen(true);
+    }
+  }, [pathname]);
+
+  // mantém Dashboard aberto quando estiver em qualquer submódulo dele
   useEffect(() => {
     if (pathname.startsWith("/inicio/dashboard")) {
       setDashboardOpen(true);
@@ -106,6 +100,15 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
     }`;
   }
 
+  // classe padrão dos botões que abrem submenus
+  function grupoMenuClass(ativo: boolean) {
+    return `flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
+      ativo
+        ? "bg-blue-700 shadow-inner ring-1 ring-blue-300/40"
+        : "hover:bg-blue-700"
+    }`;
+  }
+
   // classe padrão dos subitens
   function subItemMenuClass(ativo: boolean) {
     return `block rounded-lg px-3 py-2 text-sm transition ${
@@ -116,6 +119,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
   }
 
   const baseDadosAtivo = pathname.startsWith("/inicio/base-dados");
+  const admissaoAtivo = pathname.startsWith("/inicio/admissao");
   const dashboardAtivo = pathname.startsWith("/inicio/dashboard");
 
   return (
@@ -263,11 +267,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
             <button
               type="button"
               onClick={() => setBaseDadosOpen(!baseDadosOpen)}
-              className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
-                baseDadosAtivo
-                  ? "bg-blue-700 shadow-inner ring-1 ring-blue-300/40"
-                  : "hover:bg-blue-700"
-              }`}
+              className={grupoMenuClass(baseDadosAtivo)}
             >
               <span className="flex items-center gap-3">
                 <svg
@@ -309,7 +309,10 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
 
             {baseDadosOpen && (
               <div className="ml-8 mt-1 space-y-1 border-l border-blue-600 pl-3">
-                {podeVerBaseDadosColaboradores && (
+                {temPermissao(
+                  perfil,
+                  PERMISSOES.BASE_DADOS_COLABORADORES
+                ) && (
                   <Link
                     prefetch={false}
                     className={subItemMenuClass(
@@ -324,7 +327,10 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                   </Link>
                 )}
 
-                {podeVerBaseDadosGestaoRh && (
+                {temPermissao(
+                  perfil,
+                  PERMISSOES.BASE_DADOS_GESTAO_RH
+                ) && (
                   <Link
                     prefetch={false}
                     className={subItemMenuClass(
@@ -343,17 +349,103 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
           </>
         )}
 
+        {/* admissão */}
+        {podeVerAdmissao && (
+          <>
+            <button
+              type="button"
+              onClick={() => setAdmissaoOpen(!admissaoOpen)}
+              className={grupoMenuClass(admissaoAtivo)}
+            >
+              <span className="flex items-center gap-3">
+                <svg
+                  className="h-5 w-5 text-blue-100"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <path
+                    d="M8 7a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                  <path
+                    d="M4 21a8 8 0 0 1 16 0"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M19 8v6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M22 11h-6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+
+                Admissão
+              </span>
+
+              <span
+                className={`text-xs text-blue-100 transition ${
+                  admissaoOpen ? "rotate-90" : ""
+                }`}
+              >
+                ›
+              </span>
+            </button>
+
+            {admissaoOpen && (
+              <div className="ml-8 mt-1 space-y-1 border-l border-blue-600 pl-3">
+                {temPermissao(perfil, PERMISSOES.ADMISSOES_VISUALIZAR) && (
+                  <Link
+                    prefetch={false}
+                    className={subItemMenuClass(
+                      rotaAtiva("/inicio/admissao/controle")
+                    )}
+                    href="/inicio/admissao/controle"
+                    onClick={() =>
+                      iniciarNavegacao("/inicio/admissao/controle")
+                    }
+                  >
+                    Controle de Admissões
+                  </Link>
+                )}
+
+                {temPermissao(
+                  perfil,
+                  PERMISSOES.NOVOS_ADMITIDOS_VISUALIZAR
+                ) && (
+                  <Link
+                    prefetch={false}
+                    className={subItemMenuClass(
+                      rotaAtiva("/inicio/admissao/novos-admitidos")
+                    )}
+                    href="/inicio/admissao/novos-admitidos"
+                    onClick={() =>
+                      iniciarNavegacao("/inicio/admissao/novos-admitidos")
+                    }
+                  >
+                    Novos Admitidos
+                  </Link>
+                )}
+              </div>
+            )}
+          </>
+        )}
+
         {/* dashboard */}
         {podeVerDashboard && (
           <>
             <button
               type="button"
               onClick={() => setDashboardOpen(!dashboardOpen)}
-              className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
-                dashboardAtivo
-                  ? "bg-blue-700 shadow-inner ring-1 ring-blue-300/40"
-                  : "hover:bg-blue-700"
-              }`}
+              className={grupoMenuClass(dashboardAtivo)}
             >
               <span className="flex items-center gap-3">
                 <svg
@@ -393,22 +485,26 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
               </span>
             </button>
 
-            {/* opções do dashboard */}
             {dashboardOpen && (
               <div className="ml-8 mt-1 space-y-1 border-l border-blue-600 pl-3">
-                <Link
-                  className={subItemMenuClass(
-                    rotaAtiva("/inicio/dashboard/visao-geral")
-                  )}
-                  href="/inicio/dashboard/visao-geral"
-                  onClick={() =>
-                    iniciarNavegacao("/inicio/dashboard/visao-geral")
-                  }
-                >
-                  Visão Geral
-                </Link>
+                {temPermissao(perfil, PERMISSOES.DASHBOARD) && (
+                  <Link
+                    className={subItemMenuClass(
+                      rotaAtiva("/inicio/dashboard/visao-geral")
+                    )}
+                    href="/inicio/dashboard/visao-geral"
+                    onClick={() =>
+                      iniciarNavegacao("/inicio/dashboard/visao-geral")
+                    }
+                  >
+                    Visão Geral
+                  </Link>
+                )}
 
-                {podeVerDashboardAdmissoes && (
+                {temPermissao(
+                  perfil,
+                  PERMISSOES.ADMISSOES_DASHBOARD
+                ) && (
                   <Link
                     className={subItemMenuClass(
                       rotaAtiva("/inicio/dashboard/admissoes")
@@ -422,7 +518,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                   </Link>
                 )}
 
-                {podeVerDashboardDesligamentos && (
+                {temPermissao(perfil, PERMISSOES.DESLIGAMENTOS) && (
                   <Link
                     className={subItemMenuClass(
                       rotaAtiva("/inicio/dashboard/desligamentos")
@@ -436,7 +532,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                   </Link>
                 )}
 
-                {podeVerDashboardAtestados && (
+                {temPermissao(perfil, PERMISSOES.ATESTADOS) && (
                   <Link
                     className={subItemMenuClass(
                       rotaAtiva("/inicio/dashboard/atestados")
@@ -455,7 +551,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
         )}
 
         {/* conferência de folha */}
-        {podeVerConferenciaFolha && (
+        {podeVerAnaliseFopag && (
           <Link
             className={itemMenuClass(rotaAtiva("/inicio/conferencia-folha"))}
             href="/inicio/conferencia-folha"
