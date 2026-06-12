@@ -63,7 +63,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
   const dashboardAtivo = pathname.startsWith("/inicio/dashboard");
 
   return (
-    <aside className="min-h-screen w-56 bg-blue-800 text-white">
+    <aside className="min-h-screen w-56 overflow-hidden rounded-tr-[28px] rounded-br-[28px] bg-blue-800 text-white shadow-xl">
       {/* logo do sistema */}
       <div className="flex justify-center py-4">
         <Link
