@@ -47,6 +47,8 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
 
   const podeVerAdmissao = podeVerMenuAdmissao(perfil);
 
+  const podeVerDesligamento = temPermissao(perfil, PERMISSOES.DESLIGAMENTOS);
+
   const podeVerDashboard =
     temPermissao(perfil, PERMISSOES.DASHBOARD) ||
     temPermissao(perfil, PERMISSOES.ADMISSOES_DASHBOARD) ||
@@ -437,6 +439,45 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
               </div>
             )}
           </>
+        )}
+
+        {/* desligamento */}
+        {podeVerDesligamento && (
+          <Link
+            className={itemMenuClass(
+              rotaAtiva("/inicio/desligamento/controle")
+            )}
+            href="/inicio/desligamento/controle"
+            onClick={() =>
+              iniciarNavegacao("/inicio/desligamento/controle")
+            }
+          >
+            <svg
+              className="h-5 w-5 text-blue-100"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M8 7a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              <path
+                d="M4 21a8 8 0 0 1 16 0"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <path
+                d="M18 11h5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+
+            Desligamento
+          </Link>
         )}
 
         {/* dashboard */}
