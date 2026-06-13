@@ -183,21 +183,33 @@ export async function GET(request: NextRequest) {
 
     const basesEncontradas = encontrados.map((item) => item.base_origem);
 
-    const colaboradorPrincipal =
-      encontrados.find((item) => item.base_origem === "colaboradores") ??
-      encontrados[0];
-
-    return Response.json({
-      success: true,
-      encontrado: true,
-      colaborador: {
-        ...colaboradorPrincipal,
-        base_origem: encontrados.length > 1 ? "ambas" : colaboradorPrincipal.base_origem,
-        bases_encontradas: basesEncontradas,
-      },
+if (encontrados.length > 1) {
+  return Response.json(
+    {
+      success: false,
+      error:
+        "Inconsistência encontrada: a matrícula consta na Base de Dados e na Gestão RH ao mesmo tempo.",
       basesEncontradas,
       quantidade: encontrados.length,
-    });
+    },
+    { status: 409 }
+  );
+}
+
+const colaboradorPrincipal = encontrados[0];
+
+return Response.json({
+  success: true,
+  encontrado: true,
+  colaborador: {
+    ...colaboradorPrincipal,
+    bases_encontradas: basesEncontradas,
+  },
+  basesEncontradas,
+  quantidade: encontrados.length,
+});
+
+
   } catch (error) {
     return Response.json(
       { success: false, error: String(error) },
