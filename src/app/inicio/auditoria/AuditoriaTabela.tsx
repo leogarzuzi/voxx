@@ -16,6 +16,14 @@ function formatarAcao(acao: string) {
   const mapa: Record<string, string> = {
     APROVACAO_ACESSO: "Acesso aprovado",
     CONFERENCIA_FOLHA_EXECUTADA: "Conferência de folha executada",
+
+    DESLIGAMENTO_CRIADO: "Desligamento criado",
+    DESLIGAMENTO_EDITADO: "Desligamento editado",
+    DESLIGAMENTO_DATA_ASO_ALTERADA: "Data do ASO alterada",
+    DESLIGAMENTO_DATA_HOMOLOGACAO_ALTERADA: "Data da homologação alterada",
+    DESLIGAMENTO_ENVIADO_SEDE: "Desligamento enviado para SEDE",
+    DESLIGAMENTO_COMPUTADO_BASE: "Desligamento computado na base",
+
     ADMISSAO_CRIADA: "Nova admissão cadastrada",
     ADMISSAO_EDITADA: "Admissão editada",
   };
@@ -28,6 +36,7 @@ function formatarModulo(modulo: string) {
     solicitacoes_acesso: "Solicitações de acesso",
     conferencia_folha: "Conferência de folha",
     admissao: "Admissão",
+    desligamento: "Desligamento",
   };
 
   return mapa[modulo] || modulo;
@@ -58,6 +67,14 @@ function formatarDetalhes(detalhes: Record<string, any> | null) {
     cargo: "Cargo",
     baseDestino: "Base de destino",
     camposAlterados: "Campos alterados",
+
+    desligamentoId: "ID do desligamento",
+    tipoDesligamento: "Tipo de desligamento",
+    dataDesligamento: "Data do desligamento",
+    baseOrigem: "Base de origem",
+    alteracoes: "Alterações",
+    antes: "Antes",
+    depois: "Depois",
   };
 
   const nomesCampos: Record<string, string> = {
@@ -98,7 +115,7 @@ function formatarDetalhes(detalhes: Record<string, any> | null) {
       valorFormatado = String(valor ?? "");
     }
 
-    if (chave === "baseDestino") {
+    if (chave === "baseDestino" || chave === "baseOrigem") {
       valorFormatado = valoresBonitos[valorFormatado] || valorFormatado;
     }
 
@@ -244,6 +261,14 @@ export default function AuditoriaTabela() {
                 Nova admissão cadastrada
               </option>
               <option value="ADMISSAO_EDITADA">Admissão editada</option>
+              <option value="DESLIGAMENTO_CRIADO">Desligamento criado</option>
+              <option value="DESLIGAMENTO_EDITADO">Desligamento editado</option>
+              <option value="DESLIGAMENTO_DATA_ASO_ALTERADA">
+                Data do ASO alterada
+              </option>
+              <option value="DESLIGAMENTO_DATA_HOMOLOGACAO_ALTERADA">
+                Data da homologação alterada
+              </option>
             </select>
           </div>
 
@@ -262,6 +287,7 @@ export default function AuditoriaTabela() {
               </option>
               <option value="conferencia_folha">Conferência de folha</option>
               <option value="admissao">Admissão</option>
+              <option value="desligamento">Desligamento</option>
             </select>
           </div>
         </div>

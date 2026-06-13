@@ -47,7 +47,10 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
 
   const podeVerAdmissao = podeVerMenuAdmissao(perfil);
 
-  const podeVerDesligamento = temPermissao(perfil, PERMISSOES.DESLIGAMENTOS);
+  const podeVerDesligamento = temPermissao(
+    perfil,
+    PERMISSOES.DESLIGAMENTOS
+  );
 
   const podeVerDashboard =
     temPermissao(perfil, PERMISSOES.DASHBOARD) ||
@@ -125,7 +128,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
   const dashboardAtivo = pathname.startsWith("/inicio/dashboard");
 
   return (
-    <aside className="min-h-screen w-56 overflow-hidden rounded-tr-[28px] rounded-br-[28px] bg-blue-800 text-white shadow-xl">
+    <aside className="sticky top-0 h-screen w-56 shrink-0 self-start overflow-y-auto rounded-tr-[28px] rounded-br-[28px] bg-blue-800 text-white shadow-xl">
       {/* logo do sistema */}
       <div className="flex justify-center py-4">
         <Link
