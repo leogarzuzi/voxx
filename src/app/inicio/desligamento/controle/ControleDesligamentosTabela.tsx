@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
@@ -26,6 +26,29 @@ type DesligamentoControle = {
   criado_por_email: string | null;
   atualizado_em: string | null;
   atualizado_por_email: string | null;
+};
+
+type TerminoContrato = {
+  id: number;
+  pref: string | null;
+  matricula: string | null;
+  nome: string | null;
+  cargo: string | null;
+  carga_horaria: string | null;
+  exercicio: string | null;
+  cpf: string | null;
+  pis: string | null;
+  data_nascimento: string | null;
+  email: string | null;
+  observacao: string | null;
+  base_origem: string | null;
+  regra_contrato: string | null;
+  ano_contrato: number | null;
+  anos_maximos: number | null;
+  data_termino: string | null;
+  dias_restantes: number;
+  status_termino: string;
+  status_termino_label: string;
 };
 
 type FormularioDesligamento = {
@@ -74,6 +97,29 @@ const TIPOS_DESLIGAMENTO = [
   "INICIATIVA DO EMPREGADOR",
   "JUSTA CAUSA",
 ];
+
+const MESES_TERMINOS = [
+  { value: "1", label: "Janeiro" },
+  { value: "2", label: "Fevereiro" },
+  { value: "3", label: "Março" },
+  { value: "4", label: "Abril" },
+  { value: "5", label: "Maio" },
+  { value: "6", label: "Junho" },
+  { value: "7", label: "Julho" },
+  { value: "8", label: "Agosto" },
+  { value: "9", label: "Setembro" },
+  { value: "10", label: "Outubro" },
+  { value: "11", label: "Novembro" },
+  { value: "12", label: "Dezembro" },
+];
+
+function mesAtual() {
+  return String(new Date().getMonth() + 1);
+}
+
+function anoAtual() {
+  return String(new Date().getFullYear());
+}
 
 const CAMPOS_MAIUSCULOS: (keyof FormularioDesligamento)[] = [
   "nome",
@@ -151,6 +197,37 @@ function statusClass(status: string | null | undefined) {
   return "bg-yellow-50 text-yellow-700";
 }
 
+function statusTerminoClass(status: string | null | undefined) {
+  const valor = String(status || "").toLowerCase();
+
+  if (valor === "vencido") {
+    return "bg-red-50 text-red-700";
+  }
+
+  if (valor === "vence_hoje") {
+    return "bg-yellow-50 text-yellow-700";
+  }
+
+  if (valor === "futuro") {
+    return "bg-blue-50 text-blue-700";
+  }
+
+  return "bg-slate-100 text-slate-700";
+}
+
+function formatarDiasRestantes(dias: number) {
+  if (dias < 0) {
+    const diasVencido = Math.abs(dias);
+    return `${diasVencido} ${diasVencido === 1 ? "dia" : "dias"} vencido`;
+  }
+
+  if (dias === 0) {
+    return "Vence hoje";
+  }
+
+  return `${dias} ${dias === 1 ? "dia" : "dias"}`;
+}
+
 function validarMatricula(matricula: string) {
   const valor = matricula.trim();
 
@@ -205,6 +282,18 @@ function gerarNomeArquivoExcel() {
   const minuto = String(agora.getMinutes()).padStart(2, "0");
 
   return `desligamentos-voxx-${ano}-${mes}-${dia}-${hora}${minuto}.csv`;
+}
+
+function gerarNomeArquivoTerminosContrato() {
+  const agora = new Date();
+
+  const ano = agora.getFullYear();
+  const mes = String(agora.getMonth() + 1).padStart(2, "0");
+  const dia = String(agora.getDate()).padStart(2, "0");
+  const hora = String(agora.getHours()).padStart(2, "0");
+  const minuto = String(agora.getMinutes()).padStart(2, "0");
+
+  return `terminos-contrato-voxx-${ano}-${mes}-${dia}-${hora}${minuto}.csv`;
 }
 
 type InputTextoProps = {
@@ -314,6 +403,19 @@ export default function ControleDesligamentosTabela() {
   const [salvando, setSalvando] = useState(false);
   const [buscandoColaborador, setBuscandoColaborador] = useState(false);
   const [modalAberto, setModalAberto] = useState(false);
+  const [modalTerminosAberto, setModalTerminosAberto] = useState(false);
+  const [voltarParaTerminos, setVoltarParaTerminos] = useState(false);
+  const [loadingTerminos, setLoadingTerminos] = useState(false);
+  const [erroTerminos, setErroTerminos] = useState("");
+  const [terminosContrato, setTerminosContrato] = useState<TerminoContrato[]>(
+    []
+  );
+  const [buscaTermino, setBuscaTermino] = useState("");
+  const [mesTerminos, setMesTerminos] = useState(mesAtual);
+  const [anoTerminos, setAnoTerminos] = useState(anoAtual);
+  const [filtroPrefTermino, setFiltroPrefTermino] = useState("todos");
+  const [paginaTerminos, setPaginaTerminos] = useState(1);
+  const [itensPorPaginaTerminos, setItensPorPaginaTerminos] = useState(25);
   const [desligamentoEditando, setDesligamentoEditando] =
     useState<DesligamentoControle | null>(null);
   const [formulario, setFormulario] =
@@ -332,6 +434,57 @@ export default function ControleDesligamentosTabela() {
       (desligamento) => desligamento.status_base === "pendente"
     );
   }, [desligamentos]);
+
+  const terminosFiltrados = useMemo(() => {
+    const termo = buscaTermino.trim().toLowerCase();
+
+    return terminosContrato.filter((termino) => {
+      const passaPref =
+        filtroPrefTermino === "todos" || termino.pref === filtroPrefTermino;
+
+      const textoBusca = [
+        termino.matricula,
+        termino.nome,
+        termino.cargo,
+        termino.cpf,
+        termino.email,
+        termino.pref,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      const passaBusca = !termo || textoBusca.includes(termo);
+
+      return passaPref && passaBusca;
+    });
+  }, [terminosContrato, filtroPrefTermino, buscaTermino]);
+
+  const resumoTerminos = useMemo(() => {
+    return {
+      vencidos: terminosFiltrados.filter(
+        (termino) => termino.status_termino === "vencido"
+      ).length,
+      hoje: terminosFiltrados.filter(
+        (termino) => termino.status_termino === "vence_hoje"
+      ).length,
+      futuros: terminosFiltrados.filter(
+        (termino) => termino.status_termino === "futuro"
+      ).length,
+    };
+  }, [terminosFiltrados]);
+
+  const totalPaginasTerminos = Math.max(
+    1,
+    Math.ceil(terminosFiltrados.length / itensPorPaginaTerminos)
+  );
+
+  const terminosPaginados = useMemo(() => {
+    const inicio = (paginaTerminos - 1) * itensPorPaginaTerminos;
+    const fim = inicio + itensPorPaginaTerminos;
+
+    return terminosFiltrados.slice(inicio, fim);
+  }, [terminosFiltrados, paginaTerminos, itensPorPaginaTerminos]);
 
   async function buscarDesligamentos(valorBusca = busca) {
     setLoading(true);
@@ -365,7 +518,43 @@ export default function ControleDesligamentosTabela() {
     setLoading(false);
   }
 
+  async function buscarTerminosContrato(
+    mes = mesTerminos,
+    ano = anoTerminos
+  ) {
+    setLoadingTerminos(true);
+    setErroTerminos("");
+
+    const params = new URLSearchParams({
+      mes,
+      ano,
+    });
+
+    const response = await fetch(
+      `/api/desligamento/terminos-contrato?${params.toString()}`,
+      {
+        method: "GET",
+        cache: "no-store",
+      }
+    );
+
+    const resultado = await response.json();
+
+    if (!response.ok || !resultado.success) {
+      setErroTerminos(
+        resultado.error || "Erro ao carregar términos de contrato."
+      );
+      setTerminosContrato([]);
+      setLoadingTerminos(false);
+      return;
+    }
+
+    setTerminosContrato(resultado.terminos ?? []);
+    setLoadingTerminos(false);
+  }
+
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     buscarDesligamentos("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -375,16 +564,49 @@ export default function ControleDesligamentosTabela() {
 
     function handleEsc(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        fecharModal();
+        event.preventDefault();
+
+        if (salvando || buscandoColaborador) return;
+
+        const deveVoltarParaTerminos = voltarParaTerminos;
+
+        setModalAberto(false);
+        setDesligamentoEditando(null);
+        setFormulario(FORM_INICIAL);
+        setVoltarParaTerminos(false);
+
+        if (deveVoltarParaTerminos) {
+          setModalTerminosAberto(true);
+        }
       }
     }
 
-    document.addEventListener("keydown", handleEsc);
+    document.addEventListener("keydown", handleEsc, true);
 
     return () => {
-      document.removeEventListener("keydown", handleEsc);
+      document.removeEventListener("keydown", handleEsc, true);
     };
-  }, [modalAberto]);
+  }, [modalAberto, salvando, buscandoColaborador, voltarParaTerminos]);
+
+  useEffect(() => {
+    if (!modalTerminosAberto) return;
+
+    function handleEsc(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+
+        setModalTerminosAberto(false);
+        setErroTerminos("");
+      }
+    }
+
+    document.addEventListener("keydown", handleEsc, true);
+
+    return () => {
+      document.removeEventListener("keydown", handleEsc, true);
+    };
+  }, [modalTerminosAberto]);
 
   function atualizarCampo(
     campo: keyof FormularioDesligamento,
@@ -405,6 +627,7 @@ export default function ControleDesligamentosTabela() {
   function abrirModalNovoDesligamento() {
     setFormulario(FORM_INICIAL);
     setDesligamentoEditando(null);
+    setVoltarParaTerminos(false);
     setErro("");
     setSucesso("");
     setModalAberto(true);
@@ -412,6 +635,7 @@ export default function ControleDesligamentosTabela() {
 
   function abrirModalEditar(desligamento: DesligamentoControle) {
     setDesligamentoEditando(desligamento);
+    setVoltarParaTerminos(false);
     setErro("");
     setSucesso("");
 
@@ -435,15 +659,79 @@ export default function ControleDesligamentosTabela() {
       observacao: desligamento.observacao || "",
     });
 
+    setVoltarParaTerminos(false);
     setModalAberto(true);
+  }
+
+  function abrirModalDesligamentoPorTermino(termino: TerminoContrato) {
+    setDesligamentoEditando(null);
+    setErro("");
+    setSucesso("");
+    setErroTerminos("");
+
+    setFormulario({
+      pref: termino.pref || "",
+      matricula: termino.matricula || "",
+      nome: termino.nome || "",
+      cargo: termino.cargo || "",
+      carga_horaria: termino.carga_horaria || "",
+      exercicio: dataParaInput(termino.exercicio),
+      cpf: termino.cpf || "",
+      pis: termino.pis || "",
+      data_nascimento: dataParaInput(termino.data_nascimento),
+      email: termino.email || "",
+      data_desligamento: dataParaInput(termino.data_termino),
+      tipo_desligamento: TIPOS_DESLIGAMENTO[0],
+      data_aso: "",
+      data_homologacao: "",
+      base_origem: termino.base_origem || "",
+      observacao: termino.observacao || "",
+    });
+
+    setModalTerminosAberto(false);
+    setVoltarParaTerminos(true);
+    setModalAberto(true);
+  }
+
+  function alterarAnoTerminos(delta: number) {
+    const anoBase = Number(anoTerminos) || new Date().getFullYear();
+    const novoAno = String(Math.max(1900, anoBase + delta));
+
+    setAnoTerminos(novoAno);
+    setPaginaTerminos(1);
+    buscarTerminosContrato(mesTerminos, novoAno);
+  }
+
+  async function abrirModalTerminos() {
+    setModalTerminosAberto(true);
+    setVoltarParaTerminos(false);
+    setBuscaTermino("");
+    setFiltroPrefTermino("todos");
+    setPaginaTerminos(1);
+    await buscarTerminosContrato(mesTerminos, anoTerminos);
   }
 
   function fecharModal() {
     if (salvando || buscandoColaborador) return;
 
+    const deveVoltarParaTerminos = voltarParaTerminos;
+
     setModalAberto(false);
     setDesligamentoEditando(null);
     setFormulario(FORM_INICIAL);
+    setVoltarParaTerminos(false);
+
+    if (deveVoltarParaTerminos) {
+      setModalTerminosAberto(true);
+    }
+  }
+
+  function fecharModalTerminos() {
+    if (loadingTerminos) return;
+
+    setModalTerminosAberto(false);
+    setVoltarParaTerminos(false);
+    setErroTerminos("");
   }
 
   async function buscarColaboradorPorMatricula() {
@@ -568,8 +856,19 @@ export default function ControleDesligamentosTabela() {
         : "Desligamento salvo com sucesso."
     );
 
+    const deveVoltarParaTerminos = voltarParaTerminos;
+
     setSalvando(false);
-    fecharModal();
+    setModalAberto(false);
+    setDesligamentoEditando(null);
+    setFormulario(FORM_INICIAL);
+    setVoltarParaTerminos(false);
+
+    if (deveVoltarParaTerminos) {
+      setModalTerminosAberto(true);
+      buscarTerminosContrato(mesTerminos, anoTerminos);
+    }
+
     buscarDesligamentos(busca);
   }
 
@@ -635,6 +934,56 @@ export default function ControleDesligamentosTabela() {
     URL.revokeObjectURL(url);
   }
 
+  function baixarExcelTerminosContrato() {
+    const cabecalho = [
+      "Status",
+      "Pref.",
+      "Matrícula",
+      "Nome",
+      "Função",
+      "CH",
+      "Exercício",
+      "Término",
+      "Prazo",
+      "Base",
+      "Marco",
+    ];
+
+    const linhas = terminosFiltrados.map((termino) => [
+      termino.status_termino_label,
+      termino.pref,
+      termino.matricula,
+      termino.nome,
+      termino.cargo,
+      termino.carga_horaria,
+      formatarData(termino.exercicio),
+      formatarData(termino.data_termino),
+      formatarDiasRestantes(termino.dias_restantes),
+      baseOrigemLabel(termino.base_origem),
+      termino.ano_contrato && termino.anos_maximos
+        ? `${termino.ano_contrato}/${termino.anos_maximos}`
+        : "-",
+    ]);
+
+    const conteudoCsv = [
+      cabecalho.map(formatarValorExcel).join(";"),
+      ...linhas.map((linha) => linha.map(formatarValorExcel).join(";")),
+    ].join("\n");
+
+    const blob = new Blob(["\uFEFF" + conteudoCsv], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = gerarNomeArquivoTerminosContrato();
+    link.click();
+
+    URL.revokeObjectURL(url);
+  }
+
   function pesquisar(e: FormEvent) {
     e.preventDefault();
     buscarDesligamentos(busca);
@@ -660,11 +1009,11 @@ export default function ControleDesligamentosTabela() {
 
             <button
               type="button"
-              disabled
-              title="Vamos ativar este botão em uma próxima etapa."
-              className="rounded-xl border border-gray-200 bg-gray-100 px-5 py-2.5 text-sm font-semibold text-gray-400"
+              onClick={abrirModalTerminos}
+              disabled={loadingTerminos}
+              className="rounded-xl border border-blue-200 bg-blue-50 px-5 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Términos de Contrato
+              {loadingTerminos ? "Carregando..." : "Términos de Contrato"}
             </button>
 
             <button
@@ -792,11 +1141,21 @@ export default function ControleDesligamentosTabela() {
                 <th className="px-3 py-4 text-center">Nome</th>
                 <th className="px-3 py-4 text-center">Cargo</th>
                 <th className="px-3 py-4 text-center">CH</th>
-                <th className="w-[60px] min-w-[60px] max-w-[60px] px-1 py-4 text-center">Exercício</th>
-                <th className="px-3 py-4 text-center">Data do<br />desligamento</th>
+                <th className="w-[60px] min-w-[60px] max-w-[60px] px-1 py-4 text-center">
+                  Exercício
+                </th>
+                <th className="px-3 py-4 text-center">
+                  Data do
+                  <br />
+                  desligamento
+                </th>
                 <th className="px-3 py-4 text-center">Tipo</th>
-                <th className="w-[60px] min-w-[60px] max-w-[60px] px-1 py-4 text-center">ASO</th>
-                <th className="w-[80px] min-w-[80px] max-w-[80px] px-1 py-4 text-center">Homologação</th>
+                <th className="w-[60px] min-w-[60px] max-w-[60px] px-1 py-4 text-center">
+                  ASO
+                </th>
+                <th className="w-[80px] min-w-[80px] max-w-[80px] px-1 py-4 text-center">
+                  Homologação
+                </th>
                 <th className="px-3 py-4 text-center">Base origem</th>
                 <th className="px-3 py-4 text-center">Status SEDE</th>
                 <th className="px-3 py-4 text-center">Status Base</th>
@@ -905,6 +1264,420 @@ export default function ControleDesligamentosTabela() {
         </div>
       )}
 
+      {modalTerminosAberto && (
+        <div
+          className="fixed inset-0 z-[95] flex items-center justify-center bg-black/40 px-4 backdrop-blur-[1px]"
+          onMouseDown={fecharModalTerminos}
+        >
+          <div
+            onMouseDown={(e) => e.stopPropagation()}
+            className="flex max-h-[92vh] w-full max-w-7xl flex-col overflow-hidden rounded-3xl bg-white p-6 shadow-2xl"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-800">
+                  Términos de Contrato
+                </h3>
+
+                <p className="mt-1 text-sm text-gray-500">
+                  Colaboradores cujo prazo final do contrato vence no mês e ano
+                  selecionados. Nesta etapa, a tela é apenas para conferência.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={fecharModalTerminos}
+                disabled={loadingTerminos}
+                className="rounded-full px-3 py-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                ×
+              </button>
+            </div>
+
+            {erroTerminos && (
+              <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {erroTerminos}
+              </div>
+            )}
+
+            <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-[170px_110px_110px_1fr] lg:w-[860px]">
+                <label className="block">
+                  <span className="text-sm font-semibold text-gray-700">
+                    Mês
+                  </span>
+
+                  <select
+                    value={mesTerminos}
+                    onChange={(e) => {
+                      const valor = e.target.value;
+                      setMesTerminos(valor);
+                      setPaginaTerminos(1);
+                      buscarTerminosContrato(valor, anoTerminos);
+                    }}
+                    disabled={loadingTerminos}
+                    className="mt-1 h-10 w-full rounded-xl border border-gray-300 px-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {MESES_TERMINOS.map((mes) => (
+                      <option key={mes.value} value={mes.value}>
+                        {mes.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="block">
+                  <span className="text-sm font-semibold text-gray-700">
+                    Ano
+                  </span>
+
+                  <div className="mt-1 flex h-10 overflow-hidden rounded-xl border border-gray-300 text-sm text-gray-800 shadow-sm">
+                    <button
+                      type="button"
+                      onClick={() => alterarAnoTerminos(-1)}
+                      disabled={loadingTerminos}
+                      title="Ano anterior"
+                      aria-label="Ano anterior"
+                      className="flex w-10 items-center justify-center bg-white text-blue-700 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="m15 18-6-6 6-6"
+                          stroke="currentColor"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+
+                    <span className="flex min-w-0 flex-1 items-center justify-center bg-slate-50 px-2 font-semibold">
+                      {anoTerminos}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => alterarAnoTerminos(1)}
+                      disabled={loadingTerminos}
+                      title="Próximo ano"
+                      aria-label="Próximo ano"
+                      className="flex w-10 items-center justify-center bg-white text-blue-700 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="m9 18 6-6-6-6"
+                          stroke="currentColor"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </label>
+
+                <label className="block">
+                  <span className="text-sm font-semibold text-gray-700">
+                    Contrato
+                  </span>
+
+                  <select
+                    value={filtroPrefTermino}
+                    onChange={(e) => {
+                      setFiltroPrefTermino(e.target.value);
+                      setPaginaTerminos(1);
+                    }}
+                    disabled={loadingTerminos}
+                    className="mt-1 h-10 w-full rounded-xl border border-gray-300 px-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <option value="todos">Todos</option>
+                    <option value="47">47</option>
+                    <option value="95">95</option>
+                  </select>
+                </label>
+
+                <label className="block">
+                  <span className="text-sm font-semibold text-gray-700">
+                    Buscar
+                  </span>
+
+                  <input
+                    type="text"
+                    value={buscaTermino}
+                    onChange={(e) => {
+                      setBuscaTermino(e.target.value);
+                      setPaginaTerminos(1);
+                    }}
+                    placeholder="Nome, matrícula, CPF, função ou e-mail"
+                    className="mt-1 h-10 w-full rounded-xl border border-gray-300 px-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  />
+                </label>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                  {terminosFiltrados.length} resultado
+                  {terminosFiltrados.length === 1 ? "" : "s"}
+                </span>
+
+                <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
+                  {resumoTerminos.vencidos} vencido
+                  {resumoTerminos.vencidos === 1 ? "" : "s"}
+                </span>
+
+                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                  {resumoTerminos.futuros} a vencer
+                </span>
+
+                <span className="rounded-full bg-yellow-50 px-3 py-1 text-xs font-semibold text-yellow-700">
+                  {resumoTerminos.hoje} hoje
+                </span>
+
+                <label className="flex items-center gap-2 text-xs font-semibold text-gray-600">
+                  Linhas:
+                  <select
+                    value={itensPorPaginaTerminos}
+                    onChange={(e) => {
+                      setItensPorPaginaTerminos(Number(e.target.value));
+                      setPaginaTerminos(1);
+                    }}
+                    className="h-9 rounded-lg border border-gray-300 px-2 text-xs"
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                    <option value={150}>150</option>
+                  </select>
+                </label>
+
+                <button
+                  type="button"
+                  onClick={baixarExcelTerminosContrato}
+                  disabled={loadingTerminos || terminosFiltrados.length === 0}
+                  title="Baixar Excel"
+                  aria-label="Baixar Excel"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-green-200 bg-green-50 text-green-700 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <svg
+                    className="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M14 3v5h5"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M8.5 16l2.2-3-2.1-3h1.8l1.2 1.9L12.9 10h1.7l-2.1 3 2.2 3h-1.8l-1.3-2-1.3 2H8.5Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    buscarTerminosContrato(mesTerminos, anoTerminos)
+                  }
+                  disabled={loadingTerminos}
+                  className="h-10 rounded-xl border px-5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Atualizar
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-5 max-h-[52vh] overflow-auto rounded-xl border">
+              <table className="min-w-[1220px] text-center text-xs [&_td]:border-r [&_td]:border-slate-200/70 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-slate-200/70 [&_th:last-child]:border-r-0">
+                <thead className="sticky top-0 z-10 bg-slate-100">
+                  <tr className="border-b text-gray-600">
+                    <th className="px-3 py-4 text-center">Status</th>
+                    <th className="px-3 py-4 text-center">Pref.</th>
+                    <th className="px-3 py-4 text-center">Matrícula</th>
+                    <th className="px-3 py-4 text-center">Nome</th>
+                    <th className="px-3 py-4 text-center">Função</th>
+                    <th className="px-3 py-4 text-center">CH</th>
+                    <th className="px-3 py-4 text-center">Exercício</th>
+                    <th className="px-3 py-4 text-center">Término</th>
+                    <th className="px-3 py-4 text-center">Prazo</th>
+                    <th className="px-3 py-4 text-center">Base</th>
+                    <th className="px-3 py-4 text-center">Marco</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {loadingTerminos ? (
+                    <tr>
+                      <td
+                        colSpan={11}
+                        className="px-4 py-10 text-center text-gray-500"
+                      >
+                        Carregando términos de contrato...
+                      </td>
+                    </tr>
+                  ) : (
+                    <>
+                      {terminosPaginados.map((termino) => (
+                        <tr
+                          key={`${termino.base_origem}-${termino.id}-${termino.matricula}-${termino.ano_contrato}`}
+                          className="border-b align-middle hover:bg-slate-50"
+                        >
+                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle">
+                            <div className="mx-auto grid w-[150px] grid-cols-[1fr_1.75rem] items-center gap-2">
+                              <span
+                                className={`flex h-7 items-center justify-center rounded-full px-3 text-xs font-semibold ${statusTerminoClass(
+                                  termino.status_termino
+                                )}`}
+                              >
+                                {termino.status_termino_label}
+                              </span>
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  abrirModalDesligamentoPorTermino(termino)
+                                }
+                                title="Lançar desligamento"
+                                aria-label={`Lançar desligamento de ${
+                                  termino.nome || "colaborador"
+                                }`}
+                                className="flex h-7 w-7 items-center justify-center rounded-full border border-blue-200 bg-blue-50 text-sm font-bold text-blue-700 transition hover:bg-blue-100"
+                              >
+                                +
+                              </button>
+                            </div>
+                          </td>
+
+                          <td className="px-3 py-4 text-center align-middle text-gray-700">
+                            {texto(termino.pref)}
+                          </td>
+
+                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle font-semibold text-gray-800">
+                            {texto(termino.matricula)}
+                          </td>
+
+                          <td className="w-[220px] max-w-[220px] whitespace-normal break-words px-3 py-4 text-center align-middle font-semibold text-gray-800">
+                            {texto(termino.nome)}
+                          </td>
+
+                          <td className="w-[170px] max-w-[170px] whitespace-normal break-words px-3 py-4 text-center align-middle text-gray-700">
+                            {texto(termino.cargo)}
+                          </td>
+
+                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-gray-700">
+                            {texto(termino.carga_horaria)}
+                          </td>
+
+                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-gray-700">
+                            {formatarData(termino.exercicio)}
+                          </td>
+
+                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle font-semibold text-red-700">
+                            {formatarData(termino.data_termino)}
+                          </td>
+
+                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-gray-700">
+                            {formatarDiasRestantes(termino.dias_restantes)}
+                          </td>
+
+                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-gray-700">
+                            {baseOrigemLabel(termino.base_origem)}
+                          </td>
+
+                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle font-semibold text-gray-700">
+                            {termino.ano_contrato && termino.anos_maximos
+                              ? `${termino.ano_contrato}/${termino.anos_maximos}`
+                              : "-"}
+                          </td>
+                        </tr>
+                      ))}
+
+                      {terminosFiltrados.length === 0 && (
+                        <tr>
+                          <td
+                            colSpan={11}
+                            className="px-4 py-10 text-center text-gray-500"
+                          >
+                            Nenhum término encontrado com os filtros
+                            selecionados.
+                          </td>
+                        </tr>
+                      )}
+                    </>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <p className="text-xs text-gray-500">
+                Página {paginaTerminos} de {totalPaginasTerminos}
+              </p>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPaginaTerminos((paginaAtual) =>
+                      Math.max(1, paginaAtual - 1)
+                    )
+                  }
+                  disabled={paginaTerminos === 1 || loadingTerminos}
+                  className="rounded-lg border px-3 py-2 text-xs font-semibold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Anterior
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPaginaTerminos((paginaAtual) =>
+                      Math.min(totalPaginasTerminos, paginaAtual + 1)
+                    )
+                  }
+                  disabled={paginaTerminos === totalPaginasTerminos || loadingTerminos}
+                  className="rounded-lg border px-3 py-2 text-xs font-semibold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Próxima
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3 border-t pt-5">
+              <button
+                type="button"
+                onClick={fecharModalTerminos}
+                disabled={loadingTerminos}
+                className="rounded-xl border px-5 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {modalAberto && (
         <div
           className="fixed inset-0 z-[90] flex items-center justify-center bg-black/40 px-4 backdrop-blur-[1px]"
@@ -913,7 +1686,7 @@ export default function ControleDesligamentosTabela() {
           <form
             onSubmit={salvarDesligamento}
             onMouseDown={(e) => e.stopPropagation()}
-            className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl"
+            className="max-h-[92vh] w-full max-w-6xl overflow-y-auto overflow-x-hidden rounded-3xl bg-white p-6 shadow-2xl"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -944,9 +1717,8 @@ export default function ControleDesligamentosTabela() {
                 ×
               </button>
             </div>
-                  
-                {/* LINHA 1 - MATRÍCULA, BUSCA, PREF. E NOME */}
-            <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-24">
+
+            <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
               <InputTexto
                 label="Matrícula"
                 value={formulario.matricula}
@@ -956,10 +1728,10 @@ export default function ControleDesligamentosTabela() {
                 pattern="[0-9]*"
                 maxLength={8}
                 required
-                className="lg:col-span-3"
+                className="xl:col-span-2"
               />
 
-              <div className="flex items-end lg:col-span-4">
+              <div className="flex items-end xl:col-span-2">
                 <button
                   type="button"
                   onClick={buscarColaboradorPorMatricula}
@@ -974,59 +1746,57 @@ export default function ControleDesligamentosTabela() {
                 label="Pref."
                 value={formulario.pref}
                 disabled
-                className="w-16 lg:col-span-2"
+                className="xl:col-span-1"
               />
 
               <InputTexto
                 label="Nome"
                 value={formulario.nome}
                 disabled
-                className="lg:col-span-15"
-              />
-
-              {/* LINHA 2 - CARGO, BASE, CARGA HORÁRIA E CPF */}
-              <InputTexto
-                label="Cargo"
-                value={formulario.cargo}
-                disabled
-                className="lg:col-span-9"
+                className="xl:col-span-4"
               />
 
               <InputTexto
                 label="Base origem"
                 value={baseOrigemLabel(formulario.base_origem)}
                 disabled
-                className="lg:col-span-4"
+                className="xl:col-span-3"
+              />
+
+              <InputTexto
+                label="Cargo"
+                value={formulario.cargo}
+                disabled
+                className="xl:col-span-4"
               />
 
               <InputTexto
                 label="Carga horária"
                 value={formulario.carga_horaria}
                 disabled
-                className="lg:col-span-3"
+                className="xl:col-span-2"
               />
 
               <InputTexto
                 label="CPF"
                 value={formulario.cpf}
                 disabled
-                className="lg:col-span-4"
+                className="xl:col-span-2"
               />
 
               <InputTexto
-                  label="Exercício"
-                  value={formulario.exercicio}
-                  type="date"
-                  disabled
-                  className="lg:col-span-4"
-                />
+                label="Exercício"
+                value={formulario.exercicio}
+                type="date"
+                disabled
+                className="xl:col-span-2"
+              />
 
-              {/* LINHA 3 - PIS, NASCIMENTO E E-MAIL */}
               <InputTexto
                 label="PIS"
                 value={formulario.pis}
                 disabled
-                className="lg:col-span-4"
+                className="xl:col-span-2"
               />
 
               <InputTexto
@@ -1034,56 +1804,58 @@ export default function ControleDesligamentosTabela() {
                 value={formulario.data_nascimento}
                 type="date"
                 disabled
-                className="lg:col-span-5"
+                className="xl:col-span-2"
               />
 
               <InputTexto
                 label="E-mail"
                 value={formulario.email}
                 disabled
-                className="lg:col-span-15"
+                className="xl:col-span-4"
               />
 
-              
+              <SelectCampo
+                label="Tipo de desligamento"
+                value={formulario.tipo_desligamento}
+                onChange={(valor) =>
+                  atualizarCampo("tipo_desligamento", valor)
+                }
+                required
+                className="xl:col-span-3"
+                options={TIPOS_DESLIGAMENTO.map((tipo) => ({
+                  value: tipo,
+                  label: tipo,
+                }))}
+              />
 
-              {/* LINHA 4 - TIPO E DATAS */}
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:col-span-24 lg:grid-cols-[repeat(24,minmax(0,1fr))]">
-                <SelectCampo
-                  label="Tipo de desligamento"
-                  value={formulario.tipo_desligamento}
-                  onChange={(valor) => atualizarCampo("tipo_desligamento", valor)}
-                  required
-                  className="lg:col-span-7"
-                  options={TIPOS_DESLIGAMENTO.map((tipo) => ({
-                    value: tipo,
-                    label: tipo,
-                  }))}
-                />
+              <InputTexto
+                label="Data do desligamento"
+                value={formulario.data_desligamento}
+                onChange={(valor) =>
+                  atualizarCampo("data_desligamento", valor)
+                }
+                type="date"
+                required
+                className="xl:col-span-2"
+              />
 
-                <InputTexto
-                  label="Data do ASO"
-                  value={formulario.data_aso}
-                  onChange={(valor) => atualizarCampo("data_aso", valor)}
-                  type="date"
-                  className="lg:col-span-4"
-                />
+              <InputTexto
+                label="Data do ASO"
+                value={formulario.data_aso}
+                onChange={(valor) => atualizarCampo("data_aso", valor)}
+                type="date"
+                className="xl:col-span-2"
+              />
 
-                <InputTexto
-                  label="Data do desligamento"
-                  value={formulario.data_desligamento}
-                  onChange={(valor) => atualizarCampo("data_desligamento", valor)}
-                  type="date"
-                  required
-                  className="lg:col-span-7"
-                />
-                <InputTexto
-                  label="Data da homologação"
-                  value={formulario.data_homologacao}
-                  onChange={(valor) => atualizarCampo("data_homologacao", valor)}
-                  type="date"
-                  className="lg:col-span-6"
-                />
-              </div>
+              <InputTexto
+                label="Data da homologação"
+                value={formulario.data_homologacao}
+                onChange={(valor) =>
+                  atualizarCampo("data_homologacao", valor)
+                }
+                type="date"
+                className="xl:col-span-2"
+              />
             </div>
 
             <label className="mt-5 block">
