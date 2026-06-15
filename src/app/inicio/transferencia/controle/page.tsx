@@ -37,11 +37,6 @@ export default async function ControleTransferenciasPage() {
         <h1 className="text-3xl font-bold text-blue-700">
           Controle de Transferências
         </h1>
-
-        <p className="mt-1 text-sm text-gray-500">
-          Gerencie entradas e saídas de colaboradores por transferência entre
-          unidades.
-        </p>
       </div>
 
       <ControleTransferenciasTabela />

@@ -233,9 +233,6 @@ export default function ConferenciaFolhaPage() {
             <h1 className="text-2xl font-black text-slate-900" style={{ letterSpacing: "-0.04em" }}>
               Conferência de Folha
             </h1>
-            <p className="mt-1 text-sm text-slate-500">
-              Compare FOPAG e prévia e gere o relatório de divergências
-            </p>
           </div>
         
 

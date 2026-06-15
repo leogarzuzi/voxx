@@ -36,9 +36,6 @@ export default async function ControleAdmissoesPage() {
       <div>
         <h1 className="text-3xl font-bold text-blue-700">Admissão</h1>
 
-        <p className="mt-1 text-sm text-gray-500">
-          Controle de Admissões
-        </p>
       </div>
 
       <ControleAdmissoesTabela />

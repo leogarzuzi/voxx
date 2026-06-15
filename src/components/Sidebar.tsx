@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { BuscaRapidaColaborador } from "@/components/BuscaRapidaColaborador";
 import {
   PERMISSOES,
   podeVerMenuAdmissao,
@@ -150,6 +151,8 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
           />
         </Link>
       </div>
+
+      <BuscaRapidaColaborador />
 
       <nav className="mt-0 space-y-1 px-4">
         {/* solicitações */}

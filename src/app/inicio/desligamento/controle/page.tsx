@@ -46,10 +46,6 @@ export default async function ControleDesligamentosPage() {
       <main className="min-h-screen min-w-0 bg-slate-50 p-8">
         <div>
           <h1 className="text-3xl font-bold text-blue-700">Desligamento</h1>
-  
-          <p className="mt-1 text-sm text-gray-500">
-            Controle de Desligamento
-          </p>
         </div>
   
         <ControleDesligamentosTabela/>

@@ -86,7 +86,7 @@ async function carregarSolicitacoes() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold text-gray-800">
+      <h1 className="text-3xl font-bold text-blue-700">
         Solicitações de acesso
       </h1>
 

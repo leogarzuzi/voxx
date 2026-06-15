@@ -30,10 +30,6 @@ export default async function AuditoriaPage() {
     <main className="min-h-screen bg-slate-50 p-8">
       <div>
         <h1 className="text-3xl font-bold text-blue-700">Auditoria</h1>
-
-        <p className="mt-2 text-gray-600">
-          Histórico de ações importantes realizadas no VOXX.
-        </p>
       </div>
 
       <AuditoriaTabela />

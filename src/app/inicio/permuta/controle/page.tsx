@@ -37,10 +37,6 @@ export default async function ControlePermutasPage() {
         <h1 className="text-3xl font-bold text-blue-700">
           Controle de Permutas
         </h1>
-
-        <p className="mt-1 text-sm text-gray-500">
-          Gerencie trocas entre colaboradores do HMRG e outras unidades.
-        </p>
       </div>
 
       <ControlePermutasTabela />
