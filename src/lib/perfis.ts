@@ -2,6 +2,10 @@
 export const PERFIS = {
   ADMIN: "Admin",
   GERENTE: "Gerente",
+  ADMISSAO_SEM_ACENTO: "Admissao",
+  TRANSFERENCIA: "Transferência",
+  TRANSFERENCIA_SEM_ACENTO: "Transferencia",
+  DESLIGAMENTO: "Desligamento",
   ADMISSAO: "Admissão",
   ATENDIMENTO: "Atendimento",
 } as const;
@@ -18,6 +22,8 @@ export const PERMISSOES = {
   ADMISSOES_DASHBOARD: "admissoesDashboard",
   DESLIGAMENTOS: "desligamentos",
   ATESTADOS: "atestados",
+  TRANSFERENCIAS: "transferencias",
+  PERMUTAS: "permutas",
 
   // áreas administrativas
   AUDITORIA: "auditoria",
@@ -53,6 +59,8 @@ export const PERFIS_CONFIG: Record<Perfil, PerfilConfig> = {
     admissoesDashboard: true,
     desligamentos: true,
     atestados: true,
+    transferencias: true,
+    permutas: true,
 
     auditoria: true,
     usuarios: true,
@@ -78,6 +86,8 @@ export const PERFIS_CONFIG: Record<Perfil, PerfilConfig> = {
     admissoesDashboard: true,
     desligamentos: true,
     atestados: true,
+    transferencias: true,
+    permutas: true,
 
     auditoria: false,
     usuarios: false,
@@ -103,6 +113,8 @@ export const PERFIS_CONFIG: Record<Perfil, PerfilConfig> = {
     admissoesDashboard: false,
     desligamentos: false,
     atestados: false,
+    transferencias: true,
+    permutas: true,
 
     auditoria: false,
     usuarios: false,
@@ -120,6 +132,114 @@ export const PERFIS_CONFIG: Record<Perfil, PerfilConfig> = {
     novosAdmitidosEditar: false,
   },
 
+  Admissao: {
+    solicitacoes: false,
+    dashboard: false,
+    conferenciaFolha: false,
+
+    admissoesDashboard: false,
+    desligamentos: false,
+    atestados: false,
+    transferencias: true,
+    permutas: true,
+
+    auditoria: false,
+    usuarios: false,
+
+    baseDadosColaboradores: true,
+    baseDadosGestaoRh: false,
+
+    admissoesVisualizar: true,
+    admissoesCriar: true,
+    admissoesEditar: true,
+    admissoesEnviarSede: true,
+    admissoesSubirBase: true,
+
+    novosAdmitidosVisualizar: true,
+    novosAdmitidosEditar: false,
+  },
+
+  Transferência: {
+    solicitacoes: false,
+    dashboard: false,
+    conferenciaFolha: false,
+
+    admissoesDashboard: false,
+    desligamentos: false,
+    atestados: false,
+    transferencias: true,
+    permutas: true,
+
+    auditoria: false,
+    usuarios: false,
+
+    baseDadosColaboradores: true,
+    baseDadosGestaoRh: true,
+
+    admissoesVisualizar: false,
+    admissoesCriar: false,
+    admissoesEditar: false,
+    admissoesEnviarSede: false,
+    admissoesSubirBase: false,
+
+    novosAdmitidosVisualizar: false,
+    novosAdmitidosEditar: false,
+  },
+
+  Transferencia: {
+    solicitacoes: false,
+    dashboard: false,
+    conferenciaFolha: false,
+
+    admissoesDashboard: false,
+    desligamentos: false,
+    atestados: false,
+    transferencias: true,
+    permutas: true,
+
+    auditoria: false,
+    usuarios: false,
+
+    baseDadosColaboradores: true,
+    baseDadosGestaoRh: true,
+
+    admissoesVisualizar: false,
+    admissoesCriar: false,
+    admissoesEditar: false,
+    admissoesEnviarSede: false,
+    admissoesSubirBase: false,
+
+    novosAdmitidosVisualizar: false,
+    novosAdmitidosEditar: false,
+  },
+
+  Desligamento: {
+    solicitacoes: false,
+    dashboard: false,
+    conferenciaFolha: false,
+
+    admissoesDashboard: false,
+    desligamentos: true,
+    atestados: false,
+    transferencias: true,
+    permutas: true,
+
+    auditoria: false,
+    usuarios: false,
+
+    baseDadosColaboradores: true,
+    baseDadosGestaoRh: true,
+
+    admissoesVisualizar: false,
+    admissoesCriar: false,
+    admissoesEditar: false,
+    admissoesEnviarSede: false,
+    admissoesSubirBase: false,
+
+    novosAdmitidosVisualizar: false,
+    novosAdmitidosEditar: false,
+  },
+
   Atendimento: {
     solicitacoes: false,
     dashboard: false,
@@ -128,6 +248,8 @@ export const PERFIS_CONFIG: Record<Perfil, PerfilConfig> = {
     admissoesDashboard: false,
     desligamentos: false,
     atestados: false,
+    transferencias: false,
+    permutas: false,
 
     auditoria: false,
     usuarios: false,

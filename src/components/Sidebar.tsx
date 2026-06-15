@@ -52,6 +52,13 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
     PERMISSOES.DESLIGAMENTOS
   );
 
+  const podeVerTransferencia = temPermissao(
+    perfil,
+    PERMISSOES.TRANSFERENCIAS
+  );
+
+  const podeVerPermuta = temPermissao(perfil, PERMISSOES.PERMUTAS);
+
   const podeVerDashboard =
     temPermissao(perfil, PERMISSOES.DASHBOARD) ||
     temPermissao(perfil, PERMISSOES.ADMISSOES_DASHBOARD) ||
@@ -480,6 +487,120 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
             </svg>
 
             Desligamento
+          </Link>
+        )}
+
+        {/* transferência */}
+        {podeVerTransferencia && (
+          <Link
+            className={itemMenuClass(
+              rotaAtiva("/inicio/transferencia/controle")
+            )}
+            href="/inicio/transferencia/controle"
+            onClick={() =>
+              iniciarNavegacao("/inicio/transferencia/controle")
+            }
+          >
+            <svg
+              className="h-5 w-5 text-blue-100"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M7 7h11l-3-3"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M18 7l-3 3"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M17 17H6l3 3"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M6 17l3-3"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <circle
+                cx="12"
+                cy="12"
+                r="2.5"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+            </svg>
+
+            Transferência
+          </Link>
+        )}
+
+        {/* permuta */}
+        {podeVerPermuta && (
+          <Link
+            className={itemMenuClass(rotaAtiva("/inicio/permuta/controle"))}
+            href="/inicio/permuta/controle"
+            onClick={() => iniciarNavegacao("/inicio/permuta/controle")}
+          >
+            <svg
+              className="h-5 w-5 text-blue-100"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M7 7a3 3 0 1 1 6 0 3 3 0 0 1-6 0Z"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              <path
+                d="M3.5 20a6.5 6.5 0 0 1 13 0"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <path
+                d="M17 7h4l-2-2"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="m19 9 2-2"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M21 15h-4l2 2"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="m19 13-2 2"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+
+            Permuta
           </Link>
         )}
 

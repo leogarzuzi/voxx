@@ -24,6 +24,13 @@ function formatarAcao(acao: string) {
     DESLIGAMENTO_ENVIADO_SEDE: "Desligamento enviado para SEDE",
     DESLIGAMENTO_COMPUTADO_BASE: "Desligamento computado na base",
 
+    TRANSFERENCIA_CRIADA: "Transferência criada",
+    TRANSFERENCIA_EDITADA: "Transferência editada",
+    TRANSFERENCIA_STATUS_ALTERADO: "Status da transferência alterado",
+    PERMUTA_CRIADA: "Permuta criada",
+    PERMUTA_EDITADA: "Permuta editada",
+    PERMUTA_STATUS_ALTERADO: "Status da permuta alterado",
+
     ADMISSAO_CRIADA: "Nova admissão cadastrada",
     ADMISSAO_EDITADA: "Admissão editada",
   };
@@ -37,6 +44,8 @@ function formatarModulo(modulo: string) {
     conferencia_folha: "Conferência de folha",
     admissao: "Admissão",
     desligamento: "Desligamento",
+    transferencia: "Transferência",
+    permuta: "Permuta",
   };
 
   return mapa[modulo] || modulo;
@@ -69,7 +78,21 @@ function formatarDetalhes(detalhes: Record<string, any> | null) {
     camposAlterados: "Campos alterados",
 
     desligamentoId: "ID do desligamento",
+    transferenciaId: "ID da transferência",
+    permutaId: "ID da permuta",
+    matriculaSaida: "Matrícula de quem sai",
+    nomeSaida: "Nome de quem sai",
+    matriculaEntrada: "Matrícula de quem entra",
+    nomeEntrada: "Nome de quem entra",
+    unidadeOrigem: "Unidade de origem",
+    inicioHmrg: "Início no HMRG",
     tipoDesligamento: "Tipo de desligamento",
+    tipoMovimento: "Tipo de movimento",
+    cedente: "Cedente",
+    cessionario: "Cessionário",
+    inicioNovaUnidade: "Início na nova unidade",
+    statusAnterior: "Status anterior",
+    statusNovo: "Novo status",
     dataDesligamento: "Data do desligamento",
     baseOrigem: "Base de origem",
     alteracoes: "Alterações",
@@ -269,6 +292,18 @@ export default function AuditoriaTabela() {
               <option value="DESLIGAMENTO_DATA_HOMOLOGACAO_ALTERADA">
                 Data da homologação alterada
               </option>
+              <option value="TRANSFERENCIA_CRIADA">Transferência criada</option>
+              <option value="TRANSFERENCIA_EDITADA">
+                Transferência editada
+              </option>
+              <option value="TRANSFERENCIA_STATUS_ALTERADO">
+                Status da transferência alterado
+              </option>
+              <option value="PERMUTA_CRIADA">Permuta criada</option>
+              <option value="PERMUTA_EDITADA">Permuta editada</option>
+              <option value="PERMUTA_STATUS_ALTERADO">
+                Status da permuta alterado
+              </option>
             </select>
           </div>
 
@@ -288,6 +323,8 @@ export default function AuditoriaTabela() {
               <option value="conferencia_folha">Conferência de folha</option>
               <option value="admissao">Admissão</option>
               <option value="desligamento">Desligamento</option>
+              <option value="transferencia">Transferência</option>
+              <option value="permuta">Permuta</option>
             </select>
           </div>
         </div>
