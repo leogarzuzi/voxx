@@ -12,6 +12,15 @@ type AuditoriaLog = {
   criado_em: string;
 };
 
+const CHAVES_ALTERACAO = new Set([
+  "alteracoes",
+  "camposAlterados",
+  "statusAnterior",
+  "statusNovo",
+  "antes",
+  "depois",
+]);
+
 function formatarAcao(acao: string) {
   const mapa: Record<string, string> = {
     APROVACAO_ACESSO: "Acesso aprovado",
@@ -27,6 +36,7 @@ function formatarAcao(acao: string) {
     TRANSFERENCIA_CRIADA: "Transferência criada",
     TRANSFERENCIA_EDITADA: "Transferência editada",
     TRANSFERENCIA_STATUS_ALTERADO: "Status da transferência alterado",
+
     PERMUTA_CRIADA: "Permuta criada",
     PERMUTA_EDITADA: "Permuta editada",
     PERMUTA_STATUS_ALTERADO: "Status da permuta alterado",
@@ -49,6 +59,19 @@ function formatarModulo(modulo: string) {
   };
 
   return mapa[modulo] || modulo;
+}
+
+function corModulo(modulo: string) {
+  const mapa: Record<string, string> = {
+    solicitacoes_acesso: "border-sky-300/25 bg-sky-300/10 text-sky-100",
+    conferencia_folha: "border-violet-300/25 bg-violet-300/10 text-violet-100",
+    admissao: "border-emerald-300/25 bg-emerald-300/10 text-emerald-100",
+    desligamento: "border-red-300/25 bg-red-300/10 text-red-100",
+    transferencia: "border-blue-300/25 bg-blue-300/10 text-blue-100",
+    permuta: "border-amber-300/25 bg-amber-300/10 text-amber-100",
+  };
+
+  return mapa[modulo] || "border-white/15 bg-white/[0.06] text-slate-200";
 }
 
 function formatarDetalhes(detalhes: Record<string, any> | null) {
@@ -91,6 +114,7 @@ function formatarDetalhes(detalhes: Record<string, any> | null) {
     cedente: "Cedente",
     cessionario: "Cessionário",
     inicioNovaUnidade: "Início na nova unidade",
+    status: "Status",
     statusAnterior: "Status anterior",
     statusNovo: "Novo status",
     dataDesligamento: "Data do desligamento",
@@ -134,6 +158,8 @@ function formatarDetalhes(detalhes: Record<string, any> | null) {
       valorFormatado = valor.map((item) => nomesCampos[item] || item).join(", ");
     } else if (typeof valor === "boolean") {
       valorFormatado = valor ? "Sim" : "Não";
+    } else if (typeof valor === "object" && valor !== null) {
+      valorFormatado = JSON.stringify(valor);
     } else {
       valorFormatado = String(valor ?? "");
     }
@@ -143,10 +169,63 @@ function formatarDetalhes(detalhes: Record<string, any> | null) {
     }
 
     return {
+      chave,
       label: labels[chave] || chave,
       valor: valorFormatado,
     };
   });
+}
+
+function formatarValorVisual(valor: unknown) {
+  if (valor === null || valor === undefined || valor === "") return "Vazio";
+
+  const texto = String(valor);
+
+  if (texto === "VAZIO") return "Vazio";
+  if (texto === "SIM") return "Sim";
+  if (texto === "NAO" || texto === "NÃO" || texto === "NÃƒO") return "Não";
+
+  return texto;
+}
+
+function obterAlteracoesDetalhadas(detalhes: Record<string, any> | null) {
+  if (!detalhes) return [];
+
+  if (Array.isArray(detalhes.alteracoes)) {
+    return detalhes.alteracoes
+      .filter((item) => item && typeof item === "object")
+      .map((item) => ({
+        campo: String(item.label || item.campo || "Campo alterado"),
+        antes: formatarValorVisual(item.antes),
+        depois: formatarValorVisual(item.depois),
+      }));
+  }
+
+  if (
+    detalhes.statusAnterior !== undefined ||
+    detalhes.statusNovo !== undefined
+  ) {
+    return [
+      {
+        campo: "Status",
+        antes: formatarValorVisual(detalhes.statusAnterior),
+        depois: formatarValorVisual(detalhes.statusNovo),
+      },
+    ];
+  }
+
+  return [];
+}
+
+function obterCamposAlteradosSemComparacao(
+  detalhes: Record<string, any> | null
+) {
+  if (!detalhes || !Array.isArray(detalhes.camposAlterados)) return [];
+  if (Array.isArray(detalhes.alteracoes) && detalhes.alteracoes.length > 0) {
+    return [];
+  }
+
+  return detalhes.camposAlterados.map((campo) => formatarValorVisual(campo));
 }
 
 export default function AuditoriaTabela() {
@@ -223,38 +302,54 @@ export default function AuditoriaTabela() {
     buscarLogs();
   }
 
+  const camposFormulario =
+    "mt-1 h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/30 focus:bg-white/[0.08] focus:ring-2 focus:ring-blue-300/10 [color-scheme:dark] [&>option]:bg-[#171a23] [&>option]:text-slate-100";
+
   return (
     <>
-      <section className="mt-8 rounded-xl border bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-gray-800">Filtros</h2>
+      <section className="mt-6 rounded-[26px] border border-white/10 bg-[#171a23] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]">
+        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+              Filtros
+            </p>
+            <h2 className="mt-1 text-xl font-bold text-white">
+              Refinar registros
+            </h2>
+          </div>
+
+          <p className="text-sm text-slate-400">
+            Exibindo até 50 registros encontrados no banco.
+          </p>
+        </div>
 
         <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-5">
           <div>
-            <label className="block text-sm font-medium text-gray-600">
+            <label className="block text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
               Data inicial
             </label>
             <input
               type="date"
               value={dataInicial}
               onChange={(e) => setDataInicial(e.target.value)}
-              className="mt-1 h-10 w-full rounded-lg border px-3 text-sm"
+              className={camposFormulario}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-600">
+            <label className="block text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
               Data final
             </label>
             <input
               type="date"
               value={dataFinal}
               onChange={(e) => setDataFinal(e.target.value)}
-              className="mt-1 h-10 w-full rounded-lg border px-3 text-sm"
+              className={camposFormulario}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-600">
+            <label className="block text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
               Usuário
             </label>
             <input
@@ -262,27 +357,25 @@ export default function AuditoriaTabela() {
               placeholder="email@exemplo.com"
               value={usuario}
               onChange={(e) => setUsuario(e.target.value)}
-              className="mt-1 h-10 w-full rounded-lg border px-3 text-sm"
+              className={camposFormulario}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-600">
+            <label className="block text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
               Ação
             </label>
             <select
               value={acao}
               onChange={(e) => setAcao(e.target.value)}
-              className="mt-1 h-10 w-full rounded-lg border px-3 text-sm"
+              className={camposFormulario}
             >
               <option value="">Todas</option>
               <option value="APROVACAO_ACESSO">Acesso aprovado</option>
               <option value="CONFERENCIA_FOLHA_EXECUTADA">
                 Conferência de folha executada
               </option>
-              <option value="ADMISSAO_CRIADA">
-                Nova admissão cadastrada
-              </option>
+              <option value="ADMISSAO_CRIADA">Nova admissão cadastrada</option>
               <option value="ADMISSAO_EDITADA">Admissão editada</option>
               <option value="DESLIGAMENTO_CRIADO">Desligamento criado</option>
               <option value="DESLIGAMENTO_EDITADO">Desligamento editado</option>
@@ -293,9 +386,7 @@ export default function AuditoriaTabela() {
                 Data da homologação alterada
               </option>
               <option value="TRANSFERENCIA_CRIADA">Transferência criada</option>
-              <option value="TRANSFERENCIA_EDITADA">
-                Transferência editada
-              </option>
+              <option value="TRANSFERENCIA_EDITADA">Transferência editada</option>
               <option value="TRANSFERENCIA_STATUS_ALTERADO">
                 Status da transferência alterado
               </option>
@@ -308,18 +399,16 @@ export default function AuditoriaTabela() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-600">
+            <label className="block text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
               Módulo
             </label>
             <select
               value={modulo}
               onChange={(e) => setModulo(e.target.value)}
-              className="mt-1 h-10 w-full rounded-lg border px-3 text-sm"
+              className={camposFormulario}
             >
               <option value="">Todos</option>
-              <option value="solicitacoes_acesso">
-                Solicitações de acesso
-              </option>
+              <option value="solicitacoes_acesso">Solicitações de acesso</option>
               <option value="conferencia_folha">Conferência de folha</option>
               <option value="admissao">Admissão</option>
               <option value="desligamento">Desligamento</option>
@@ -329,123 +418,236 @@ export default function AuditoriaTabela() {
           </div>
         </div>
 
-        <div className="mt-5 flex items-center justify-between">
-          <p className="text-sm text-gray-500">
-            Exibindo até 50 registros encontrados no banco.
-          </p>
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={limparFiltros}
+            className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08]"
+          >
+            Limpar filtros
+          </button>
 
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={limparFiltros}
-              className="rounded-lg border px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
-            >
-              Limpar filtros
-            </button>
-
-            <button
-              type="button"
-              onClick={aplicarFiltros}
-              className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800"
-            >
-              Buscar
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={aplicarFiltros}
+            className="rounded-2xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_14px_35px_rgba(0,0,0,0.24)] transition hover:-translate-y-0.5 hover:bg-slate-200"
+          >
+            Buscar
+          </button>
         </div>
       </section>
 
-      <section className="mt-8 rounded-xl border bg-white p-6 shadow-sm">
-        <div className="mb-5">
-          <h2 className="text-xl font-semibold text-gray-800">
-            Registros de auditoria
-          </h2>
+      <section className="mt-6 overflow-hidden rounded-[26px] border border-white/10 bg-[#171a23] shadow-[0_22px_70px_rgba(0,0,0,0.28)]">
+        <div className="flex flex-col gap-2 border-b border-white/10 px-6 py-5 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+              Histórico
+            </p>
+            <h2 className="mt-1 text-xl font-bold text-white">
+              Registros de auditoria
+            </h2>
+            <p className="mt-1 text-sm text-slate-400">
+              Últimos 50 eventos, ou últimos 50 resultados dos filtros aplicados.
+            </p>
+          </div>
 
-          <p className="mt-1 text-sm text-gray-500">
-            Últimos 50 eventos, ou últimos 50 resultados dos filtros aplicados.
-          </p>
+          <div className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-semibold text-slate-200">
+            {logs.length} registro{logs.length === 1 ? "" : "s"}
+          </div>
         </div>
 
         {erro && (
-          <p className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <p className="m-4 rounded-2xl border border-red-300/25 bg-red-400/10 p-4 text-sm text-red-100">
             {erro}
           </p>
         )}
 
         {loading ? (
-          <p className="py-8 text-center text-sm text-gray-500">
+          <p className="px-6 py-10 text-center text-sm text-slate-400">
             Carregando auditoria...
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b text-gray-500">
-                  <th className="py-3">Data/Hora</th>
-                  <th className="py-3">Usuário</th>
-                  <th className="py-3">Ação</th>
-                  <th className="py-3">Módulo</th>
-                  <th className="py-3">Detalhes</th>
-                </tr>
-              </thead>
+          <div className="space-y-3 p-4">
+            {logs.length === 0 ? (
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-10 text-center text-sm text-slate-400">
+                Nenhum registro encontrado com os filtros selecionados.
+              </div>
+            ) : (
+              logs.map((log) => {
+                const chavesOcultas = new Set(CHAVES_ALTERACAO);
 
-              <tbody>
-                {logs.map((log) => {
-                  const detalhesFormatados = formatarDetalhes(log.detalhes);
+                if (
+                  log.detalhes?.statusAnterior !== undefined ||
+                  log.detalhes?.statusNovo !== undefined
+                ) {
+                  chavesOcultas.add("status");
+                }
 
-                  return (
-                    <tr key={log.id} className="border-b align-top">
-                      <td className="py-4 whitespace-nowrap text-gray-700">
-                        {new Date(log.criado_em).toLocaleString("pt-BR")}
-                      </td>
+                const detalhesFormatados = formatarDetalhes(log.detalhes).filter(
+                  (item) => !chavesOcultas.has(item.chave)
+                );
+                const alteracoesDetalhadas = obterAlteracoesDetalhadas(
+                  log.detalhes
+                );
+                const camposAlteradosSemComparacao =
+                  obterCamposAlteradosSemComparacao(log.detalhes);
+                const temDetalhes =
+                  detalhesFormatados.length > 0 ||
+                  alteracoesDetalhadas.length > 0 ||
+                  camposAlteradosSemComparacao.length > 0;
 
-                      <td className="py-4 text-gray-700">
-                        {log.usuario_email || "Sistema"}
-                      </td>
+                return (
+                  <article
+                    key={log.id}
+                    className="rounded-2xl border border-white/10 bg-white/[0.045] p-4 transition hover:border-white/20 hover:bg-white/[0.07]"
+                  >
+                    <div className="grid gap-4 lg:grid-cols-[170px_minmax(210px,1fr)_minmax(180px,0.9fr)_150px]">
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                          Data/Hora
+                        </p>
+                        <p className="mt-2 text-sm font-medium text-slate-200">
+                          {new Date(log.criado_em).toLocaleString("pt-BR")}
+                        </p>
+                      </div>
 
-                      <td className="py-4 font-medium text-blue-700">
-                        {formatarAcao(log.acao)}
-                      </td>
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                          Usuário
+                        </p>
+                        <p className="mt-2 break-all text-sm text-slate-300">
+                          {log.usuario_email || "Sistema"}
+                        </p>
+                      </div>
 
-                      <td className="py-4 text-gray-700">
-                        {formatarModulo(log.modulo)}
-                      </td>
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                          Ação
+                        </p>
+                        <p className="mt-2 text-sm font-semibold text-white">
+                          {formatarAcao(log.acao)}
+                        </p>
+                      </div>
 
-                      <td className="py-4">
-                        <div className="max-w-xl rounded-lg bg-slate-100 p-3 text-xs text-slate-700">
-                          {detalhesFormatados.length > 0 ? (
-                            <div className="space-y-1">
-                              {detalhesFormatados.map((item) => (
-                                <div key={item.label}>
-                                  <span className="font-semibold">
-                                    {item.label}:
-                                  </span>{" "}
-                                  {item.valor}
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                          Módulo
+                        </p>
+                        <span
+                          className={`mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-bold ${corModulo(
+                            log.modulo
+                          )}`}
+                        >
+                          {formatarModulo(log.modulo)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 space-y-4 rounded-2xl border border-white/10 bg-black/[0.16] p-4">
+                      {!temDetalhes ? (
+                        <span className="text-sm text-slate-500">
+                          Sem detalhes.
+                        </span>
+                      ) : (
+                        <>
+                          {alteracoesDetalhadas.length > 0 && (
+                            <div>
+                              <div className="mb-3 flex items-center justify-between gap-3">
+                                <div>
+                                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                                    O que mudou
+                                  </p>
+                                  <p className="mt-1 text-sm text-slate-300">
+                                    Comparação direta entre o valor anterior e o
+                                    valor salvo.
+                                  </p>
                                 </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-gray-400">
-                              Sem detalhes.
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                              </div>
 
-                {logs.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="py-6 text-center text-gray-500"
-                    >
-                      Nenhum registro encontrado com os filtros selecionados.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                              <div className="overflow-hidden rounded-2xl border border-white/10">
+                                <div className="grid grid-cols-[minmax(130px,0.8fr)_minmax(160px,1fr)_minmax(160px,1fr)] bg-white/[0.06] text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                                  <div className="px-3 py-2">Campo</div>
+                                  <div className="border-l border-white/10 px-3 py-2">
+                                    Antes
+                                  </div>
+                                  <div className="border-l border-white/10 px-3 py-2">
+                                    Depois
+                                  </div>
+                                </div>
+
+                                {alteracoesDetalhadas.map((item, index) => (
+                                  <div
+                                    key={`${item.campo}-${index}`}
+                                    className="grid grid-cols-[minmax(130px,0.8fr)_minmax(160px,1fr)_minmax(160px,1fr)] border-t border-white/10 text-xs"
+                                  >
+                                    <div className="px-3 py-3 font-semibold text-white">
+                                      {item.campo}
+                                    </div>
+                                    <div className="break-words border-l border-white/10 px-3 py-3 text-slate-400">
+                                      {item.antes}
+                                    </div>
+                                    <div className="break-words border-l border-white/10 px-3 py-3 font-semibold text-emerald-100">
+                                      {item.depois}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {camposAlteradosSemComparacao.length > 0 && (
+                            <div>
+                              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                                Campos alterados
+                              </p>
+                              <p className="mt-1 text-sm text-slate-300">
+                                Esse registro informa quais campos mudaram, mas
+                                ainda não trouxe o antes/depois salvo na
+                                auditoria.
+                              </p>
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {camposAlteradosSemComparacao.map((campo) => (
+                                  <span
+                                    key={campo}
+                                    className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-200"
+                                  >
+                                    {campo}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {detalhesFormatados.length > 0 && (
+                            <div>
+                              <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                                Resumo do registro
+                              </p>
+
+                              <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+                                {detalhesFormatados.map((item) => (
+                                  <div
+                                    key={item.label}
+                                    className="min-w-0 rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2"
+                                  >
+                                    <p className="text-[11px] font-semibold text-slate-400">
+                                      {item.label}
+                                    </p>
+                                    <p className="mt-1 break-words text-xs leading-5 text-slate-100">
+                                      {item.valor || "-"}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </article>
+                );
+              })
+            )}
           </div>
         )}
       </section>

@@ -3,6 +3,7 @@
 import {
   BarChart,
   Bar,
+  Cell,
   XAxis,
   YAxis,
   Tooltip,
@@ -14,17 +15,62 @@ type PrefixChartProps = {
     prefixo: string;
     total: number;
   }[];
+  selectedPrefixo?: string | null;
+  onSelectPrefixo?: (prefixo: string) => void;
 };
 
-export function PrefixChart({ data }: PrefixChartProps) {
+export function PrefixChart({
+  data,
+  selectedPrefixo,
+  onSelectPrefixo,
+}: PrefixChartProps) {
   return (
     <div className="h-72 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data}>
-          <XAxis dataKey="prefixo" />
-          <YAxis allowDecimals={false} />
-          <Tooltip />
-          <Bar dataKey="total" />
+          <XAxis
+            dataKey="prefixo"
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: "#cbd5e1", fontSize: 12, fontWeight: 700 }}
+          />
+          <YAxis
+            allowDecimals={false}
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: "#94a3b8", fontSize: 12 }}
+          />
+          <Tooltip
+            cursor={{ fill: "rgba(148,163,184,0.08)" }}
+            contentStyle={{
+              background: "#171a23",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: 16,
+              color: "#e2e8f0",
+            }}
+            itemStyle={{ color: "#e2e8f0" }}
+            labelStyle={{ color: "#cbd5e1", fontWeight: 700 }}
+          />
+          <Bar
+            dataKey="total"
+            radius={[12, 12, 4, 4]}
+            cursor={onSelectPrefixo ? "pointer" : "default"}
+            onClick={(item) => {
+              const prefixo = item?.payload?.prefixo;
+              if (prefixo) onSelectPrefixo?.(String(prefixo));
+            }}
+          >
+            {data.map((item) => (
+              <Cell
+                key={item.prefixo}
+                fill={
+                  selectedPrefixo === item.prefixo
+                    ? "#60a5fa"
+                    : "rgba(148,163,184,0.68)"
+                }
+              />
+            ))}
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
     </div>

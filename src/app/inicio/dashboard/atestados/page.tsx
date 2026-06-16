@@ -245,7 +245,7 @@ export default async function DashboardAtestadosPage() {
               <AtestadosMesChart data={atestadosPorMes} />
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="voxx-scrollbar overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b text-gray-500">
@@ -296,7 +296,7 @@ export default async function DashboardAtestadosPage() {
               CIDs mais frequentes nos atestados.
             </p>
 
-            <div className="mt-4 overflow-x-auto">
+            <div className="voxx-scrollbar mt-4 overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b text-gray-500">
@@ -331,7 +331,7 @@ export default async function DashboardAtestadosPage() {
               Funções com maior quantidade de atestados.
             </p>
 
-            <div className="mt-4 overflow-x-auto">
+            <div className="voxx-scrollbar mt-4 overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b text-gray-500">

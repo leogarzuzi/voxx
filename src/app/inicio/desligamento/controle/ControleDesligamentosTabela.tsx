@@ -187,32 +187,32 @@ function statusClass(status: string | null | undefined) {
   const valor = String(status || "").toLowerCase();
 
   if (valor === "enviado" || valor === "computado" || valor === "subido") {
-    return "bg-green-50 text-green-700";
+    return "border border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
   }
 
   if (valor === "erro") {
-    return "bg-red-50 text-red-700";
+    return "border border-red-300/25 bg-red-400/10 text-red-100";
   }
 
-  return "bg-yellow-50 text-yellow-700";
+  return "border border-yellow-300/25 bg-yellow-300/10 text-yellow-100";
 }
 
 function statusTerminoClass(status: string | null | undefined) {
   const valor = String(status || "").toLowerCase();
 
   if (valor === "vencido") {
-    return "bg-red-50 text-red-700";
+    return "border border-red-300/25 bg-red-400/10 text-red-100";
   }
 
   if (valor === "vence_hoje") {
-    return "bg-yellow-50 text-yellow-700";
+    return "border border-yellow-300/25 bg-yellow-300/10 text-yellow-100";
   }
 
   if (valor === "futuro") {
-    return "bg-blue-50 text-blue-700";
+    return "border border-blue-300/25 bg-blue-300/10 text-blue-100";
   }
 
-  return "bg-slate-100 text-slate-700";
+  return "border border-white/10 bg-white/[0.06] text-slate-200";
 }
 
 function formatarDiasRestantes(dias: number) {
@@ -325,7 +325,7 @@ function InputTexto({
 }: InputTextoProps) {
   return (
     <label className={`block ${className}`}>
-      <span className="text-sm font-semibold text-gray-700">
+      <span className="text-sm font-semibold text-slate-300">
         {label}
         {required && <span className="text-red-500"> *</span>}
       </span>
@@ -340,10 +340,10 @@ function InputTexto({
         pattern={pattern}
         maxLength={maxLength}
         disabled={disabled}
-        className={`mt-1 h-10 w-full rounded-xl border px-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${
+        className={`mt-1 h-11 w-full rounded-2xl border px-3 text-sm outline-none transition [color-scheme:dark] focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 ${
           disabled
-            ? "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-500"
-            : "border-gray-300 text-gray-800"
+            ? "cursor-not-allowed border-white/10 bg-white/[0.035] text-slate-500"
+            : "border-white/10 bg-white/[0.06] text-slate-100 placeholder:text-slate-500"
         }`}
       />
     </label>
@@ -371,7 +371,7 @@ function SelectCampo({
 }: SelectCampoProps) {
   return (
     <label className={`block ${className}`}>
-      <span className="text-sm font-semibold text-gray-700">
+      <span className="text-sm font-semibold text-slate-300">
         {label}
         {required && <span className="text-red-500"> *</span>}
       </span>
@@ -380,7 +380,7 @@ function SelectCampo({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="mt-1 h-10 w-full rounded-xl border border-gray-300 px-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+        className="mt-1 h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 text-sm text-slate-100 outline-none transition focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 [color-scheme:dark] [&>option]:bg-[#171a23] [&>option]:text-slate-100"
       >
         <option value="">{placeholder}</option>
 
@@ -995,14 +995,14 @@ export default function ControleDesligamentosTabela() {
   }
 
   return (
-    <section className="mt-8 min-w-0 rounded-xl border bg-white p-6 shadow-sm">
+    <section className="mt-6 min-w-0 overflow-hidden rounded-[26px] border border-white/10 bg-[#171a23] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]">
       <div className="mb-5 flex flex-col gap-4">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={abrirModalNovoDesligamento}
-              className="rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
+              className="rounded-2xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_14px_35px_rgba(0,0,0,0.24)] transition hover:-translate-y-0.5 hover:bg-slate-200"
             >
               Novo desligamento
             </button>
@@ -1011,7 +1011,7 @@ export default function ControleDesligamentosTabela() {
               type="button"
               onClick={abrirModalTerminos}
               disabled={loadingTerminos}
-              className="rounded-xl border border-blue-200 bg-blue-50 px-5 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-2xl border border-blue-300/25 bg-blue-300/10 px-5 py-2.5 text-sm font-semibold text-blue-100 transition hover:bg-blue-300/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loadingTerminos ? "Carregando..." : "Términos de Contrato"}
             </button>
@@ -1020,7 +1020,7 @@ export default function ControleDesligamentosTabela() {
               type="button"
               disabled
               title="Vamos ativar este botão em uma próxima etapa."
-              className="rounded-xl border border-gray-200 bg-gray-100 px-5 py-2.5 text-sm font-semibold text-gray-400"
+              className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-slate-500"
             >
               Enviar para SEDE ({pendentesSede.length})
             </button>
@@ -1029,7 +1029,7 @@ export default function ControleDesligamentosTabela() {
               type="button"
               disabled
               title="Vamos ativar este botão em uma próxima etapa."
-              className="rounded-xl border border-gray-200 bg-gray-100 px-5 py-2.5 text-sm font-semibold text-gray-400"
+              className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-slate-500"
             >
               Computar desligamento ({pendentesBase.length})
             </button>
@@ -1041,13 +1041,13 @@ export default function ControleDesligamentosTabela() {
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               placeholder="Buscar por nome, matrícula, CPF, cargo ou e-mail"
-              className="h-10 w-full rounded-xl border border-gray-300 px-4 text-center text-sm text-gray-800 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 xl:w-96"
+              className="h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 text-center text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/30 focus:bg-white/[0.08] focus:ring-2 focus:ring-blue-300/10 xl:w-96"
             />
 
             <button
               type="submit"
               disabled={loading}
-              className="h-10 rounded-xl bg-blue-700 px-5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-11 rounded-2xl bg-white px-5 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Buscar
             </button>
@@ -1056,7 +1056,7 @@ export default function ControleDesligamentosTabela() {
               type="button"
               onClick={limparBusca}
               disabled={loading}
-              className="h-10 rounded-xl border px-5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-11 rounded-2xl border border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
             >
               Limpar
             </button>
@@ -1067,7 +1067,7 @@ export default function ControleDesligamentosTabela() {
               disabled={loading || desligamentos.length === 0}
               title="Baixar Excel"
               aria-label="Baixar Excel"
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-green-200 bg-green-50 text-green-700 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-300/25 bg-emerald-300/10 text-emerald-100 transition hover:bg-emerald-300/20 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <svg
                 className="h-5 w-5"
@@ -1097,17 +1097,17 @@ export default function ControleDesligamentosTabela() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+          <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-200">
             {desligamentos.length}{" "}
             {desligamentos.length === 1 ? "desligamento" : "desligamentos"}
           </span>
 
-          <span className="rounded-full bg-yellow-50 px-3 py-1 text-xs font-semibold text-yellow-700">
+          <span className="rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-semibold text-yellow-100">
             {pendentesSede.length} pendente
             {pendentesSede.length === 1 ? "" : "s"} para SEDE
           </span>
 
-          <span className="rounded-full bg-yellow-50 px-3 py-1 text-xs font-semibold text-yellow-700">
+          <span className="rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-semibold text-yellow-100">
             {pendentesBase.length} pendente
             {pendentesBase.length === 1 ? "" : "s"} para computar
           </span>
@@ -1115,26 +1115,27 @@ export default function ControleDesligamentosTabela() {
       </div>
 
       {erro && !modalAberto && (
-        <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-5 rounded-2xl border border-red-300/25 bg-red-400/10 px-4 py-3 text-sm text-red-100">
           {erro}
         </div>
       )}
 
       {sucesso && (
-        <div className="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+        <div className="mb-5 rounded-2xl border border-emerald-300/25 bg-emerald-300/10 px-4 py-3 text-sm text-emerald-100">
           {sucesso}
         </div>
       )}
 
       {loading ? (
-        <div className="py-10 text-center text-sm text-gray-500">
+        <div className="py-10 text-center text-sm text-slate-400">
           Carregando desligamentos...
         </div>
       ) : (
-        <div className="w-full max-w-full overflow-x-auto rounded-xl border">
-          <table className="min-w-[1770px] text-center text-xs [&_td]:border-r [&_td]:border-slate-200/70 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-slate-200/70 [&_th:last-child]:border-r-0">
-            <thead className="bg-slate-100">
-              <tr className="border-b text-gray-600">
+        <div className="voxx-scrollbar w-full max-w-full overflow-x-auto rounded-[22px] border border-white/10 bg-[#202532] shadow-[0_18px_45px_rgba(0,0,0,0.2)]">
+          <table className="min-w-[1830px] text-center text-xs [&_td]:border-r [&_td]:border-white/10 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-white/10 [&_th:last-child]:border-r-0">
+            <thead className="sticky top-0 z-10 bg-[#2a3040]">
+              <tr className="border-b border-white/10 text-slate-300">
+                <th className="px-3 py-4 text-center">#</th>
                 <th className="px-3 py-4 text-center">Ações</th>
                 <th className="px-3 py-4 text-center">Pref.</th>
                 <th className="px-3 py-4 text-center">Matrícula</th>
@@ -1164,62 +1165,68 @@ export default function ControleDesligamentosTabela() {
             </thead>
 
             <tbody>
-              {desligamentos.map((desligamento) => (
+              {desligamentos.map((desligamento, indice) => (
                 <tr
                   key={desligamento.id}
-                  className="border-b align-middle hover:bg-slate-50"
+                  className="border-b border-white/10 align-middle text-slate-200 transition hover:bg-white/[0.055]"
                 >
+                  <td className="px-3 py-4 text-center align-middle">
+                    <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] px-2 text-[11px] font-bold text-slate-200">
+                      {indice + 1}
+                    </span>
+                  </td>
+
                   <td className="whitespace-nowrap px-3 py-4 text-center align-middle">
                     <button
                       type="button"
                       onClick={() => abrirModalEditar(desligamento)}
-                      className="rounded-lg border px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-50"
+                      className="rounded-xl border border-blue-300/25 bg-blue-300/10 px-3 py-1.5 text-xs font-semibold text-blue-100 transition hover:bg-blue-300/20"
                     >
                       Editar
                     </button>
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="px-3 py-4 text-center align-middle text-slate-300">
                     {texto(desligamento.pref)}
                   </td>
 
-                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle font-semibold text-gray-800">
+                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle font-semibold text-slate-100">
                     {texto(desligamento.matricula)}
                   </td>
 
-                  <td className="min-w-[180px] px-3 py-4 text-center align-middle font-semibold text-gray-800">
+                  <td className="min-w-[180px] px-3 py-4 text-center align-middle font-semibold text-slate-100">
                     {texto(desligamento.nome)}
                   </td>
 
-                  <td className="min-w-[180px] px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="min-w-[180px] px-3 py-4 text-center align-middle text-slate-300">
                     {texto(desligamento.cargo)}
                   </td>
 
-                  <td className="min-w-[80px] whitespace-nowrap px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="min-w-[80px] whitespace-nowrap px-3 py-4 text-center align-middle text-slate-300">
                     {texto(desligamento.carga_horaria)}
                   </td>
 
-                  <td className="w-[60px] min-w-[60px] max-w-[60px] px-1 py-4 text-center align-middle text-gray-700">
+                  <td className="w-[60px] min-w-[60px] max-w-[60px] px-1 py-4 text-center align-middle text-slate-300">
                     {formatarData(desligamento.exercicio)}
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle font-semibold text-red-700">
+                  <td className="px-3 py-4 text-center align-middle font-semibold text-red-100">
                     {formatarData(desligamento.data_desligamento)}
                   </td>
 
-                  <td className="min-w-[90px] px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="min-w-[90px] px-3 py-4 text-center align-middle text-slate-300">
                     {texto(desligamento.tipo_desligamento)}
                   </td>
 
-                  <td className="w-[60px] min-w-[60px] max-w-[60px] px-1 py-4 text-center align-middle text-gray-700">
+                  <td className="w-[60px] min-w-[60px] max-w-[60px] px-1 py-4 text-center align-middle text-slate-300">
                     {formatarData(desligamento.data_aso)}
                   </td>
 
-                  <td className="w-[80px] min-w-[80px] max-w-[80px] px-1 py-4 text-center align-middle text-gray-700">
+                  <td className="w-[80px] min-w-[80px] max-w-[80px] px-1 py-4 text-center align-middle text-slate-300">
                     {formatarData(desligamento.data_homologacao)}
                   </td>
 
-                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-slate-300">
                     {baseOrigemLabel(desligamento.base_origem)}
                   </td>
 
@@ -1243,7 +1250,7 @@ export default function ControleDesligamentosTabela() {
                     </span>
                   </td>
 
-                  <td className="min-w-[240px] px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="min-w-[240px] px-3 py-4 text-center align-middle text-slate-300">
                     {texto(desligamento.observacao)}
                   </td>
                 </tr>
@@ -1252,8 +1259,8 @@ export default function ControleDesligamentosTabela() {
               {desligamentos.length === 0 && (
                 <tr>
                   <td
-                    colSpan={15}
-                    className="px-4 py-10 text-center text-gray-500"
+                    colSpan={16}
+                    className="px-4 py-10 text-center text-slate-400"
                   >
                     Nenhum desligamento encontrado.
                   </td>
@@ -1266,20 +1273,20 @@ export default function ControleDesligamentosTabela() {
 
       {modalTerminosAberto && (
         <div
-          className="fixed inset-0 z-[95] flex items-center justify-center bg-black/40 px-4 backdrop-blur-[1px]"
+          className="fixed inset-0 z-[95] flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
           onMouseDown={fecharModalTerminos}
         >
           <div
             onMouseDown={(e) => e.stopPropagation()}
-            className="flex max-h-[92vh] w-full max-w-7xl flex-col overflow-hidden rounded-3xl bg-white p-6 shadow-2xl"
+            className="flex max-h-[92vh] w-full max-w-7xl flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[#171a23] p-6 text-slate-100 shadow-[0_28px_90px_rgba(0,0,0,0.48)]"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-2xl font-bold text-gray-800">
+                <h3 className="text-2xl font-bold text-slate-100">
                   Términos de Contrato
                 </h3>
 
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-slate-400">
                   Colaboradores cujo prazo final do contrato vence no mês e ano
                   selecionados. Nesta etapa, a tela é apenas para conferência.
                 </p>
@@ -1289,14 +1296,14 @@ export default function ControleDesligamentosTabela() {
                 type="button"
                 onClick={fecharModalTerminos}
                 disabled={loadingTerminos}
-                className="rounded-full px-3 py-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-full px-3 py-1 text-slate-400 hover:bg-white/[0.04] hover:text-slate-300 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 ×
               </button>
             </div>
 
             {erroTerminos && (
-              <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div className="mt-5 rounded-2xl border border-red-300/25 bg-red-400/10 px-4 py-3 text-sm text-red-100">
                 {erroTerminos}
               </div>
             )}
@@ -1304,7 +1311,7 @@ export default function ControleDesligamentosTabela() {
             <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
               <div className="grid grid-cols-1 gap-3 md:grid-cols-[170px_110px_110px_1fr] lg:w-[860px]">
                 <label className="block">
-                  <span className="text-sm font-semibold text-gray-700">
+                  <span className="text-sm font-semibold text-slate-300">
                     Mês
                   </span>
 
@@ -1317,7 +1324,7 @@ export default function ControleDesligamentosTabela() {
                       buscarTerminosContrato(valor, anoTerminos);
                     }}
                     disabled={loadingTerminos}
-                    className="mt-1 h-10 w-full rounded-xl border border-gray-300 px-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="mt-1 h-10 w-full rounded-xl border border-white/10 bg-white/[0.06] px-3 text-sm text-slate-100 outline-none transition [color-scheme:dark] focus:border-blue-300 focus:ring-2 focus:ring-blue-300/20 disabled:cursor-not-allowed disabled:opacity-60 [&>option]:bg-[#171a23] [&>option]:text-slate-100"
                   >
                     {MESES_TERMINOS.map((mes) => (
                       <option key={mes.value} value={mes.value}>
@@ -1328,18 +1335,18 @@ export default function ControleDesligamentosTabela() {
                 </label>
 
                 <label className="block">
-                  <span className="text-sm font-semibold text-gray-700">
+                  <span className="text-sm font-semibold text-slate-300">
                     Ano
                   </span>
 
-                  <div className="mt-1 flex h-10 overflow-hidden rounded-xl border border-gray-300 text-sm text-gray-800 shadow-sm">
+                  <div className="mt-1 flex h-10 overflow-hidden rounded-xl border border-white/10 bg-white/[0.06] text-sm text-slate-100 shadow-sm">
                     <button
                       type="button"
                       onClick={() => alterarAnoTerminos(-1)}
                       disabled={loadingTerminos}
                       title="Ano anterior"
                       aria-label="Ano anterior"
-                      className="flex w-10 items-center justify-center bg-white text-blue-700 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="flex w-10 items-center justify-center bg-white/[0.08] text-blue-100 transition hover:bg-white/[0.14] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <svg
                         className="h-4 w-4"
@@ -1357,7 +1364,7 @@ export default function ControleDesligamentosTabela() {
                       </svg>
                     </button>
 
-                    <span className="flex min-w-0 flex-1 items-center justify-center bg-slate-50 px-2 font-semibold">
+                    <span className="flex min-w-0 flex-1 items-center justify-center px-2 font-semibold">
                       {anoTerminos}
                     </span>
 
@@ -1367,7 +1374,7 @@ export default function ControleDesligamentosTabela() {
                       disabled={loadingTerminos}
                       title="Próximo ano"
                       aria-label="Próximo ano"
-                      className="flex w-10 items-center justify-center bg-white text-blue-700 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="flex w-10 items-center justify-center bg-white/[0.08] text-blue-100 transition hover:bg-white/[0.14] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <svg
                         className="h-4 w-4"
@@ -1388,7 +1395,7 @@ export default function ControleDesligamentosTabela() {
                 </label>
 
                 <label className="block">
-                  <span className="text-sm font-semibold text-gray-700">
+                  <span className="text-sm font-semibold text-slate-300">
                     Contrato
                   </span>
 
@@ -1399,7 +1406,7 @@ export default function ControleDesligamentosTabela() {
                       setPaginaTerminos(1);
                     }}
                     disabled={loadingTerminos}
-                    className="mt-1 h-10 w-full rounded-xl border border-gray-300 px-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="mt-1 h-10 w-full rounded-xl border border-white/10 bg-white/[0.06] px-3 text-sm text-slate-100 outline-none transition [color-scheme:dark] focus:border-blue-300 focus:ring-2 focus:ring-blue-300/20 disabled:cursor-not-allowed disabled:opacity-60 [&>option]:bg-[#171a23] [&>option]:text-slate-100"
                   >
                     <option value="todos">Todos</option>
                     <option value="47">47</option>
@@ -1408,7 +1415,7 @@ export default function ControleDesligamentosTabela() {
                 </label>
 
                 <label className="block">
-                  <span className="text-sm font-semibold text-gray-700">
+                  <span className="text-sm font-semibold text-slate-300">
                     Buscar
                   </span>
 
@@ -1420,31 +1427,31 @@ export default function ControleDesligamentosTabela() {
                       setPaginaTerminos(1);
                     }}
                     placeholder="Nome, matrícula, CPF, função ou e-mail"
-                    className="mt-1 h-10 w-full rounded-xl border border-gray-300 px-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="mt-1 h-10 w-full rounded-xl border border-white/10 bg-white/[0.06] px-3 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-blue-300 focus:ring-2 focus:ring-blue-300/20"
                   />
                 </label>
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                <span className="rounded-full border border-white/10 bg-white/[0.08] px-3 py-1 text-xs font-semibold text-slate-200">
                   {terminosFiltrados.length} resultado
                   {terminosFiltrados.length === 1 ? "" : "s"}
                 </span>
 
-                <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
+                <span className="rounded-full border border-red-300/25 bg-red-400/10 px-3 py-1 text-xs font-semibold text-red-100">
                   {resumoTerminos.vencidos} vencido
                   {resumoTerminos.vencidos === 1 ? "" : "s"}
                 </span>
 
-                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                <span className="rounded-full border border-blue-300/25 bg-blue-300/10 px-3 py-1 text-xs font-semibold text-blue-100">
                   {resumoTerminos.futuros} a vencer
                 </span>
 
-                <span className="rounded-full bg-yellow-50 px-3 py-1 text-xs font-semibold text-yellow-700">
+                <span className="rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-semibold text-yellow-100">
                   {resumoTerminos.hoje} hoje
                 </span>
 
-                <label className="flex items-center gap-2 text-xs font-semibold text-gray-600">
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-300">
                   Linhas:
                   <select
                     value={itensPorPaginaTerminos}
@@ -1452,7 +1459,7 @@ export default function ControleDesligamentosTabela() {
                       setItensPorPaginaTerminos(Number(e.target.value));
                       setPaginaTerminos(1);
                     }}
-                    className="h-9 rounded-lg border border-gray-300 px-2 text-xs"
+                    className="h-9 rounded-lg border border-white/10 bg-white/[0.06] px-2 text-xs text-slate-100 outline-none [color-scheme:dark] [&>option]:bg-[#171a23] [&>option]:text-slate-100"
                   >
                     <option value={10}>10</option>
                     <option value={25}>25</option>
@@ -1468,7 +1475,7 @@ export default function ControleDesligamentosTabela() {
                   disabled={loadingTerminos || terminosFiltrados.length === 0}
                   title="Baixar Excel"
                   aria-label="Baixar Excel"
-                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-green-200 bg-green-50 text-green-700 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-300/25 bg-emerald-300/10 text-emerald-100 transition hover:bg-emerald-300/20 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <svg
                     className="h-5 w-5"
@@ -1501,17 +1508,17 @@ export default function ControleDesligamentosTabela() {
                     buscarTerminosContrato(mesTerminos, anoTerminos)
                   }
                   disabled={loadingTerminos}
-                  className="h-10 rounded-xl border px-5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="h-10 rounded-xl border border-white/10 bg-white/[0.06] px-5 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Atualizar
                 </button>
               </div>
             </div>
 
-            <div className="mt-5 max-h-[52vh] overflow-auto rounded-xl border">
-              <table className="min-w-[1220px] text-center text-xs [&_td]:border-r [&_td]:border-slate-200/70 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-slate-200/70 [&_th:last-child]:border-r-0">
-                <thead className="sticky top-0 z-10 bg-slate-100">
-                  <tr className="border-b text-gray-600">
+            <div className="voxx-scrollbar mt-5 max-h-[52vh] overflow-auto rounded-[22px] border border-white/10 bg-[#202532]">
+              <table className="min-w-[1220px] text-center text-xs [&_td]:border-r [&_td]:border-white/10 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-white/10 [&_th:last-child]:border-r-0">
+                <thead className="sticky top-0 z-10 bg-[#2a3040]">
+                  <tr className="border-b border-white/10 text-slate-300">
                     <th className="px-3 py-4 text-center">Status</th>
                     <th className="px-3 py-4 text-center">Pref.</th>
                     <th className="px-3 py-4 text-center">Matrícula</th>
@@ -1531,7 +1538,7 @@ export default function ControleDesligamentosTabela() {
                     <tr>
                       <td
                         colSpan={11}
-                        className="px-4 py-10 text-center text-gray-500"
+                        className="px-4 py-10 text-center text-slate-400"
                       >
                         Carregando términos de contrato...
                       </td>
@@ -1541,7 +1548,7 @@ export default function ControleDesligamentosTabela() {
                       {terminosPaginados.map((termino) => (
                         <tr
                           key={`${termino.base_origem}-${termino.id}-${termino.matricula}-${termino.ano_contrato}`}
-                          className="border-b align-middle hover:bg-slate-50"
+                          className="border-b border-white/10 align-middle text-slate-200 transition hover:bg-white/[0.055]"
                         >
                           <td className="whitespace-nowrap px-3 py-4 text-center align-middle">
                             <div className="mx-auto grid w-[150px] grid-cols-[1fr_1.75rem] items-center gap-2">
@@ -1562,50 +1569,50 @@ export default function ControleDesligamentosTabela() {
                                 aria-label={`Lançar desligamento de ${
                                   termino.nome || "colaborador"
                                 }`}
-                                className="flex h-7 w-7 items-center justify-center rounded-full border border-blue-200 bg-blue-50 text-sm font-bold text-blue-700 transition hover:bg-blue-100"
+                                className="flex h-7 w-7 items-center justify-center rounded-full border border-blue-300/25 bg-blue-300/10 text-sm font-bold text-blue-100 transition hover:bg-blue-300/20"
                               >
                                 +
                               </button>
                             </div>
                           </td>
 
-                          <td className="px-3 py-4 text-center align-middle text-gray-700">
+                          <td className="px-3 py-4 text-center align-middle text-slate-300">
                             {texto(termino.pref)}
                           </td>
 
-                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle font-semibold text-gray-800">
+                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle font-semibold text-slate-100">
                             {texto(termino.matricula)}
                           </td>
 
-                          <td className="w-[220px] max-w-[220px] whitespace-normal break-words px-3 py-4 text-center align-middle font-semibold text-gray-800">
+                          <td className="w-[220px] max-w-[220px] whitespace-normal break-words px-3 py-4 text-center align-middle font-semibold text-slate-100">
                             {texto(termino.nome)}
                           </td>
 
-                          <td className="w-[170px] max-w-[170px] whitespace-normal break-words px-3 py-4 text-center align-middle text-gray-700">
+                          <td className="w-[170px] max-w-[170px] whitespace-normal break-words px-3 py-4 text-center align-middle text-slate-300">
                             {texto(termino.cargo)}
                           </td>
 
-                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-gray-700">
+                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-slate-300">
                             {texto(termino.carga_horaria)}
                           </td>
 
-                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-gray-700">
+                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-slate-300">
                             {formatarData(termino.exercicio)}
                           </td>
 
-                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle font-semibold text-red-700">
+                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle font-semibold text-red-100">
                             {formatarData(termino.data_termino)}
                           </td>
 
-                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-gray-700">
+                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-slate-300">
                             {formatarDiasRestantes(termino.dias_restantes)}
                           </td>
 
-                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-gray-700">
+                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-slate-300">
                             {baseOrigemLabel(termino.base_origem)}
                           </td>
 
-                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle font-semibold text-gray-700">
+                          <td className="whitespace-nowrap px-3 py-4 text-center align-middle font-semibold text-slate-300">
                             {termino.ano_contrato && termino.anos_maximos
                               ? `${termino.ano_contrato}/${termino.anos_maximos}`
                               : "-"}
@@ -1617,7 +1624,7 @@ export default function ControleDesligamentosTabela() {
                         <tr>
                           <td
                             colSpan={11}
-                            className="px-4 py-10 text-center text-gray-500"
+                            className="px-4 py-10 text-center text-slate-400"
                           >
                             Nenhum término encontrado com os filtros
                             selecionados.
@@ -1631,7 +1638,7 @@ export default function ControleDesligamentosTabela() {
             </div>
 
             <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-slate-400">
                 Página {paginaTerminos} de {totalPaginasTerminos}
               </p>
 
@@ -1644,7 +1651,7 @@ export default function ControleDesligamentosTabela() {
                     )
                   }
                   disabled={paginaTerminos === 1 || loadingTerminos}
-                  className="rounded-lg border px-3 py-2 text-xs font-semibold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Anterior
                 </button>
@@ -1657,19 +1664,19 @@ export default function ControleDesligamentosTabela() {
                     )
                   }
                   disabled={paginaTerminos === totalPaginasTerminos || loadingTerminos}
-                  className="rounded-lg border px-3 py-2 text-xs font-semibold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Próxima
                 </button>
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end gap-3 border-t pt-5">
+            <div className="mt-6 flex justify-end gap-3 border-t border-white/10 pt-5">
               <button
                 type="button"
                 onClick={fecharModalTerminos}
                 disabled={loadingTerminos}
-                className="rounded-xl border px-5 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-xl border border-white/10 bg-white/[0.06] px-5 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Fechar
               </button>
@@ -1680,29 +1687,29 @@ export default function ControleDesligamentosTabela() {
 
       {modalAberto && (
         <div
-          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/40 px-4 backdrop-blur-[1px]"
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
           onMouseDown={fecharModal}
         >
           <form
             onSubmit={salvarDesligamento}
             onMouseDown={(e) => e.stopPropagation()}
-            className="max-h-[92vh] w-full max-w-6xl overflow-y-auto overflow-x-hidden rounded-3xl bg-white p-6 shadow-2xl"
+            className="max-h-[92vh] w-full max-w-6xl overflow-y-auto overflow-x-hidden rounded-[28px] border border-white/10 bg-[#171a23] p-6 text-slate-100 shadow-[0_28px_90px_rgba(0,0,0,0.48)]"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
                 {erro && (
-                  <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-700">
+                  <div className="mt-5 rounded-2xl border border-red-300/25 bg-red-400/10 px-4 py-3 text-center text-sm font-medium text-red-100">
                     {erro}
                   </div>
                 )}
 
-                <h3 className="text-2xl font-bold text-gray-800">
+                <h3 className="text-2xl font-bold text-slate-100">
                   {desligamentoEditando
                     ? "Editar desligamento"
                     : "Novo desligamento"}
                 </h3>
 
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-slate-400">
                   {desligamentoEditando
                     ? "Atualize os dados do desligamento selecionado."
                     : "Informe a matrícula, busque o colaborador e preencha os dados do desligamento."}
@@ -1712,7 +1719,7 @@ export default function ControleDesligamentosTabela() {
               <button
                 type="button"
                 onClick={fecharModal}
-                className="rounded-full px-3 py-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                className="rounded-full px-3 py-1 text-slate-400 hover:bg-white/[0.04] hover:text-slate-300"
               >
                 ×
               </button>
@@ -1736,7 +1743,7 @@ export default function ControleDesligamentosTabela() {
                   type="button"
                   onClick={buscarColaboradorPorMatricula}
                   disabled={buscandoColaborador || salvando}
-                  className="h-10 w-full rounded-xl bg-blue-700 px-3 text-xs font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="h-11 w-full rounded-2xl bg-blue-600 px-3 text-xs font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {buscandoColaborador ? "Buscando..." : "Buscar matrícula"}
                 </button>
@@ -1859,7 +1866,7 @@ export default function ControleDesligamentosTabela() {
             </div>
 
             <label className="mt-5 block">
-              <span className="text-sm font-semibold text-gray-700">
+              <span className="text-sm font-semibold text-slate-300">
                 Observação
               </span>
 
@@ -1867,16 +1874,16 @@ export default function ControleDesligamentosTabela() {
                 value={formulario.observacao}
                 onChange={(e) => atualizarCampo("observacao", e.target.value)}
                 rows={4}
-                className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-3 text-center text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="mt-1 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 py-3 text-center text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-blue-300 focus:ring-2 focus:ring-blue-300/20"
               />
             </label>
 
-            <div className="mt-6 flex justify-end gap-3 border-t pt-5">
+            <div className="mt-6 flex justify-end gap-3 border-t border-white/10 pt-5">
               <button
                 type="button"
                 onClick={fecharModal}
                 disabled={salvando || buscandoColaborador}
-                className="rounded-xl border px-5 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-xl border border-white/10 bg-white/[0.06] px-5 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Cancelar
               </button>
@@ -1884,7 +1891,7 @@ export default function ControleDesligamentosTabela() {
               <button
                 type="submit"
                 disabled={salvando || buscandoColaborador}
-                className="rounded-xl bg-blue-700 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {salvando
                   ? "Salvando..."
@@ -1899,3 +1906,4 @@ export default function ControleDesligamentosTabela() {
     </section>
   );
 }
+

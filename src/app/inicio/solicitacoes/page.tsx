@@ -12,35 +12,49 @@ type Solicitacao = {
   criado_em: string;
 };
 
+function badgeStatus(status: string) {
+  if (status === "Pendente") {
+    return "border-yellow-300/30 bg-yellow-300/12 text-yellow-200";
+  }
+
+  if (status === "Recusada") {
+    return "border-red-300/30 bg-red-400/12 text-red-200";
+  }
+
+  return "border-emerald-300/30 bg-emerald-300/12 text-emerald-200";
+}
+
 export default function SolicitacoesPage() {
   const [solicitacoes, setSolicitacoes] = useState<Solicitacao[]>([]);
   const [loading, setLoading] = useState(true);
-  const [solicitacaoSelecionada, setSolicitacaoSelecionada] = useState<number | null>(null);
+  const [solicitacaoSelecionada, setSolicitacaoSelecionada] =
+    useState<number | null>(null);
   const [perfilSelecionado, setPerfilSelecionado] = useState("");
 
-async function carregarSolicitacoes() {
-  try {
-    setLoading(true);
+  async function carregarSolicitacoes() {
+    try {
+      setLoading(true);
 
-    const { data, error } = await supabase
-      .from("solicitacoes_acesso")
-      .select("*")
-      .order("criado_em", { ascending: false });
+      const { data, error } = await supabase
+        .from("solicitacoes_acesso")
+        .select("*")
+        .order("criado_em", { ascending: false });
 
-    if (error) {
-      console.error("Erro ao carregar solicitações:", error);
-      alert("Erro ao carregar solicitações.");
-      return;
+      if (error) {
+        console.error("Erro ao carregar solicitações:", error);
+        alert("Erro ao carregar solicitações.");
+        return;
+      }
+
+      setSolicitacoes(data || []);
+    } catch (erro) {
+      console.error("Erro inesperado:", erro);
+      alert("Erro inesperado ao carregar solicitações.");
+    } finally {
+      setLoading(false);
     }
-
-    setSolicitacoes(data || []);
-  } catch (erro) {
-    console.error("Erro inesperado:", erro);
-    alert("Erro inesperado ao carregar solicitações.");
-  } finally {
-    setLoading(false);
   }
-}
+
   async function recusarSolicitacao(id: number) {
     const { error } = await supabase
       .from("solicitacoes_acesso")
@@ -56,152 +70,242 @@ async function carregarSolicitacoes() {
     carregarSolicitacoes();
   }
 
-      async function aprovarSolicitacao() {
-      if (!solicitacaoSelecionada || !perfilSelecionado) {
-        return;
-      }
+  async function aprovarSolicitacao() {
+    if (!solicitacaoSelecionada || !perfilSelecionado) return;
 
-      const response = await fetch("/api/aprovar-solicitacao", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          solicitacaoId: solicitacaoSelecionada,
-          perfil: perfilSelecionado,
-        }),
-      });
+    const response = await fetch("/api/aprovar-solicitacao", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        solicitacaoId: solicitacaoSelecionada,
+        perfil: perfilSelecionado,
+      }),
+    });
 
-      const resultado = await response.json();
+    const resultado = await response.json();
 
-      alert(JSON.stringify(resultado));
+    alert(JSON.stringify(resultado));
 
-      setSolicitacaoSelecionada(null);
-      setPerfilSelecionado("");
-    }
+    setSolicitacaoSelecionada(null);
+    setPerfilSelecionado("");
+    carregarSolicitacoes();
+  }
 
   useEffect(() => {
     carregarSolicitacoes();
   }, []);
 
+  const totalSolicitacoes = solicitacoes.length;
+  const pendentes = solicitacoes.filter(
+    (item) => item.status === "Pendente"
+  ).length;
+  const aprovadas = solicitacoes.filter(
+    (item) => item.status === "Aprovada"
+  ).length;
+  const recusadas = solicitacoes.filter(
+    (item) => item.status === "Recusada"
+  ).length;
+  const solicitacaoEmAprovacao = solicitacoes.find(
+    (item) => item.id === solicitacaoSelecionada
+  );
+
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold text-blue-700">
-        Solicitações de acesso
-      </h1>
+    <main className="min-h-screen bg-[#11141b] p-8 text-slate-100">
+      <section className="overflow-hidden rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_14%_0%,rgba(59,130,246,0.26),transparent_32%),linear-gradient(135deg,#242833_0%,#171a23_58%,#10131a_100%)] p-7 shadow-[0_24px_80px_rgba(0,0,0,0.32)]">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-400">
+              Acessos VOXX
+            </p>
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-white">
+              Solicitações de acesso
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm text-slate-300">
+              Analise novos pedidos, defina perfis e mantenha o acesso ao
+              sistema sob controle.
+            </p>
+          </div>
 
-      <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-gray-600">
-            <tr>
-              <th className="px-5 py-3 font-semibold">Nome</th>
-              <th className="px-5 py-3 font-semibold">E-mail</th>
-              <th className="px-5 py-3 font-semibold">Status</th>
-              <th className="px-5 py-3 font-semibold">Perfil</th>
-              <th className="px-5 py-3 font-semibold">Data</th>
-              <th className="px-5 py-3 font-semibold text-right">Ações</th>
-            </tr>
-          </thead>
+          <button
+            type="button"
+            onClick={carregarSolicitacoes}
+            disabled={loading}
+            className="w-fit rounded-2xl border border-white/10 bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_14px_35px_rgba(0,0,0,0.25)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading ? "Atualizando..." : "Atualizar"}
+          </button>
+        </div>
 
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={6} className="px-5 py-6 text-center text-gray-500">
-                  Carregando solicitações...
-                </td>
-              </tr>
-            ) : solicitacoes.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-5 py-6 text-center text-gray-500">
-                  Nenhuma solicitação encontrada.
-                </td>
-              </tr>
-            ) : (
-              solicitacoes.map((item) => (
-                <tr key={item.id} className="border-t border-gray-100">
-                  <td className="px-5 py-4 font-medium text-gray-800">
+        <div className="mt-7 grid grid-cols-1 gap-3 md:grid-cols-4">
+          {[
+            {
+              label: "Total",
+              value: totalSolicitacoes,
+              tone: "border-white/20 bg-white text-slate-950",
+            },
+            {
+              label: "Pendentes",
+              value: pendentes,
+              tone: "border-yellow-300/30 bg-yellow-300/15 text-yellow-100",
+            },
+            {
+              label: "Aprovadas",
+              value: aprovadas,
+              tone: "border-emerald-300/30 bg-emerald-300/15 text-emerald-100",
+            },
+            {
+              label: "Recusadas",
+              value: recusadas,
+              tone: "border-red-300/30 bg-red-400/15 text-red-100",
+            },
+          ].map((card) => (
+            <div
+              key={card.label}
+              className="rounded-3xl border border-white/10 bg-white/[0.06] p-4 shadow-inner shadow-white/5"
+            >
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+                {card.label}
+              </p>
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <span className="text-3xl font-semibold text-white">
+                  {card.value}
+                </span>
+                <span
+                  className={`rounded-full border px-3 py-1 text-xs font-bold ${card.tone}`}
+                >
+                  {card.label}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-6 overflow-hidden rounded-[26px] border border-white/10 bg-[#171a23] shadow-[0_22px_70px_rgba(0,0,0,0.28)]">
+        <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
+          <div>
+            <h2 className="text-lg font-bold text-white">
+              Fila de solicitações
+            </h2>
+            <p className="mt-1 text-sm text-slate-400">
+              Registros mais recentes aparecem primeiro.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-3 p-4">
+          {loading ? (
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-10 text-center text-sm text-slate-400">
+              Carregando solicitações...
+            </div>
+          ) : solicitacoes.length === 0 ? (
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-10 text-center text-sm text-slate-400">
+              Nenhuma solicitação encontrada.
+            </div>
+          ) : (
+            solicitacoes.map((item) => (
+              <article
+                key={item.id}
+                className="grid gap-4 rounded-2xl border border-white/10 bg-white/[0.045] p-4 transition hover:border-white/20 hover:bg-white/[0.07] lg:grid-cols-[minmax(220px,1.4fr)_140px_130px_110px_170px]"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-white">
                     {item.nome}
-                  </td>
-
-                  <td className="px-5 py-4 text-gray-600">
+                  </p>
+                  <p className="mt-1 break-all text-xs text-slate-400">
                     {item.email}
-                  </td>
+                  </p>
+                </div>
 
-                  <td className="px-5 py-4">
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium border ${
-                        item.status === "Pendente"
-                          ? "bg-yellow-50 text-yellow-700 border-yellow-200"
-                          : item.status === "Recusada"
-                          ? "bg-red-50 text-red-700 border-red-200"
-                          : "bg-green-50 text-green-700 border-green-200"
-                      }`}
-                    >
-                      {item.status}
-                    </span>
-                  </td>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                    Status
+                  </p>
+                  <span
+                    className={`mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-bold ${badgeStatus(
+                      item.status
+                    )}`}
+                  >
+                    {item.status}
+                  </span>
+                </div>
 
-                  <td className="px-5 py-4 text-gray-600">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                    Perfil
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-slate-200">
                     {item.perfil ? item.perfil : "-"}
-                  </td>
+                  </p>
+                </div>
 
-                  <td className="px-5 py-4 text-gray-500">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                    Data
+                  </p>
+                  <p className="mt-2 text-sm text-slate-300">
                     {new Date(item.criado_em).toLocaleDateString("pt-BR")}
-                  </td>
+                  </p>
+                </div>
 
-                  <td className="px-5 py-4 text-right">
-                    {item.status === "Pendente" ? (
-                      <>
-                        <button
-                          onClick={() => {
-                            setSolicitacaoSelecionada(item.id);
-                            setPerfilSelecionado("");
-                          }}
-                          className="mr-2 rounded-lg bg-green-600 px-3 py-2 text-xs font-semibold text-white hover:bg-green-700"
-                        >
-                          Aprovar
-                        </button>
+                <div className="flex items-center justify-start gap-2 lg:justify-end">
+                  {item.status === "Pendente" ? (
+                    <>
+                      <button
+                        onClick={() => {
+                          setSolicitacaoSelecionada(item.id);
+                          setPerfilSelecionado("");
+                        }}
+                        className="rounded-xl bg-white px-3 py-2 text-xs font-semibold text-slate-950 transition hover:-translate-y-0.5 hover:bg-slate-200"
+                      >
+                        Aprovar
+                      </button>
 
-                        <button
-                          onClick={() => recusarSolicitacao(item.id)}
-                          className="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-700"
-                        >
-                          Recusar
-                        </button>
-                      </>
-                    ) : (
-                      <span className="text-xs text-gray-400">
-                        Finalizada
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+                      <button
+                        onClick={() => recusarSolicitacao(item.id)}
+                        className="rounded-xl border border-red-300/30 bg-red-400/10 px-3 py-2 text-xs font-semibold text-red-200 transition hover:bg-red-400/20"
+                      >
+                        Recusar
+                      </button>
+                    </>
+                  ) : (
+                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-slate-400">
+                      Finalizada
+                    </span>
+                  )}
+                </div>
+              </article>
+            ))
+          )}
+        </div>
+      </section>
 
       {solicitacaoSelecionada && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
-            <h2 className="text-lg font-bold text-gray-800">
-              Aprovar solicitação
-            </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4 backdrop-blur-[2px]">
+          <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#171a23] p-6 text-slate-100 shadow-2xl">
+            <div className="mb-5 rounded-2xl border border-white/10 bg-white/[0.05] p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                Aprovação
+              </p>
+              <h2 className="mt-2 text-xl font-bold text-white">
+                Aprovar solicitação
+              </h2>
+              <p className="mt-1 text-sm text-slate-300">
+                {solicitacaoEmAprovacao?.nome || "Escolha o perfil do usuário."}
+              </p>
+            </div>
 
-            <p className="mt-1 text-sm text-gray-500">
-              Escolha o perfil do usuário.
-            </p>
-
-            <div className="mt-5">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-slate-300">
                 Perfil
               </label>
 
               <select
                 value={perfilSelecionado}
                 onChange={(e) => setPerfilSelecionado(e.target.value)}
-                className="w-full h-11 rounded-xl border border-gray-300 px-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 text-slate-100 outline-none transition focus:border-white/30 focus:ring-2 focus:ring-blue-300/10"
               >
                 <option value="">Selecione...</option>
                 <option value="Admin">Admin</option>
@@ -216,7 +320,7 @@ async function carregarSolicitacoes() {
                   setSolicitacaoSelecionada(null);
                   setPerfilSelecionado("");
                 }}
-                className="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                className="flex-1 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08]"
               >
                 Cancelar
               </button>
@@ -225,7 +329,7 @@ async function carregarSolicitacoes() {
                 type="button"
                 onClick={aprovarSolicitacao}
                 disabled={!perfilSelecionado}
-                className="flex-1 rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+                className="flex-1 rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Confirmar
               </button>
@@ -233,6 +337,6 @@ async function carregarSolicitacoes() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   );
 }

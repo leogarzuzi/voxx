@@ -150,7 +150,7 @@ export function BuscaRapidaColaborador() {
         <label className="relative block">
           <button
             type="submit"
-            className="absolute left-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-lg text-blue-100 transition hover:bg-blue-700/70 hover:text-white"
+            className="absolute left-2.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-xl text-slate-400 transition hover:bg-white/10 hover:text-white"
             aria-label="Buscar colaborador"
           >
             <svg
@@ -180,7 +180,7 @@ export function BuscaRapidaColaborador() {
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Buscar colaborador..."
-            className="h-10 w-full rounded-xl border border-blue-500/40 bg-blue-900/30 pl-9 pr-3 text-sm text-white outline-none placeholder:text-blue-100/80 focus:border-blue-200 focus:ring-2 focus:ring-blue-200/20"
+            className="h-11 w-full rounded-2xl border border-white/10 bg-white/[0.07] pl-11 pr-3 text-sm text-white shadow-inner shadow-black/10 outline-none placeholder:text-slate-500 transition focus:border-white/30 focus:bg-white/[0.1] focus:ring-2 focus:ring-blue-300/10"
           />
         </label>
       </form>

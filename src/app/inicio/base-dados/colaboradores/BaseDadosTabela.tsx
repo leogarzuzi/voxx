@@ -167,6 +167,22 @@ export default function BaseDadosTabela() {
     buscarColaboradores("");
   }, []);
 
+  useEffect(() => {
+    if (!modalFiltroAberto) return;
+
+    function fecharComEsc(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setModalFiltroAberto(false);
+      }
+    }
+
+    document.addEventListener("keydown", fecharComEsc);
+
+    return () => {
+      document.removeEventListener("keydown", fecharComEsc);
+    };
+  }, [modalFiltroAberto]);
+
   function handleBuscar(e: React.FormEvent) {
     e.preventDefault();
 
@@ -414,16 +430,16 @@ export default function BaseDadosTabela() {
   }
 
   return (
-    <section className="mt-8 rounded-xl border bg-white p-6 shadow-sm">
+    <section className="mt-6 overflow-hidden rounded-[26px] border border-white/10 bg-[#171a23] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]">
       <div className="mb-5 flex flex-col gap-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <button
             type="button"
             onClick={abrirModalFiltro}
             disabled={loading}
-            className="group inline-flex w-fit items-center gap-2 rounded-2xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-200 transition hover:-translate-y-0.5 hover:bg-blue-800 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+            className="group inline-flex w-fit items-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_14px_35px_rgba(0,0,0,0.24)] transition hover:-translate-y-0.5 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
           >
-            <span className="relative flex h-7 w-7 items-center justify-center rounded-xl bg-white/15">
+            <span className="relative flex h-7 w-7 items-center justify-center rounded-xl bg-slate-950 text-white">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -438,12 +454,12 @@ export default function BaseDadosTabela() {
                 />
               </svg>
 
-              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-white text-[11px] font-bold text-blue-700 shadow-sm">
+              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[11px] font-bold text-white shadow-sm">
                 +
               </span>
             </span>
 
-            <span></span>
+            <span>Filtro</span>
           </button>
 
           <form onSubmit={handleBuscar} className="flex w-full gap-3 lg:w-auto">
@@ -452,13 +468,13 @@ export default function BaseDadosTabela() {
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               placeholder="Buscar por nome, matrícula, CPF, cargo ou e-mail"
-              className="h-10 w-full rounded-xl border border-gray-300 px-4 text-sm text-gray-800 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 lg:w-96"
+              className="h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/30 focus:bg-white/[0.08] focus:ring-2 focus:ring-blue-300/10 lg:w-96"
             />
 
             <button
               type="submit"
               disabled={loading}
-              className="h-10 rounded-xl bg-blue-700 px-5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-11 rounded-2xl bg-white px-5 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Buscar
             </button>
@@ -467,7 +483,7 @@ export default function BaseDadosTabela() {
               type="button"
               onClick={limparBusca}
               disabled={loading}
-              className="h-10 rounded-xl border px-5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-11 rounded-2xl border border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
             >
               Limpar
             </button>
@@ -479,7 +495,7 @@ export default function BaseDadosTabela() {
             {filtrosAtivos.map((filtro) => (
               <div
                 key={filtro.campo}
-                className="flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700"
+                className="flex items-center gap-2 rounded-full border border-blue-300/25 bg-blue-300/10 px-3 py-1 text-xs font-semibold text-blue-100"
               >
                 <span>
                   {filtro.label}: {resumirValores(filtro.valores)}
@@ -488,7 +504,7 @@ export default function BaseDadosTabela() {
                 <button
                   type="button"
                   onClick={() => removerFiltro(filtro.campo)}
-                  className="rounded-full px-1 text-blue-500 hover:bg-blue-100 hover:text-blue-800"
+                  className="rounded-full px-1 text-blue-200 hover:bg-white/10 hover:text-white"
                   title="Remover filtro"
                 >
                   ×
@@ -500,30 +516,30 @@ export default function BaseDadosTabela() {
       </div>
 
       {erro && (
-        <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-5 rounded-2xl border border-red-300/25 bg-red-400/10 px-4 py-3 text-sm text-red-100">
           {erro}
         </div>
       )}
 
       {loading ? (
-        <div className="py-10 text-center text-sm text-gray-500">
+        <div className="py-10 text-center text-sm text-slate-400">
           Carregando base de dados...
         </div>
       ) : (
         <>
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+              <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-200">
                 {colaboradores.length} resultado
                 {colaboradores.length === 1 ? "" : "s"}
               </span>
 
               {modoTodos ? (
-                <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
+                <span className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1 text-xs font-semibold text-emerald-100">
                   Base completa carregada
                 </span>
               ) : (
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-slate-300">
                   Exibindo até 100 registros
                 </span>
               )}
@@ -536,7 +552,7 @@ export default function BaseDadosTabela() {
                 disabled={loading || exportando}
                 title="Baixar Excel"
                 aria-label="Baixar Excel"
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-green-200 bg-green-50 text-green-700 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-10 items-center justify-center rounded-2xl border border-emerald-300/25 bg-emerald-300/10 text-emerald-100 transition hover:bg-emerald-300/20 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <svg
                   className="h-5 w-5"
@@ -567,17 +583,18 @@ export default function BaseDadosTabela() {
                 type="button"
                 onClick={carregarTodosColaboradores}
                 disabled={loading}
-                className="rounded-xl border px-4 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Carregar todos
               </button>
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-xl border">
-            <table className="w-full table-fixed text-center text-xs">
+          <div className="voxx-scrollbar overflow-x-auto rounded-[22px] border border-white/10 bg-[#202532] shadow-[0_18px_45px_rgba(0,0,0,0.2)]">
+            <table className="w-full min-w-[1380px] table-fixed text-center text-xs">
               <colgroup>
                 {[
+                  <col key="indice" style={{ width: "54px" }} />,
                   <col key="pref" style={{ width: "80px" }} />,
                   <col key="matricula" style={{ width: "70px" }} />,
                   <col key="nome" />,
@@ -592,8 +609,9 @@ export default function BaseDadosTabela() {
                 ]}
               </colgroup>
 
-              <thead className="bg-slate-100">
-                <tr className="border-b text-gray-600">
+              <thead className="sticky top-0 z-10 bg-[#2a3040]">
+                <tr className="border-b border-white/10 text-slate-300">
+                  <th className="px-2 py-4 text-center align-middle">#</th>
                   <th className="px-2 py-4 text-center align-middle">Pref.</th>
                   <th className="px-2 py-4 text-center align-middle">
                     Matrícula
@@ -615,72 +633,78 @@ export default function BaseDadosTabela() {
               </thead>
 
               <tbody>
-                {colaboradores.map((colaborador) => (
+                {colaboradores.map((colaborador, indice) => (
                   <tr
                     key={colaborador.id}
-                    className="border-b align-middle hover:bg-slate-50"
+                    className="border-b border-white/10 align-middle text-slate-200 transition hover:bg-white/[0.055]"
                   >
-                    <td className="px-2 py-4 text-center align-middle text-gray-700">
+                    <td className="px-2 py-4 text-center align-middle">
+                      <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] px-2 text-[11px] font-bold text-slate-200">
+                        {indice + 1}
+                      </span>
+                    </td>
+
+                    <td className="px-2 py-4 text-center align-middle text-slate-300">
                       <div className="whitespace-normal break-words leading-snug">
                         {texto(colaborador.pref)}
                       </div>
                     </td>
 
-                    <td className="px-2 py-4 text-center align-middle font-medium text-gray-800">
+                    <td className="px-2 py-4 text-center align-middle font-medium text-slate-100">
                       <div className="whitespace-normal break-words leading-snug">
                         {texto(colaborador.matricula)}
                       </div>
                     </td>
 
-                    <td className="px-2 py-4 text-center align-middle font-semibold text-gray-800">
+                    <td className="px-2 py-4 text-center align-middle font-semibold text-white">
                       <div className="whitespace-normal break-words leading-snug">
                         {texto(colaborador.nome)}
                       </div>
                     </td>
 
-                    <td className="px-2 py-4 text-center align-middle text-gray-700">
+                    <td className="px-2 py-4 text-center align-middle text-slate-300">
                       <div className="whitespace-normal break-words leading-snug">
                         {texto(colaborador.cargo)}
                       </div>
                     </td>
 
-                    <td className="px-2 py-4 text-center align-middle text-gray-700">
+                    <td className="px-2 py-4 text-center align-middle text-slate-300">
                       <div className="whitespace-normal break-words leading-snug">
                         {texto(colaborador.carga_horaria)}
                       </div>
                     </td>
 
-                    <td className="px-2 py-4 text-center align-middle text-gray-700">
+                    <td className="px-2 py-4 text-center align-middle text-slate-300">
                       <div className="whitespace-normal break-words leading-snug">
                         {texto(colaborador.exercicio)}
                       </div>
                     </td>
 
-                    <td className="px-2 py-4 text-center align-middle text-gray-700">
+                    <td className="px-2 py-4 text-center align-middle text-slate-300">
                       <div className="whitespace-normal break-words leading-snug">
                         {texto(colaborador.cpf)}
                       </div>
                     </td>
 
-                    <td className="px-2 py-4 text-center align-middle text-gray-700">
+                    <td className="px-2 py-4 text-center align-middle text-slate-300">
                       <div className="whitespace-normal break-words leading-snug">
                         {texto(colaborador.pis)}
                       </div>
                     </td>
 
-                    <td className="px-2 py-4 text-center align-middle text-gray-700">
+                    <td className="px-2 py-4 text-center align-middle text-slate-300">
                       <div className="whitespace-normal break-words leading-snug">
                         {texto(colaborador.data_nascimento)}
                       </div>
                     </td>
 
-                    <td className="px-2 py-4 text-center align-middle text-gray-700">
+                    <td className="px-2 py-4 text-center align-middle text-slate-300">
                       <div className="whitespace-normal break-words leading-snug">
                         {texto(colaborador.email)}
                       </div>
                     </td>
 
-                    <td className="px-2 py-4 text-center align-middle text-gray-700">
+                    <td className="px-2 py-4 text-center align-middle text-slate-300">
                       <div className="whitespace-normal break-words leading-snug">
                         {texto(colaborador.observacao)}
                       </div>
@@ -691,8 +715,8 @@ export default function BaseDadosTabela() {
                 {colaboradores.length === 0 && (
                   <tr>
                     <td
-                      colSpan={11}
-                      className="px-4 py-8 text-center align-middle text-gray-500"
+                      colSpan={12}
+                      className="px-4 py-8 text-center align-middle text-slate-400"
                     >
                       Nenhum colaborador encontrado.
                     </td>
@@ -706,20 +730,20 @@ export default function BaseDadosTabela() {
 
       {modalFiltroAberto && (
         <div
-          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/40 px-4 backdrop-blur-[1px]"
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/55 px-4 backdrop-blur-[2px]"
           onMouseDown={() => setModalFiltroAberto(false)}
         >
           <div
-            className="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl"
+            className="w-full max-w-2xl rounded-3xl border border-white/10 bg-[#171a23] p-6 text-slate-100 shadow-2xl"
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-xl font-bold text-gray-800">
+                <h3 className="text-xl font-bold text-white">
                   Adicionar filtro
                 </h3>
 
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-slate-400">
                   Escolha um campo e marque uma ou mais opções.
                 </p>
               </div>
@@ -727,21 +751,21 @@ export default function BaseDadosTabela() {
               <button
                 type="button"
                 onClick={() => setModalFiltroAberto(false)}
-                className="rounded-full px-3 py-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                className="rounded-full px-3 py-1 text-slate-400 hover:bg-white/10 hover:text-white"
               >
                 ×
               </button>
             </div>
 
             <div className="mt-5">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-semibold text-slate-300">
                 Campo
               </label>
 
               <select
                 value={campoSelecionado}
                 onChange={(e) => carregarOpcoesDoCampo(e.target.value)}
-                className="mt-1 h-10 w-full rounded-xl border border-gray-300 px-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="mt-1 h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 text-sm text-slate-100 outline-none transition focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 [color-scheme:dark] [&>option]:bg-[#171a23] [&>option]:text-slate-100"
               >
                 <option value="">Selecione um campo</option>
 
@@ -761,14 +785,14 @@ export default function BaseDadosTabela() {
                     value={buscaOpcoes}
                     onChange={(e) => setBuscaOpcoes(e.target.value)}
                     placeholder="Buscar opção..."
-                    className="h-10 w-full rounded-xl border border-gray-300 px-4 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/30 focus:ring-2 focus:ring-blue-300/10"
                   />
 
                   <button
                     type="button"
                     onClick={selecionarOpcoesVisiveis}
                     disabled={loadingOpcoes || opcoesFiltradas.length === 0}
-                    className="h-10 whitespace-nowrap rounded-xl border px-4 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="h-11 whitespace-nowrap rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Selecionar visíveis
                   </button>
@@ -777,7 +801,7 @@ export default function BaseDadosTabela() {
                     type="button"
                     onClick={limparSelecaoFiltro}
                     disabled={loadingOpcoes || opcoesSelecionadas.length === 0}
-                    className="h-10 whitespace-nowrap rounded-xl border px-4 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="h-11 whitespace-nowrap rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Limpar seleção
                   </button>

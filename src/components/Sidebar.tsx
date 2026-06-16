@@ -106,28 +106,28 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
 
   // classe padrão dos itens principais do menu
   function itemMenuClass(ativo: boolean) {
-    return `flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
+    return `group flex w-full items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-medium transition duration-200 ${
       ativo
-        ? "bg-blue-700 shadow-inner ring-1 ring-blue-300/40"
-        : "hover:bg-blue-700"
+        ? "bg-white text-slate-950 shadow-[0_14px_35px_rgba(0,0,0,0.28)] ring-1 ring-white/70 [&_svg]:!text-slate-950"
+        : "text-slate-300 hover:bg-white/10 hover:text-white [&_svg]:!text-slate-400 hover:[&_svg]:!text-white"
     }`;
   }
 
   // classe padrão dos botões que abrem submenus
   function grupoMenuClass(ativo: boolean) {
-    return `flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
+    return `group flex w-full items-center justify-between rounded-2xl px-3.5 py-2.5 text-sm font-medium transition duration-200 ${
       ativo
-        ? "bg-blue-700 shadow-inner ring-1 ring-blue-300/40"
-        : "hover:bg-blue-700"
+        ? "bg-white text-slate-950 shadow-[0_14px_35px_rgba(0,0,0,0.28)] ring-1 ring-white/70 [&_svg]:!text-slate-950"
+        : "text-slate-300 hover:bg-white/10 hover:text-white [&_svg]:!text-slate-400 hover:[&_svg]:!text-white"
     }`;
   }
 
   // classe padrão dos subitens
   function subItemMenuClass(ativo: boolean) {
-    return `block rounded-lg px-3 py-2 text-sm transition ${
+    return `block rounded-xl px-3 py-2 text-sm transition ${
       ativo
-        ? "bg-blue-700 font-semibold text-white"
-        : "text-blue-50 hover:bg-blue-700"
+        ? "bg-white/15 font-semibold text-white ring-1 ring-white/10"
+        : "text-slate-400 hover:bg-white/10 hover:text-white"
     }`;
   }
 
@@ -136,25 +136,34 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
   const dashboardAtivo = pathname.startsWith("/inicio/dashboard");
 
   return (
-    <aside className="sticky top-0 h-screen w-56 shrink-0 self-start overflow-y-auto rounded-tr-[28px] rounded-br-[28px] bg-blue-800 text-white shadow-xl">
+    <aside className="sticky top-0 h-screen w-64 shrink-0 self-start overflow-y-auto rounded-tr-[30px] rounded-br-[30px] border-r border-white/10 bg-[radial-gradient(circle_at_20%_0%,rgba(59,130,246,0.24),transparent_34%),linear-gradient(180deg,#20242d_0%,#151821_52%,#11141b_100%)] text-white shadow-[18px_0_45px_rgba(15,23,42,0.22)]">
       {/* logo do sistema */}
-      <div className="flex justify-center py-4">
+      <div className="px-4 pb-3 pt-5">
         <Link
           href="/inicio"
           title="Ir para o início"
           onClick={() => iniciarNavegacao("/inicio")}
+          className="flex items-center gap-3 rounded-3xl border border-white/10 bg-white/[0.06] p-3 shadow-inner shadow-white/5 transition hover:bg-white/[0.09]"
         >
-          <img
-            src="/logo-simbolo.png"
-            alt="VOXX"
-            className="h-20 w-20 object-contain transition hover:scale-105"
-          />
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.24)]">
+            <img
+              src="/logo-simbolo.png"
+              alt="VOXX"
+              className="h-9 w-9 object-contain"
+            />
+          </span>
+
+          <span className="min-w-0">
+            <span className="block text-base font-bold leading-tight tracking-wide text-white">
+              VOXX
+            </span>
+          </span>
         </Link>
       </div>
 
       <BuscaRapidaColaborador />
 
-      <nav className="mt-0 space-y-1 px-4">
+      <nav className="mt-1 space-y-1.5 px-4 pb-6">
         {/* solicitações */}
         {podeVerSolicitacoes && (
           <Link

@@ -3,6 +3,7 @@
 import {
   BarChart,
   Bar,
+  Cell,
   XAxis,
   YAxis,
   Tooltip,
@@ -14,17 +15,63 @@ type DivisionChartProps = {
     divisao: string;
     total: number;
   }[];
+  selectedDivisao?: string | null;
+  onSelectDivisao?: (divisao: string) => void;
 };
 
-export function DivisionChart({ data }: DivisionChartProps) {
+export function DivisionChart({
+  data,
+  selectedDivisao,
+  onSelectDivisao,
+}: DivisionChartProps) {
   return (
     <div className="h-80 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data}>
-          <XAxis dataKey="divisao" />
-          <YAxis allowDecimals={false} />
-          <Tooltip />
-          <Bar dataKey="total" />
+          <XAxis
+            dataKey="divisao"
+            axisLine={false}
+            tickLine={false}
+            interval={0}
+            tick={{ fill: "#cbd5e1", fontSize: 11, fontWeight: 700 }}
+          />
+          <YAxis
+            allowDecimals={false}
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: "#94a3b8", fontSize: 12 }}
+          />
+          <Tooltip
+            cursor={{ fill: "rgba(148,163,184,0.08)" }}
+            contentStyle={{
+              background: "#171a23",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: 16,
+              color: "#e2e8f0",
+            }}
+            itemStyle={{ color: "#e2e8f0" }}
+            labelStyle={{ color: "#cbd5e1", fontWeight: 700 }}
+          />
+          <Bar
+            dataKey="total"
+            radius={[12, 12, 4, 4]}
+            cursor={onSelectDivisao ? "pointer" : "default"}
+            onClick={(item) => {
+              const divisao = item?.payload?.divisao;
+              if (divisao) onSelectDivisao?.(String(divisao));
+            }}
+          >
+            {data.map((item) => (
+              <Cell
+                key={item.divisao}
+                fill={
+                  selectedDivisao === item.divisao
+                    ? "#60a5fa"
+                    : "rgba(148,163,184,0.68)"
+                }
+              />
+            ))}
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
     </div>

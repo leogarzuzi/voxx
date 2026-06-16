@@ -249,7 +249,7 @@ async function handleAlterarSenha() {
   
   if (verificando) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-[#11141b]">
         <img
           src="/logo-simbolo.png"
           alt="VOXX"
@@ -260,7 +260,7 @@ async function handleAlterarSenha() {
   }
 
   return (
-    <div className="flex min-h-screen overflow-x-hidden bg-slate-50">
+    <div className="flex min-h-screen overflow-x-hidden bg-[#11141b]">
       <div className="sticky top-0 h-screen shrink-0">
         <Sidebar
           perfil={perfil}

@@ -152,7 +152,7 @@ function registroBadge(registro: string | null | undefined) {
 
   if (valor.includes("facial")) {
     return (
-      <span className="ml-1 rounded-md bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold text-blue-700">
+      <span className="ml-1 rounded-md border border-blue-300/25 bg-blue-300/10 px-1.5 py-0.5 text-[10px] font-bold text-blue-100">
         F
       </span>
     );
@@ -173,14 +173,14 @@ function statusClass(status: string | null | undefined) {
   const valor = String(status || "").toLowerCase();
 
   if (valor === "enviado" || valor === "subido") {
-    return "bg-green-50 text-green-700";
+    return "border border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
   }
 
   if (valor === "erro") {
-    return "bg-red-50 text-red-700";
+    return "border border-red-300/25 bg-red-400/10 text-red-100";
   }
 
-  return "bg-yellow-50 text-yellow-700";
+  return "border border-yellow-300/25 bg-yellow-300/10 text-yellow-100";
 }
 
 function validarCamposNumericos(formulario: FormularioAdmissao) {
@@ -319,7 +319,7 @@ function InputTexto({
 }: InputTextoProps) {
   return (
     <label className={`block ${className}`}>
-      <span className="text-sm font-semibold text-gray-700">
+      <span className="text-sm font-semibold text-slate-300">
         {label}
         {required && <span className="text-red-500"> *</span>}
       </span>
@@ -334,10 +334,10 @@ function InputTexto({
         pattern={pattern}
         maxLength={maxLength}
         disabled={disabled}
-        className={`mt-1 h-10 w-full rounded-xl border px-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${
+        className={`mt-1 h-11 w-full rounded-2xl border px-3 text-sm outline-none transition [color-scheme:dark] focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 ${
           disabled
-            ? "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-500"
-            : "border-gray-300 text-gray-800"
+            ? "cursor-not-allowed border-white/10 bg-white/[0.035] text-slate-500"
+            : "border-white/10 bg-white/[0.06] text-slate-100 placeholder:text-slate-500"
         }`}
       />
     </label>
@@ -363,12 +363,12 @@ function SelectCampo({
 }: SelectCampoProps) {
   return (
     <label className={`block ${className}`}>
-      <span className="text-sm font-semibold text-gray-700">{label}</span>
+      <span className="text-sm font-semibold text-slate-300">{label}</span>
 
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1 h-10 w-full rounded-xl border border-gray-300 px-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+        className="mt-1 h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 text-sm text-slate-100 outline-none transition focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 [color-scheme:dark] [&>option]:bg-[#171a23] [&>option]:text-slate-100"
       >
         <option value="">{placeholder}</option>
 
@@ -396,7 +396,7 @@ function CheckboxCampo({
   description,
 }: CheckboxCampoProps) {
   return (
-    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 p-3 transition hover:bg-slate-50">
+    <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3 transition hover:bg-white/[0.07]">
       <input
         type="checkbox"
         checked={checked}
@@ -405,12 +405,12 @@ function CheckboxCampo({
       />
 
       <span>
-        <span className="block text-sm font-semibold text-gray-700">
+        <span className="block text-sm font-semibold text-slate-200">
           {label}
         </span>
 
         {description && (
-          <span className="mt-0.5 block text-xs text-gray-500">
+          <span className="mt-0.5 block text-xs text-slate-400">
             {description}
           </span>
         )}
@@ -761,14 +761,14 @@ export default function ControleAdmissoesTabela() {
   }
 
   return (
-    <section className="mt-8 min-w-0 rounded-xl border bg-white p-6 shadow-sm">
+    <section className="mt-6 min-w-0 overflow-hidden rounded-[26px] border border-white/10 bg-[#171a23] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]">
       <div className="mb-5 flex flex-col gap-4">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={abrirModalNovaAdmissao}
-              className="rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
+              className="rounded-2xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_14px_35px_rgba(0,0,0,0.24)] transition hover:-translate-y-0.5 hover:bg-slate-200"
             >
               Nova admissão
             </button>
@@ -777,7 +777,7 @@ export default function ControleAdmissoesTabela() {
               type="button"
               disabled
               title="Vamos ativar este botão em uma próxima etapa."
-              className="rounded-xl border border-gray-200 bg-gray-100 px-5 py-2.5 text-sm font-semibold text-gray-400"
+              className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-slate-500"
             >
               Enviar para SEDE ({pendentesSede.length})
             </button>
@@ -786,7 +786,7 @@ export default function ControleAdmissoesTabela() {
               type="button"
               disabled
               title="Vamos ativar este botão em uma próxima etapa."
-              className="rounded-xl border border-gray-200 bg-gray-100 px-5 py-2.5 text-sm font-semibold text-gray-400"
+              className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-slate-500"
             >
               Subir para Base de Dados ({pendentesBase.length})
             </button>
@@ -798,13 +798,13 @@ export default function ControleAdmissoesTabela() {
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               placeholder="Buscar por nome, matrícula, CPF, cargo ou e-mail"
-              className="h-10 w-full rounded-xl border border-gray-300 px-4 text-center text-sm text-gray-800 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 xl:w-96"
+              className="h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 text-center text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/30 focus:bg-white/[0.08] focus:ring-2 focus:ring-blue-300/10 xl:w-96"
             />
 
             <button
               type="submit"
               disabled={loading}
-              className="h-10 rounded-xl bg-blue-700 px-5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-11 rounded-2xl bg-white px-5 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Buscar
             </button>
@@ -813,7 +813,7 @@ export default function ControleAdmissoesTabela() {
               type="button"
               onClick={limparBusca}
               disabled={loading}
-              className="h-10 rounded-xl border px-5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-11 rounded-2xl border border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
             >
               Limpar
             </button>
@@ -824,7 +824,7 @@ export default function ControleAdmissoesTabela() {
               disabled={loading || admissoes.length === 0}
               title="Baixar Excel"
               aria-label="Baixar Excel"
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-green-200 bg-green-50 text-green-700 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-300/25 bg-emerald-300/10 text-emerald-100 transition hover:bg-emerald-300/20 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <svg
                 className="h-5 w-5"
@@ -854,16 +854,16 @@ export default function ControleAdmissoesTabela() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+          <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-200">
             {admissoes.length} {admissoes.length === 1 ? "admissão" : "admissões"}
           </span>
 
-          <span className="rounded-full bg-yellow-50 px-3 py-1 text-xs font-semibold text-yellow-700">
+          <span className="rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-semibold text-yellow-100">
             {pendentesSede.length} pendente
             {pendentesSede.length === 1 ? "" : "s"} para SEDE
           </span>
 
-          <span className="rounded-full bg-yellow-50 px-3 py-1 text-xs font-semibold text-yellow-700">
+          <span className="rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-semibold text-yellow-100">
             {pendentesBase.length} pendente
             {pendentesBase.length === 1 ? "" : "s"} para Base
           </span>
@@ -871,26 +871,27 @@ export default function ControleAdmissoesTabela() {
       </div>
 
       {erro && !modalAberto && (
-        <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-5 rounded-2xl border border-red-300/25 bg-red-400/10 px-4 py-3 text-sm text-red-100">
           {erro}
         </div>
       )}
 
       {sucesso && (
-        <div className="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+        <div className="mb-5 rounded-2xl border border-emerald-300/25 bg-emerald-300/10 px-4 py-3 text-sm text-emerald-100">
           {sucesso}
         </div>
       )}
 
       {loading ? (
-        <div className="py-10 text-center text-sm text-gray-500">
+        <div className="py-10 text-center text-sm text-slate-400">
           Carregando admissões...
         </div>
       ) : (
-        <div className="w-full max-w-full overflow-x-auto rounded-xl border">
-          <table className="min-w-[2150px] text-center text-xs [&_td]:border-r [&_td]:border-slate-200/70 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-slate-200/70 [&_th:last-child]:border-r-0">
-            <thead className="bg-slate-100">
-              <tr className="border-b text-gray-600">
+        <div className="voxx-scrollbar w-full max-w-full overflow-x-auto rounded-[22px] border border-white/10 bg-[#202532] shadow-[0_18px_45px_rgba(0,0,0,0.2)]">
+          <table className="min-w-[2210px] text-center text-xs [&_td]:border-r [&_td]:border-white/10 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-white/10 [&_th:last-child]:border-r-0">
+            <thead className="sticky top-0 z-10 bg-[#2a3040]">
+              <tr className="border-b border-white/10 text-slate-300">
+                <th className="px-3 py-4 text-center">#</th>
                 <th className="px-3 py-4 text-center">Ações</th>
                 <th className="px-3 py-4 text-center">Pref.</th>  
                 <th className="px-3 py-4 text-center">Matrícula</th>
@@ -918,83 +919,89 @@ export default function ControleAdmissoesTabela() {
             </thead>
 
             <tbody>
-              {admissoes.map((admissao) => (
+              {admissoes.map((admissao, indice) => (
                 <tr
                   key={admissao.id}
-                  className="border-b align-middle hover:bg-slate-50"
+                  className="border-b border-white/10 align-middle text-slate-200 transition hover:bg-white/[0.055]"
                 >
+                  <td className="px-3 py-4 text-center align-middle">
+                    <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] px-2 text-[11px] font-bold text-slate-200">
+                      {indice + 1}
+                    </span>
+                  </td>
+
                   <td className="whitespace-nowrap px-3 py-4 text-center align-middle">
                     <button
                       type="button"
                       onClick={() => abrirModalEditar(admissao)}
-                      className="rounded-lg border px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-50"
+                      className="rounded-xl border border-blue-300/25 bg-blue-300/10 px-3 py-1.5 text-xs font-semibold text-blue-100 transition hover:bg-blue-300/20"
                     >
                       Editar
                     </button>
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="px-3 py-4 text-center align-middle text-slate-300">
                     {texto(admissao.pref)}
                   </td>
 
-                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle font-semibold text-gray-800">
+                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle font-semibold text-slate-100">
                     {texto(admissao.matricula)}
                     {registroBadge(admissao.registro_ponto)}
                   </td>
 
-                  <td className="min-w-[180px] px-3 py-4 text-center align-middle font-semibold text-gray-800">
+                  <td className="min-w-[180px] px-3 py-4 text-center align-middle font-semibold text-slate-100">
                     {texto(admissao.nome)}
                   </td>
 
-                  <td className="min-w-[180px] px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="min-w-[180px] px-3 py-4 text-center align-middle text-slate-300">
                     {texto(admissao.cargo)}
                   </td>
 
-                  <td className="min-w-[80px] px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="min-w-[80px] px-3 py-4 text-center align-middle text-slate-300">
                     {textoHoras(admissao.ch_edital)}
                   </td>
 
-                  <td className="min-w-[80px] px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="min-w-[80px] px-3 py-4 text-center align-middle text-slate-300">
                     {textoHoras(admissao.alteracao_ch)}
                   </td>
 
-                  <td className="min-w-[80px] px-3 py-4 text-center align-middle font-semibold text-gray-800">
+                  <td className="min-w-[80px] px-3 py-4 text-center align-middle font-semibold text-slate-100">
                     {textoHoras(admissao.ch_final)}
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="px-3 py-4 text-center align-middle text-slate-300">
                     {texto(admissao.sirg)}
                   </td>
 
-                  <td className="min-w-[100px] px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="min-w-[100px] px-3 py-4 text-center align-middle text-slate-300">
                     {texto(admissao.horario)}
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="px-3 py-4 text-center align-middle text-slate-300">
                     {formatarData(admissao.exercicio)}
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="px-3 py-4 text-center align-middle text-slate-300">
                     {formatarData(admissao.data_nascimento)}
                   </td>
 
-                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-slate-300">
                     {texto(admissao.cpf)}
                   </td>
 
-                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-slate-300">
                     {texto(admissao.pis)}
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="px-3 py-4 text-center align-middle text-slate-300">
                     {texto(admissao.edital)}
                   </td>
 
-                  <td className="min-w-[180px] px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="min-w-[180px] px-3 py-4 text-center align-middle text-slate-300">
                     {texto(admissao.email)}
                   </td>
 
-                  <td className="w-[80px] px-2 py-4 text-center align-middle text-gray-700">
+                  <td className="w-[80px] px-2 py-4 text-center align-middle text-slate-300">
                     <input
                       type="checkbox"
                       checked={admissao.carta_banco === true}
@@ -1011,7 +1018,7 @@ export default function ControleAdmissoesTabela() {
                     />
                   </td>
 
-                  <td className="w-[80px] px-2 py-4 text-center align-middle text-gray-700">
+                  <td className="w-[80px] px-2 py-4 text-center align-middle text-slate-300">
                     <input
                       type="checkbox"
                       checked={admissao.acesso_ponto === true}
@@ -1028,11 +1035,11 @@ export default function ControleAdmissoesTabela() {
                     />
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="px-3 py-4 text-center align-middle text-slate-300">
                     {texto(admissao.registro_ponto)}
                   </td>
 
-                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-slate-300">
                     {baseDestinoLabel(admissao.base_destino)}
                   </td>
 
@@ -1056,7 +1063,7 @@ export default function ControleAdmissoesTabela() {
                     </span>
                   </td>
 
-                  <td className="min-w-[240px] px-3 py-4 text-center align-middle text-gray-700">
+                  <td className="min-w-[240px] px-3 py-4 text-center align-middle text-slate-300">
                     {texto(admissao.observacao)}
                   </td>
                 </tr>
@@ -1065,8 +1072,8 @@ export default function ControleAdmissoesTabela() {
               {admissoes.length === 0 && (
                 <tr>
                   <td
-                    colSpan={23}
-                    className="px-4 py-10 text-center text-gray-500"
+                    colSpan={24}
+                    className="px-4 py-10 text-center text-slate-400"
                   >
                     Nenhuma admissão encontrada.
                   </td>
@@ -1079,26 +1086,26 @@ export default function ControleAdmissoesTabela() {
 
       {modalAberto && (
         <div
-          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/40 px-4 backdrop-blur-[1px]"
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/55 px-4 backdrop-blur-[2px]"
           onMouseDown={fecharModal}
         >
           <form
             onSubmit={salvarAdmissao}
             onMouseDown={(e) => e.stopPropagation()}
-            className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl"
+            className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-3xl border border-white/10 bg-[#171a23] p-6 text-slate-100 shadow-2xl"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
                 {erro && (
-                  <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-700">
+                  <div className="mt-5 rounded-2xl border border-red-300/25 bg-red-400/10 px-4 py-3 text-center text-sm font-medium text-red-100">
                     {erro}
                   </div>
                 )}
-                <h3 className="text-2xl font-bold text-gray-800">
+                <h3 className="text-2xl font-bold text-slate-100">
                   {admissaoEditando ? "Editar admissão" : "Nova admissão"}
                 </h3>
 
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-slate-400">
                   {admissaoEditando
                     ? "Atualize os dados da admissão selecionada."
                     : "Preencha os dados do colaborador admitido."}
@@ -1108,7 +1115,7 @@ export default function ControleAdmissoesTabela() {
               <button
                 type="button"
                 onClick={fecharModal}
-                className="rounded-full px-3 py-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                className="rounded-full px-3 py-1 text-slate-400 hover:bg-white/10 hover:text-white"
               >
                 ×
               </button>
@@ -1281,7 +1288,7 @@ export default function ControleAdmissoesTabela() {
             </div>
 
             <label className="mt-5 block">
-              <span className="text-sm font-semibold text-gray-700">
+              <span className="text-sm font-semibold text-slate-300">
                 Observação
               </span>
 
@@ -1289,16 +1296,16 @@ export default function ControleAdmissoesTabela() {
                 value={formulario.observacao}
                 onChange={(e) => atualizarCampo("observacao", e.target.value)}
                 rows={4}
-                className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-3 text-center text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="mt-1 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 py-3 text-center text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/30 focus:ring-2 focus:ring-blue-300/10"
               />
             </label>
 
-            <div className="mt-6 flex justify-end gap-3 border-t pt-5">
+            <div className="mt-6 flex justify-end gap-3 border-t border-white/10 pt-5">
               <button
                 type="button"
                 onClick={fecharModal}
                 disabled={salvando}
-                className="rounded-xl border px-5 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Cancelar
               </button>
@@ -1306,7 +1313,7 @@ export default function ControleAdmissoesTabela() {
               <button
                 type="submit"
                 disabled={salvando}
-                className="rounded-xl bg-blue-700 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-2xl bg-white px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {salvando
                   ? "Salvando..."

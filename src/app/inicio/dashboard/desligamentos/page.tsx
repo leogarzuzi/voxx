@@ -188,7 +188,7 @@ export default async function DashboardDesligamentosPage() {
               />
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="voxx-scrollbar overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b text-gray-500">

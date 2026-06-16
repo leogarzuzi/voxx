@@ -1,14 +1,22 @@
-export function classificarDivisao(cargo: string | null | undefined) {
-  const texto = String(cargo ?? "").toUpperCase();
+function normalizarCargo(cargo: string | null | undefined) {
+  return String(cargo ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase();
+}
 
-  if (texto.includes("MEDICO") || texto.includes("MÉDICO")) {
+export function classificarDivisao(cargo: string | null | undefined) {
+  const texto = normalizarCargo(cargo);
+
+  if (texto.includes("MEDICO")) {
     return "DIV. MÉDICA";
   }
 
   if (
-    texto.includes("ENFERMEIRO") ||
-    texto.includes("TECNICO DE ENFERMAGEM") ||
-    texto.includes("TÉCNICO DE ENFERMAGEM") ||
+    texto.includes("ENFERM") ||
+    texto.includes("TEC ENF") ||
+    texto.includes("TECNICO ENF") ||
+    texto.includes("TECNICO DE ENF") ||
     texto.includes("INSTRUMENTADOR")
   ) {
     return "DIV. DE ENFERMAGEM";
@@ -16,15 +24,12 @@ export function classificarDivisao(cargo: string | null | undefined) {
 
   if (
     texto.includes("PSICOLOGO") ||
-    texto.includes("PSICÓLOGO") ||
     texto.includes("FARMACEUTICO") ||
-    texto.includes("FARMACÊUTICO") ||
     texto.includes("FISIOTERAPEUTA") ||
     texto.includes("NUTRICIONISTA") ||
     texto.includes("DENTISTA") ||
     texto.includes("ASSISTENTE SOCIAL") ||
-    texto.includes("FONOAUDIOLOGO") ||
-    texto.includes("FONOAUDIÓLOGO")
+    texto.includes("FONOAUDIOLOGO")
   ) {
     return "DIV. MULTIDISCIPLINAR";
   }

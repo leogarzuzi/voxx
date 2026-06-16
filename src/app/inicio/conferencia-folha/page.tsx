@@ -2,6 +2,149 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
+type UploadCardProps = {
+  label: string;
+  sublabel?: string;
+  file: File | null;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+  onFile: (file: File | null) => void;
+  isDrag: boolean;
+  onDragEnter: () => void;
+  onDragLeave: () => void;
+};
+
+function UploadCard({
+  label,
+  sublabel,
+  file,
+  inputRef,
+  onFile,
+  isDrag,
+  onDragEnter,
+  onDragLeave,
+}: UploadCardProps) {
+  return (
+    <div
+      className={`overflow-hidden rounded-[24px] border transition-all duration-300 ${
+        file
+          ? "border-emerald-300/25 bg-emerald-300/10 shadow-[0_0_0_2px_rgba(52,211,153,0.08)]"
+          : isDrag
+          ? "border-blue-300/35 bg-blue-300/10 shadow-[0_0_0_3px_rgba(96,165,250,0.12)]"
+          : "border-white/10 bg-white/[0.055] shadow-[0_12px_34px_rgba(0,0,0,0.16)]"
+      }`}
+      onDragEnter={(event) => {
+        event.preventDefault();
+        onDragEnter();
+      }}
+      onDragOver={(event) => event.preventDefault()}
+      onDragLeave={onDragLeave}
+      onDrop={(event) => {
+        event.preventDefault();
+        onDragLeave();
+        onFile(event.dataTransfer.files?.[0] || null);
+      }}
+    >
+      <div
+        className={`h-1 w-full ${
+          file ? "bg-emerald-400" : isDrag ? "bg-blue-400" : "bg-white/10"
+        }`}
+      />
+
+      <div className="flex flex-col items-center px-6 py-7 text-center">
+        <div
+          className={`mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border ${
+            file
+              ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-100"
+              : isDrag
+              ? "border-blue-300/30 bg-blue-300/10 text-blue-100"
+              : "border-white/10 bg-white/[0.07] text-slate-300"
+          }`}
+        >
+          {file ? (
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              aria-hidden="true"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          ) : (
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <path d="M14 2v6h6" />
+              <line x1="12" y1="18" x2="12" y2="12" />
+              <line x1="9" y1="15" x2="15" y2="15" />
+            </svg>
+          )}
+        </div>
+
+        <p className="text-lg font-black tracking-tight text-slate-100">
+          {label}
+        </p>
+
+        {sublabel && (
+          <p className="mt-0.5 text-xs font-semibold uppercase tracking-widest text-slate-500">
+            {sublabel}
+          </p>
+        )}
+
+        {file ? (
+          <div className="mt-4 flex w-full max-w-xs items-center gap-2 rounded-2xl border border-emerald-300/25 bg-emerald-300/10 px-3 py-2">
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              className="text-emerald-100"
+              aria-hidden="true"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <path d="M14 2v6h6" />
+            </svg>
+            <p className="flex-1 truncate text-xs font-semibold text-emerald-100">
+              {file.name}
+            </p>
+          </div>
+        ) : (
+          <p className="mt-3 text-sm text-slate-400">
+            {isDrag ? "Solte o arquivo aqui" : "Arraste o arquivo ou selecione abaixo"}
+          </p>
+        )}
+
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="mt-4 rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-2 text-xs font-bold text-slate-200 transition hover:bg-white/[0.1] hover:text-white"
+        >
+          {file ? "Trocar arquivo" : "Selecionar arquivo"}
+        </button>
+
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".xlsx,.xls"
+          className="hidden"
+          onChange={(event) => onFile(event.target.files?.[0] || null)}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function ConferenciaFolhaPage() {
   const [fopag, setFopag] = useState<File | null>(null);
   const [previa, setPrevia] = useState<File | null>(null);
@@ -18,10 +161,12 @@ export default function ConferenciaFolhaPage() {
 
   const competencias = useMemo(() => {
     const hoje = new Date();
+
     return Array.from({ length: 5 }, (_, index) => {
       const data = new Date(hoje.getFullYear(), hoje.getMonth() + index - 2, 1);
       const mes = String(data.getMonth() + 1).padStart(2, "0");
       const ano = data.getFullYear();
+
       return `${mes}/${ano}`;
     });
   }, []);
@@ -32,30 +177,35 @@ export default function ConferenciaFolhaPage() {
 
   useEffect(() => {
     if (!loading) return;
+
     setProgresso(10);
+
     const interval = setInterval(() => {
       setProgresso((atual) => {
         if (atual >= 90) return atual;
         return atual + 8;
       });
     }, 350);
+
     return () => clearInterval(interval);
   }, [loading]);
 
   async function analisar() {
     if (!fopag || !previa) {
-      alert("Envie a FOPAG e a PRÉVIA.");
+      setMensagem("Envie a FOPAG e a PRÉVIA antes de analisar.");
       return;
     }
+
     setLoading(true);
     setMensagem(null);
 
     const formData = new FormData();
+
     formData.append("fopag", fopag);
     formData.append("previa", previa);
     formData.append("competencia", competencia);
 
-   let response: Response;
+    let response: Response;
 
     try {
       response = await fetch("/api/conferencia-folha", {
@@ -70,24 +220,25 @@ export default function ConferenciaFolhaPage() {
     }
 
     if (!response.ok) {
-    const erro = await response.json();
+      const erro = await response.json();
 
-    setLoading(false);
-    setProgresso(0);
+      setLoading(false);
+      setProgresso(0);
+      setMensagem(
+        erro?.error
+          ? `Erro ao gerar relatório: ${erro.error}`
+          : "Erro ao gerar relatório."
+      );
 
-    setMensagem(
-      erro?.error
-        ? `Erro ao gerar relatório: ${erro.error}`
-        : "Erro ao gerar relatório."
-    );
-
-    return;
-  }
+      return;
+    }
 
     setProgresso(100);
+
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
+
     link.href = url;
     link.download = `resultado_conferencia_${competencia.replace("/", "-")}.xlsx`;
     document.body.appendChild(link);
@@ -100,181 +251,63 @@ export default function ConferenciaFolhaPage() {
       setProgresso(0);
       setMensagem(null);
     }, 600);
-    }
+  }
 
-
-  const UploadCard = ({
-    label,
-    sublabel,
-    file,
-    inputRef,
-    onFile,
-    isDrag,
-    onDragEnter,
-    onDragLeave,
-  }: {
-    label: string;
-    sublabel?: string;
-    file: File | null;
-    inputRef: React.RefObject<HTMLInputElement | null>;
-    onFile: (f: File | null) => void;
-    isDrag: boolean;
-    onDragEnter: () => void;
-    onDragLeave: () => void;
-  }) => (
-    <div
-      className="rounded-2xl border transition-all duration-300"
-      style={{
-        borderColor: file ? "#16a34a" : isDrag ? "#2563eb" : "#e2e8f0",
-        backgroundColor: file ? "#f0fdf4" : isDrag ? "#eff6ff" : "#f8fafc",
-        boxShadow: isDrag
-          ? "0 0 0 3px rgba(37,99,235,0.15)"
-          : file
-          ? "0 0 0 2px rgba(22,163,74,0.12)"
-          : "0 1px 4px rgba(0,0,0,0.05)",
-        overflow: "hidden",
-      }}
-      onDragEnter={(e) => { e.preventDefault(); onDragEnter(); }}
-      onDragOver={(e) => e.preventDefault()}
-      onDragLeave={onDragLeave}
-      onDrop={(e) => {
-        e.preventDefault();
-        onDragLeave();
-        onFile(e.dataTransfer.files?.[0] || null);
-      }}
-    >
-      {/* Accent bar */}
-      <div
-        className="h-1 w-full transition-all duration-300"
-        style={{ backgroundColor: file ? "#16a34a" : isDrag ? "#2563eb" : "#e2e8f0" }}
-      />
-
-      <div className="flex flex-col items-center px-6 py-7 text-center">
-        {/* Ícone */}
-        <div
-          className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl transition-all duration-300"
-          style={{
-            backgroundColor: file ? "#dcfce7" : isDrag ? "#dbeafe" : "#ffffff",
-            border: `1.5px solid ${file ? "#86efac" : isDrag ? "#93c5fd" : "#e2e8f0"}`,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-          }}
-        >
-          {file ? (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          ) : (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isDrag ? "#2563eb" : "#94a3b8"} strokeWidth="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <path d="M14 2v6h6" />
-              <line x1="12" y1="18" x2="12" y2="12" />
-              <line x1="9" y1="15" x2="15" y2="15" />
-            </svg>
-          )}
-        </div>
-
-        {/* Título */}
-        <p
-          className="text-lg font-black"
-          style={{ color: file ? "#15803d" : "#0f172a", letterSpacing: "-0.02em" }}
-        >
-          {label}
-        </p>
-
-        {sublabel && (
-          <p className="mt-0.5 text-xs font-semibold uppercase tracking-widest text-slate-400">
-            {sublabel}
-          </p>
-        )}
-
-        {/* Estado do arquivo */}
-        {file ? (
-          <div className="mt-4 flex w-full max-w-xs items-center gap-2 rounded-xl border border-green-200 bg-white px-3 py-2">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <path d="M14 2v6h6" />
-            </svg>
-            <p className="flex-1 truncate text-xs font-semibold text-green-700">{file.name}</p>
-          </div>
-        ) : (
-          <p className="mt-3 text-sm text-slate-500">
-            {isDrag ? "Solte o arquivo aqui" : "Arraste o arquivo ou clique no botão abaixo"}
-          </p>
-        )}
-
-        {/* Botão que aciona o input — sem overlay */}
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="mt-4 rounded-xl border border-slate-200 bg-white px-5 py-2 text-xs font-bold text-slate-600 shadow-sm transition-all duration-200 hover:border-blue-300 hover:text-blue-600 hover:shadow-md"
-        >
-          {file ? "Trocar arquivo" : "Selecionar arquivo"}
-        </button>
-
-        {/* Input real — escondido, acionado por ref */}
-        <input
-          ref={inputRef}
-          type="file"
-          accept=".xlsx,.xls"
-          className="hidden"
-          onChange={(e) => onFile(e.target.files?.[0] || null)}
-        />
-      </div>
-    </div>
-  );
+  const mensagemErro = mensagem?.startsWith("Erro") || mensagem?.startsWith("Envie");
 
   return (
-    <main
-      className="flex min-h-screen flex-col p-8 text-slate-900"
-      style={{ backgroundColor: "#f1f5f9" }}
-    >
-        {/* Header */}
-        <div className="mb-8">
-            <h1 className="text-2xl font-black text-slate-900" style={{ letterSpacing: "-0.04em" }}>
-              Conferência de Folha
-            </h1>
-          </div>
-        
+    <main className="min-h-screen min-w-0 bg-[#11141b] p-8 text-slate-100">
+      <section className="overflow-hidden rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_14%_0%,rgba(59,130,246,0.24),transparent_32%),linear-gradient(135deg,#242833_0%,#171a23_58%,#10131a_100%)] p-7 shadow-[0_24px_80px_rgba(0,0,0,0.32)]">
+        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-400">
+          Módulo VOXX
+        </p>
+        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-white">
+          Análise FOPAG
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
+          Compare a FOPAG com a prévia da folha e baixe o relatório de
+          conferência em Excel.
+        </p>
+      </section>
 
+      {mostrarInfo && (
+        <section className="mt-6 rounded-[24px] border border-blue-300/20 bg-blue-300/[0.07] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.22)]">
+          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-blue-100">
+            Requisitos da prévia
+          </p>
+          <ul className="grid gap-2 text-sm text-blue-50 md:grid-cols-2">
+            {[
+              "A aba DINAMICA é ignorada automaticamente.",
+              "O sistema detecta automaticamente a aba principal da prévia.",
+              "A prévia deve conter: MATRÍCULA, RUBRICA e COMPETENCIA.",
+              "As abas FERIAS e DESLIGADOS são opcionais.",
+              "Competência no formato MM/AAAA.",
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-2">
+                <span className="mt-1 text-blue-200">•</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
-        {/* Info box */}
-        {mostrarInfo && (
-          <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50 p-5">
-            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-blue-500">
-              Requisitos da prévia
-            </p>
-            <ul className="space-y-2 text-sm text-blue-800">
-              {[
-                "A aba DINAMICA é ignorada automaticamente.",
-                "O sistema detecta automaticamente a aba principal da prévia.",
-                "A prévia deve conter: MATRÍCULA, RUBRICA e COMPETENCIA.",
-                "As abas FERIAS e DESLIGADOS são opcionais.",
-                "Competência no formato MM/AAAA.",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-2">
-                  <span className="mt-0.5 text-blue-400">•</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+      <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(360px,520px)_1fr]">
+        <div className="rounded-[28px] border border-white/10 bg-[#171a23] p-6 shadow-[0_22px_70px_rgba(0,0,0,0.28)]">
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.24em] text-slate-500">
+                Competência
+              </p>
+              <p className="mt-1 text-sm text-slate-300">
+                Selecione o mês da conferência.
+              </p>
+            </div>
 
-        {/* Main card */}
-        <div
-          className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-7"
-          style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04)" }}
-        >
-          {/* Competência compacta */}
-          <div className="mb-6 flex items-center justify-between">
-
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
-              Competência
-            </p>
             <select
               value={competencia}
-              onChange={(e) => setCompetencia(e.target.value)}
-              className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-bold text-slate-800 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+              onChange={(event) => setCompetencia(event.target.value)}
+              className="h-11 rounded-2xl border border-white/10 bg-white/[0.06] px-4 text-sm font-bold text-slate-100 outline-none transition [color-scheme:dark] focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 [&>option]:bg-[#171a23] [&>option]:text-slate-100"
             >
               {competencias.map((item) => (
                 <option key={item} value={item}>
@@ -284,26 +317,24 @@ export default function ConferenciaFolhaPage() {
             </select>
           </div>
 
-          {/* Ações */}
-            <div className="mb-6 flex gap-2">
-              <a
-                href="/modelos/modelo_fopag.xlsx"
-                download
-                className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:border-slate-300"
-              >
-                Modelo FOPAG
-              </a>
+          <div className="mb-6 grid grid-cols-2 gap-3">
+            <a
+              href="/modelos/modelo_fopag.xlsx"
+              download
+              className="flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-center text-sm font-semibold text-slate-200 transition hover:bg-white/[0.1]"
+            >
+              Modelo FOPAG
+            </a>
 
-              <button
-                type="button"
-                onClick={() => setMostrarInfo(!mostrarInfo)}
-                className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:border-slate-300"
-              >
-                Requisitos
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setMostrarInfo((valorAtual) => !valorAtual)}
+              className="rounded-2xl border border-blue-300/25 bg-blue-300/10 px-4 py-3 text-sm font-semibold text-blue-100 transition hover:bg-blue-300/20"
+            >
+              Requisitos
+            </button>
+          </div>
 
-          {/* Upload cards */}
           <div className="flex flex-col gap-4">
             <UploadCard
               label="FOPAG"
@@ -315,6 +346,7 @@ export default function ConferenciaFolhaPage() {
               onDragEnter={() => setFopagDrag(true)}
               onDragLeave={() => setFopagDrag(false)}
             />
+
             <UploadCard
               label="PRÉVIA"
               sublabel="Arquivo de conferência"
@@ -327,91 +359,113 @@ export default function ConferenciaFolhaPage() {
             />
           </div>
 
-          {/* Progress bar */}
           {loading && (
             <div className="mt-6">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500">Analisando arquivos...</span>
-                <span className="text-xs font-bold text-slate-700">{progresso}%</span>
+                <span className="text-xs font-semibold text-slate-400">
+                  Analisando arquivos...
+                </span>
+                <span className="text-xs font-bold text-slate-200">
+                  {progresso}%
+                </span>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.08]">
                 <div
-                  className="h-full rounded-full transition-all duration-300"
-                  style={{
-                    width: `${progresso}%`,
-                    background: "linear-gradient(90deg, #1d4ed8, #60a5fa)",
-                  }}
+                  className="h-full rounded-full bg-gradient-to-r from-blue-500 to-blue-300 transition-all duration-300"
+                  style={{ width: `${progresso}%` }}
                 />
               </div>
             </div>
           )}
 
-          {/* Botão principal */}
           <button
+            type="button"
             onClick={analisar}
             disabled={loading}
-            className="mt-6 w-full rounded-2xl py-4 text-sm font-bold text-white transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
-            style={{
-              background: loading
-                ? "#94a3b8"
-                : "linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #3b82f6 100%)",
-              boxShadow: loading
-                ? "none"
-                : "0 4px 16px rgba(37,99,235,0.4), 0 1px 4px rgba(37,99,235,0.3), inset 0 1px 0 rgba(255,255,255,0.15)",
-              letterSpacing: "-0.01em",
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                const btn = e.currentTarget as HTMLButtonElement;
-                btn.style.transform = "translateY(-1px)";
-                btn.style.boxShadow =
-                  "0 8px 24px rgba(37,99,235,0.45), 0 2px 8px rgba(37,99,235,0.3), inset 0 1px 0 rgba(255,255,255,0.2)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              const btn = e.currentTarget as HTMLButtonElement;
-              btn.style.transform = "translateY(0)";
-              btn.style.boxShadow = loading
-                ? "none"
-                : "0 4px 16px rgba(37,99,235,0.4), 0 1px 4px rgba(37,99,235,0.3), inset 0 1px 0 rgba(255,255,255,0.15)";
-            }}
+            className="mt-6 w-full rounded-2xl bg-blue-600 py-4 text-sm font-bold text-white shadow-[0_12px_34px_rgba(37,99,235,0.24)] transition hover:-translate-y-0.5 hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Analisando..." : "Analisar e baixar relatório"}
           </button>
 
-          {/* Mensagem */}
           {mensagem && (
             <div
-              className="mt-5 flex items-center gap-3 rounded-2xl border px-4 py-3.5"
-              style={{
-                borderColor: mensagem.startsWith("Erro") ? "#fca5a5" : "#86efac",
-                backgroundColor: mensagem.startsWith("Erro") ? "#fef2f2" : "#f0fdf4",
-              }}
+              className={`mt-5 flex items-center gap-3 rounded-2xl border px-4 py-3.5 ${
+                mensagemErro
+                  ? "border-red-300/25 bg-red-400/10 text-red-100"
+                  : "border-emerald-300/25 bg-emerald-300/10 text-emerald-100"
+              }`}
             >
               <div
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
-                style={{ backgroundColor: mensagem.startsWith("Erro") ? "#fee2e2" : "#dcfce7" }}
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
+                  mensagemErro ? "bg-red-400/15" : "bg-emerald-300/15"
+                }`}
               >
-                {mensagem.startsWith("Erro") ? (
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="3">
+                {mensagemErro ? (
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    aria-hidden="true"
+                  >
                     <line x1="18" y1="6" x2="6" y2="18" />
                     <line x1="6" y1="6" x2="18" y2="18" />
                   </svg>
                 ) : (
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3">
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    aria-hidden="true"
+                  >
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 )}
               </div>
-              <p
-                className="text-sm font-semibold"
-                style={{ color: mensagem.startsWith("Erro") ? "#dc2626" : "#15803d" }}
-              >
-                {mensagem}
-              </p>
+              <p className="text-sm font-semibold">{mensagem}</p>
             </div>
           )}
         </div>
-      </main>
+
+        <aside className="rounded-[28px] border border-white/10 bg-[#171a23] p-6 shadow-[0_22px_70px_rgba(0,0,0,0.22)]">
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-slate-500">
+            Fluxo da análise
+          </p>
+          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+            Conferência em três passos
+          </h2>
+
+          <div className="mt-6 grid gap-4">
+            {[
+              ["1", "Baixe o modelo", "Use o arquivo modelo da FOPAG quando precisar padronizar a origem."],
+              ["2", "Envie os arquivos", "Carregue a FOPAG e a prévia no formato Excel."],
+              ["3", "Baixe o resultado", "O VOXX compara os arquivos e entrega o relatório pronto."],
+            ].map(([numero, titulo, descricao]) => (
+              <div
+                key={numero}
+                className="rounded-[22px] border border-white/10 bg-white/[0.05] p-4"
+              >
+                <div className="flex items-start gap-3">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-blue-300/25 bg-blue-300/10 text-sm font-bold text-blue-100">
+                    {numero}
+                  </span>
+                  <div>
+                    <p className="font-semibold text-slate-100">{titulo}</p>
+                    <p className="mt-1 text-sm leading-6 text-slate-400">
+                      {descricao}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </aside>
+      </section>
+    </main>
   );
 }
