@@ -13,6 +13,32 @@ type Usuario = {
   avatar: string | null;
 };
 
+const avatares = Array.from(
+  { length: 13 },
+  (_, i) => `avatar-${String(i + 1).padStart(2, "0")}`
+);
+
+function CampoPerfil({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div>
+      <label className="mb-1 block text-sm font-medium text-slate-300">
+        {label}
+      </label>
+      <input
+        disabled
+        value={value}
+        className="h-11 w-full rounded-xl border border-white/10 bg-[#202532] px-4 text-slate-400 outline-none"
+      />
+    </div>
+  );
+}
+
 export default function PerfilPage() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [nomeExibicao, setNomeExibicao] = useState("");
@@ -21,12 +47,10 @@ export default function PerfilPage() {
   const [mensagem, setMensagem] = useState("");
   const [avatarSelecionado, setAvatarSelecionado] = useState("avatar-01");
 
-  const avatares = Array.from({ length: 13 }, (_, i) => `avatar-${String(i + 1).padStart(2, "0")}`); // quantidade de avatares disponíveis, so trocar o length
-
   useEffect(() => {
     async function carregarPerfil() {
-      const { data: sessionData } = await supabase.auth.getSession(); // pega a sessão atual
-      const email = sessionData.session?.user?.email?.trim().toLowerCase(); // pega o e-mail logado
+      const { data: sessionData } = await supabase.auth.getSession();
+      const email = sessionData.session?.user?.email?.trim().toLowerCase();
 
       if (!email) {
         setLoading(false);
@@ -37,12 +61,12 @@ export default function PerfilPage() {
         .from("usuarios")
         .select("id, nome, nome_exibicao, email, perfil, criado_em, avatar")
         .eq("email", email)
-        .single<Usuario>(); // busca o usuário na tabela usuarios
+        .single<Usuario>();
 
       if (!error && data) {
         setUsuario(data);
-        setNomeExibicao(data.nome_exibicao || data.nome.split(" ")[0]); // mostra nome salvo ou primeiro nome
-        setAvatarSelecionado(data.avatar || "avatar-01"); // mostra avatar salvo ou padrão
+        setNomeExibicao(data.nome_exibicao || data.nome.split(" ")[0]);
+        setAvatarSelecionado(data.avatar || "avatar-01");
       }
 
       setLoading(false);
@@ -69,8 +93,8 @@ export default function PerfilPage() {
     const { error } = await supabase
       .from("usuarios")
       .update({
-        nome_exibicao: nomeExibicao.trim(), // salva o nome de usuário
-        avatar: avatarSelecionado, // salva o avatar escolhido
+        nome_exibicao: nomeExibicao.trim(),
+        avatar: avatarSelecionado,
       })
       .eq("id", usuario.id);
 
@@ -84,17 +108,17 @@ export default function PerfilPage() {
     setMensagem("Perfil atualizado com sucesso.");
 
     setTimeout(() => {
-      window.location.reload(); // recarrega para atualizar menu superior
+      window.location.reload();
     }, 700);
   }
 
   function formatarData(data: string) {
-    return new Date(data).toLocaleDateString("pt-BR"); // formato brasileiro
+    return new Date(data).toLocaleDateString("pt-BR");
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-500">
+      <div className="flex min-h-screen items-center justify-center bg-[#11141b] text-slate-400">
         Carregando perfil...
       </div>
     );
@@ -102,49 +126,58 @@ export default function PerfilPage() {
 
   if (!usuario) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-red-600">
+      <div className="flex min-h-screen items-center justify-center bg-[#11141b] text-red-200">
         Não foi possível carregar o perfil.
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 px-6 py-10">
-      <div className="mx-auto max-w-4xl">
-        <h1 className="text-2xl font-bold text-gray-800">Meu perfil</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Gerencie suas informações de exibição no VOXX.
-        </p>
+    <main className="min-h-screen bg-[#11141b] px-6 py-10 text-slate-100">
+      <div className="mx-auto max-w-5xl">
+        <section className="overflow-hidden rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_14%_0%,rgba(59,130,246,0.24),transparent_32%),linear-gradient(135deg,#242833_0%,#171a23_58%,#10131a_100%)] p-7 shadow-[0_24px_80px_rgba(0,0,0,0.32)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-400">
+            Conta
+          </p>
+          <h1 className="mt-3 text-4xl font-semibold tracking-tight text-white">
+            Meu perfil
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
+            Ajuste seu nome de exibição e escolha o avatar que aparece no menu
+            superior do sistema.
+          </p>
+        </section>
 
-        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-[260px_1fr]">
-          <section className="rounded-3xl bg-white p-6 shadow-sm border border-gray-100">
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[300px_1fr]">
+          <section className="rounded-[28px] border border-white/10 bg-[#171a23] p-6 shadow-[0_22px_70px_rgba(0,0,0,0.28)]">
             <div className="flex flex-col items-center">
               <img
                 src={`/avatars/${avatarSelecionado}.png`}
                 alt="Avatar selecionado"
-                className="h-28 w-28 rounded-full object-cover border-4 border-blue-100"
+                className="h-32 w-32 rounded-full border-4 border-white/10 object-cover shadow-[0_18px_45px_rgba(0,0,0,0.28)]"
               />
 
-              <p className="mt-4 text-sm font-semibold text-gray-700">
+              <p className="mt-4 text-sm font-semibold text-white">
                 Avatar do perfil
               </p>
 
-              <p className="mt-2 text-center text-xs text-gray-400">
-                Escolha o avatar que aparecerá ao lado do seu nome.
+              <p className="mt-2 text-center text-xs leading-5 text-slate-400">
+                Esse avatar aparece no card do usuário e ajuda a reconhecer sua
+                sessão rapidamente.
               </p>
             </div>
 
-            <div className="mt-6 max-h-72 overflow-y-auto">
+            <div className="voxx-scrollbar mt-6 max-h-72 overflow-y-auto pr-1">
               <div className="grid grid-cols-5 gap-3">
                 {avatares.map((avatar) => (
                   <button
                     key={avatar}
                     type="button"
                     onClick={() => setAvatarSelecionado(avatar)}
-                    className={`rounded-full border-2 p-1 transition ${
+                    className={`rounded-full border p-1 transition ${
                       avatarSelecionado === avatar
-                        ? "border-blue-600 bg-blue-50"
-                        : "border-gray-200 hover:border-blue-300"
+                        ? "border-blue-300 bg-blue-300/10 shadow-[0_0_0_4px_rgba(96,165,250,0.08)]"
+                        : "border-white/10 bg-white/[0.04] hover:border-blue-300/50"
                     }`}
                   >
                     <img
@@ -158,84 +191,50 @@ export default function PerfilPage() {
             </div>
           </section>
 
-          <section className="rounded-3xl bg-white p-6 shadow-sm border border-gray-100">
+          <section className="rounded-[28px] border border-white/10 bg-[#171a23] p-6 shadow-[0_22px_70px_rgba(0,0,0,0.28)]">
             <div className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nome completo
-                </label>
-                <input
-                  disabled
-                  value={usuario.nome}
-                  className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-500"
-                />
-              </div>
+              <CampoPerfil label="Nome completo" value={usuario.nome} />
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="mb-1 block text-sm font-medium text-slate-300">
                   Nome de usuário
                 </label>
                 <input
                   value={nomeExibicao}
                   onChange={(e) => setNomeExibicao(e.target.value)}
                   placeholder="Ex: João Gustavo"
-                  className="w-full h-11 px-4 rounded-xl border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="h-11 w-full rounded-xl border border-white/10 bg-[#202532] px-4 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-blue-300/40 focus:ring-2 focus:ring-blue-300/15"
                 />
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="mt-2 text-xs text-slate-500">
                   Esse é o nome que aparecerá no menu do sistema.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    E-mail
-                  </label>
-                  <input
-                    disabled
-                    value={usuario.email}
-                    className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Perfil
-                  </label>
-                  <input
-                    disabled
-                    value={usuario.perfil}
-                    className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-500"
-                  />
-                </div>
+                <CampoPerfil label="E-mail" value={usuario.email} />
+                <CampoPerfil label="Perfil" value={usuario.perfil} />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Membro desde
-                </label>
-                <input
-                  disabled
-                  value={formatarData(usuario.criado_em)}
-                  className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-500"
-                />
-              </div>
+              <CampoPerfil
+                label="Membro desde"
+                value={formatarData(usuario.criado_em)}
+              />
 
               <button
                 type="button"
                 onClick={handleSalvar}
                 disabled={salvando}
-                className="w-full h-11 rounded-xl bg-blue-700 text-white font-semibold shadow-lg shadow-blue-200 transition hover:bg-blue-800 active:scale-[0.98] disabled:opacity-60"
+                className="h-11 w-full rounded-xl bg-white text-sm font-bold text-slate-950 shadow-[0_16px_40px_rgba(255,255,255,0.08)] transition hover:bg-slate-200 active:scale-[0.98] disabled:opacity-60"
               >
                 {salvando ? "Salvando..." : "Salvar alterações"}
               </button>
 
               {mensagem && (
                 <div
-                  className={`rounded-xl px-4 py-3 text-sm text-center ${
+                  className={`rounded-xl border px-4 py-3 text-center text-sm ${
                     mensagem.includes("sucesso")
-                      ? "bg-green-50 text-green-700 border border-green-200"
-                      : "bg-red-50 text-red-600 border border-red-200"
+                      ? "border-emerald-300/20 bg-emerald-400/10 text-emerald-100"
+                      : "border-red-300/20 bg-red-400/10 text-red-100"
                   }`}
                 >
                   {mensagem}

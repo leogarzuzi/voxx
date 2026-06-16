@@ -1,130 +1,180 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+
+function IconeOlho({ aberto }: { aberto: boolean }) {
+  return aberto ? (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  ) : (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M3 3l18 18"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="2"
+      />
+      <path
+        d="M10.6 10.6A3 3 0 0 0 13.4 13.4"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="2"
+      />
+      <path
+        d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a17.5 17.5 0 0 1-3.1 4.1"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="2"
+      />
+      <path
+        d="M6.6 6.6C3.7 8.4 2 12 2 12s3.5 7 10 7a10.7 10.7 0 0 0 4.4-.9"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+function RequisitoSenha({ ok, texto }: { ok: boolean; texto: string }) {
+  return (
+    <div
+      className={`flex items-center gap-2 text-xs ${
+        ok ? "text-emerald-300" : "text-slate-500"
+      }`}
+    >
+      <span
+        className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${
+          ok
+            ? "bg-emerald-400/15 text-emerald-300 ring-1 ring-emerald-300/25"
+            : "bg-white/[0.05] text-slate-500 ring-1 ring-white/10"
+        }`}
+      >
+        {ok ? "✓" : "•"}
+      </span>
+      {texto}
+    </div>
+  );
+}
+
+function TelaBase({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#11141b] px-4 py-10">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.14),transparent_34%),linear-gradient(180deg,#151923_0%,#11141b_52%,#0d1016_100%)]" />
+      <div className="relative z-10 w-full max-w-[430px]">{children}</div>
+    </div>
+  );
+}
+
+function CardSenha({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-[30px] border border-white/10 bg-[#171a23]/95 p-8 text-slate-100 shadow-[0_28px_90px_rgba(0,0,0,0.46)] backdrop-blur-xl">
+      {children}
+    </div>
+  );
+}
 
 export default function DefinirSenhaPage() {
   const router = useRouter();
 
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
-  const [mostrarSenha, setMostrarSenha] = useState(false); // mostra/oculta nova senha
-  const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false); // mostra/oculta confirmação
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
   const [loading, setLoading] = useState(false);
   const [verificando, setVerificando] = useState(true);
   const [mensagem, setMensagem] = useState("");
 
-useEffect(() => {
-  async function verificarSessao() {
-    setMensagem("");
+  useEffect(() => {
+    async function verificarSessao() {
+      setMensagem("");
 
-    // pega os parâmetros do link vindo do Supabase
-    const url = new URL(window.location.href);
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const searchParams = url.searchParams;
+      const url = new URL(window.location.href);
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const searchParams = url.searchParams;
+      const erroUrl = hashParams.get("error") || searchParams.get("error");
 
-    // se o próprio Supabase mandou erro no link, bloqueia direto
-    const erroUrl = hashParams.get("error") || searchParams.get("error");
+      if (erroUrl) {
+        setMensagem(
+          "Link inválido ou expirado. Solicite uma nova redefinição de senha."
+        );
+        setVerificando(false);
+        return;
+      }
 
-    if (erroUrl) {
-      setMensagem(
-        "Link inválido ou expirado. Solicite uma nova redefinição de senha."
-      );
+      const accessToken =
+        hashParams.get("access_token") || searchParams.get("access_token");
+      const refreshToken =
+        hashParams.get("refresh_token") || searchParams.get("refresh_token");
+      const code = searchParams.get("code");
+      const tokenHash =
+        searchParams.get("token_hash") ||
+        searchParams.get("token_hash".toUpperCase()) ||
+        searchParams.get("token");
+      const tipoLink =
+        hashParams.get("type") || searchParams.get("type") || "recovery";
+
+      let sessaoCriada = false;
+
+      if (accessToken && refreshToken) {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+
+        if (!error) sessaoCriada = true;
+      }
+
+      if (!sessaoCriada && code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (!error) sessaoCriada = true;
+      }
+
+      if (
+        !sessaoCriada &&
+        tokenHash &&
+        (tipoLink === "recovery" || tipoLink === "invite")
+      ) {
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: tipoLink as "recovery" | "invite",
+        });
+
+        if (!error) sessaoCriada = true;
+      }
+
+      const { data } = await supabase.auth.getSession();
+
+      if (!data.session) {
+        setMensagem(
+          "Link inválido ou expirado. Solicite uma nova redefinição de senha."
+        );
+        setVerificando(false);
+        return;
+      }
+
+      if (tipoLink !== "invite" && tipoLink !== "recovery") {
+        router.replace("/inicio");
+        return;
+      }
+
+      window.history.replaceState({}, document.title, "/definir-senha");
       setVerificando(false);
-      return;
     }
 
-    // formato 1: tokens no hash da URL
-    const accessToken =
-      hashParams.get("access_token") || searchParams.get("access_token");
-
-    const refreshToken =
-      hashParams.get("refresh_token") || searchParams.get("refresh_token");
-
-    // formato 2: code na URL
-    const code = searchParams.get("code");
-
-    // formato 3: token_hash vindo de template customizado do Supabase
-    const tokenHash =
-      searchParams.get("token_hash") ||
-      searchParams.get("token_hash".toUpperCase()) ||
-      searchParams.get("token");
-
-    // tipo do link: invite ou recovery
-    const tipoLink =
-      hashParams.get("type") ||
-      searchParams.get("type") ||
-      "recovery";
-
-    let sessaoCriada = false;
-
-    // CASO 1: link com access_token e refresh_token
-    if (accessToken && refreshToken) {
-      const { error } = await supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken,
-      });
-
-      if (!error) {
-        sessaoCriada = true;
-      }
-    }
-
-    // CASO 2: link com code
-    if (!sessaoCriada && code) {
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-      if (!error) {
-        sessaoCriada = true;
-      }
-    }
-
-    // CASO 3: link com token_hash/token
-    if (
-      !sessaoCriada &&
-      tokenHash &&
-      (tipoLink === "recovery" || tipoLink === "invite")
-    ) {
-      const { error } = await supabase.auth.verifyOtp({
-        token_hash: tokenHash,
-        type: tipoLink as "recovery" | "invite",
-      });
-
-      if (!error) {
-        sessaoCriada = true;
-      }
-    }
-
-    // confere se existe sessão depois de tentar todos os formatos
-    const { data } = await supabase.auth.getSession();
-
-    if (!data.session) {
-      setMensagem(
-        "Link inválido ou expirado. Solicite uma nova redefinição de senha."
-      );
-      setVerificando(false);
-      return;
-    }
-
-    // aceita apenas convite e recuperação de senha
-    if (tipoLink !== "invite" && tipoLink !== "recovery") {
-      router.replace("/inicio");
-      return;
-    }
-
-    // limpa token/code da URL depois de validar a sessão
-    window.history.replaceState({}, document.title, "/definir-senha");
-
-    setVerificando(false);
-  }
-
-  verificarSessao();
-}, [router]);
+    verificarSessao();
+  }, [router]);
 
   async function handleDefinirSenha(e: React.FormEvent) {
-    e.preventDefault(); 
-    
+    e.preventDefault();
     setMensagem("");
 
     if (!senha || !confirmarSenha) {
@@ -137,10 +187,10 @@ useEffect(() => {
       return;
     }
 
-    const temMinimo = senha.length >= 8; // mínimo de caracteres
-    const temMaiuscula = /[A-Z]/.test(senha); // letra maiúscula
-    const temNumero = /[0-9]/.test(senha); // número
-    const temEspecial = /[^A-Za-z0-9]/.test(senha); // caractere especial
+    const temMinimo = senha.length >= 8;
+    const temMaiuscula = /[A-Z]/.test(senha);
+    const temNumero = /[0-9]/.test(senha);
+    const temEspecial = /[^A-Za-z0-9]/.test(senha);
 
     if (!temMinimo || !temMaiuscula || !temNumero || !temEspecial) {
       setMensagem(
@@ -163,7 +213,6 @@ useEffect(() => {
     }
 
     setMensagem("Senha definida com sucesso.");
-
     await supabase.auth.signOut();
 
     setTimeout(() => {
@@ -171,93 +220,84 @@ useEffect(() => {
     }, 1500);
   }
 
-  function IconeOlho({ aberto }: { aberto: boolean }) {
-    return aberto ? (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" stroke="currentColor" strokeWidth="2" />
-        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
-      </svg>
-    ) : (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-        <path d="M3 3l18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        <path d="M10.6 10.6A3 3 0 0 0 13.4 13.4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        <path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a17.5 17.5 0 0 1-3.1 4.1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        <path d="M6.6 6.6C3.7 8.4 2 12 2 12s3.5 7 10 7a10.7 10.7 0 0 0 4.4-.9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    );
-  }
-
-  function RequisitoSenha({
-    ok,
-    texto,
-  }: {
-    ok: boolean;
-    texto: string;
-  }) {
-    return (
-      <div className={`text-xs ${ok ? "text-green-600" : "text-gray-400"}`}>
-        {ok ? "✓" : "•"} {texto}
-      </div>
-    );
-  }
-
   if (verificando) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100">
-        <p className="text-sm text-gray-500">Verificando acesso...</p>
-      </div>
+      <TelaBase>
+        <CardSenha>
+          <div className="flex flex-col items-center text-center">
+            <img
+              src="/logo-simbolo.png"
+              alt="VOXX"
+              className="h-20 w-20 animate-pulse object-contain"
+            />
+            <p className="mt-5 text-sm font-medium text-slate-400">
+              Verificando acesso...
+            </p>
+          </div>
+        </CardSenha>
+      </TelaBase>
     );
   }
 
   if (mensagem.includes("Link inválido")) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 px-4">
-        <div className="w-full max-w-sm rounded-3xl bg-white p-8 shadow-2xl border border-blue-100 text-center">
-          <img
-            src="/logo-voxx.png"
-            alt="VOXX"
-            className="w-40 h-40 object-contain mx-auto mb-2"
-          />
+      <TelaBase>
+        <CardSenha>
+          <div className="flex flex-col items-center text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] shadow-inner shadow-white/5">
+              <img
+                src="/logo-simbolo.png"
+                alt="VOXX"
+                className="h-12 w-12 object-contain"
+              />
+            </div>
 
-          <p className="text-red-600 text-sm mb-5">{mensagem}</p>
+            <h1 className="mt-5 text-2xl font-semibold tracking-tight text-white">
+              Link expirado
+            </h1>
+            <p className="mt-3 text-sm leading-6 text-red-100">{mensagem}</p>
 
-          <button
-            type="button"
-            onClick={() => router.push("/login")}
-            className="w-full h-11 rounded-xl bg-blue-700 text-white font-semibold shadow-lg shadow-blue-200 transition hover:bg-blue-800 active:scale-[0.98]"
-          >
-            Voltar para o login
-          </button>
+            <button
+              type="button"
+              onClick={() => router.push("/login")}
+              className="mt-6 h-11 w-full rounded-xl bg-white text-sm font-bold text-slate-950 shadow-[0_16px_40px_rgba(255,255,255,0.08)] transition hover:bg-slate-200 active:scale-[0.98]"
+            >
+              Voltar para o login
+            </button>
 
-          <p className="mt-6 text-center text-xs text-gray-400">VOXX • v1.0</p>
-        </div>
-      </div>
+            <p className="mt-6 text-center text-xs text-slate-500">
+              VOXX • v1.0
+            </p>
+          </div>
+        </CardSenha>
+      </TelaBase>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 px-4">
-      <div className="w-full max-w-sm rounded-3xl bg-white p-8 shadow-2xl border border-blue-100">
-        <div className="flex flex-col items-center mb-7">
-          <img
-            src="/logo-voxx.png"
-            alt="VOXX"
-            className="w-40 h-40 object-contain mb-2"
-          />
+    <TelaBase>
+      <CardSenha>
+        <div className="mb-7 flex flex-col items-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] shadow-inner shadow-white/5">
+            <img
+              src="/logo-simbolo.png"
+              alt="VOXX"
+              className="h-12 w-12 object-contain"
+            />
+          </div>
 
-          <p className="text-gray-500 text-sm font-medium">
+          <h1 className="mt-5 text-2xl font-semibold tracking-tight text-white">
             Definir senha de acesso
-          </p>
-
-          <p className="mt-3 text-center text-sm text-gray-500 leading-relaxed">
-            Crie uma nova senha para acessar o sistema.
+          </h1>
+          <p className="mt-2 text-center text-sm leading-6 text-slate-400">
+            Crie uma nova senha segura para acessar o sistema.
           </p>
         </div>
 
         <form onSubmit={handleDefinirSenha} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nova senha: <span className="text-red-500">*</span>
+            <label className="mb-1 block text-sm font-medium text-slate-300">
+              Nova senha <span className="text-red-300">*</span>
             </label>
 
             <div className="relative">
@@ -265,7 +305,7 @@ useEffect(() => {
                 required
                 type={mostrarSenha ? "text" : "password"}
                 placeholder="Digite sua nova senha"
-                className="w-full h-11 px-4 pr-12 rounded-xl border border-gray-300 shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="h-11 w-full rounded-xl border border-white/10 bg-[#202532] px-4 pr-12 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-blue-300/40 focus:ring-2 focus:ring-blue-300/15"
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
               />
@@ -273,13 +313,13 @@ useEffect(() => {
               <button
                 type="button"
                 onClick={() => setMostrarSenha(!mostrarSenha)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-white"
               >
                 <IconeOlho aberto={mostrarSenha} />
               </button>
             </div>
 
-            <div className="mt-2 grid grid-cols-1 gap-1">
+            <div className="mt-3 grid grid-cols-1 gap-1.5">
               <RequisitoSenha ok={senha.length >= 8} texto="Mínimo de 8 caracteres" />
               <RequisitoSenha ok={/[A-Z]/.test(senha)} texto="Uma letra maiúscula" />
               <RequisitoSenha ok={/[0-9]/.test(senha)} texto="Um número" />
@@ -288,8 +328,8 @@ useEffect(() => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Confirmar senha: <span className="text-red-500">*</span>
+            <label className="mb-1 block text-sm font-medium text-slate-300">
+              Confirmar senha <span className="text-red-300">*</span>
             </label>
 
             <div className="relative">
@@ -297,7 +337,7 @@ useEffect(() => {
                 required
                 type={mostrarConfirmarSenha ? "text" : "password"}
                 placeholder="Digite novamente sua senha"
-                className="w-full h-11 px-4 pr-12 rounded-xl border border-gray-300 shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="h-11 w-full rounded-xl border border-white/10 bg-[#202532] px-4 pr-12 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-blue-300/40 focus:ring-2 focus:ring-blue-300/15"
                 value={confirmarSenha}
                 onChange={(e) => setConfirmarSenha(e.target.value)}
               />
@@ -305,7 +345,7 @@ useEffect(() => {
               <button
                 type="button"
                 onClick={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-white"
               >
                 <IconeOlho aberto={mostrarConfirmarSenha} />
               </button>
@@ -315,7 +355,7 @@ useEffect(() => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full h-11 rounded-xl bg-blue-700 text-white font-semibold shadow-lg shadow-blue-200 transition hover:bg-blue-800 active:scale-[0.98] active:shadow-inner disabled:opacity-60"
+            className="h-11 w-full rounded-xl bg-white text-sm font-bold text-slate-950 shadow-[0_16px_40px_rgba(255,255,255,0.08)] transition hover:bg-slate-200 active:scale-[0.98] disabled:opacity-60"
           >
             {loading ? "Salvando..." : "Salvar senha"}
           </button>
@@ -323,18 +363,28 @@ useEffect(() => {
 
         {mensagem && (
           <div
-            className={`mt-5 rounded-xl px-4 py-3 text-sm text-center ${
+            className={`mt-5 rounded-xl border px-4 py-3 text-center text-sm ${
               mensagem.includes("sucesso")
-                ? "bg-green-50 text-green-700 border border-green-200"
-                : "bg-red-50 text-red-600 border border-red-200"
+                ? "border-emerald-300/20 bg-emerald-400/10 text-emerald-100"
+                : "border-red-300/20 bg-red-400/10 text-red-100"
             }`}
           >
             {mensagem}
           </div>
         )}
 
-        <p className="mt-6 text-center text-xs text-gray-400">VOXX • v1.0</p>
-      </div>
-    </div>
+        <p className="mt-6 text-center text-xs text-slate-500">VOXX • v1.0</p>
+
+        {loading && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 backdrop-blur-[1.5px]">
+            <img
+              src="/logo-simbolo.png"
+              alt="Carregando"
+              className="h-20 w-20 animate-pulse object-contain drop-shadow-2xl"
+            />
+          </div>
+        )}
+      </CardSenha>
+    </TelaBase>
   );
 }

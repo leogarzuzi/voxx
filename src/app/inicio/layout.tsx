@@ -174,7 +174,7 @@ function RequisitoSenha({
   texto: string;
 }) {
   return (
-    <div className={`text-xs ${ok ? "text-green-600" : "text-gray-400"}`}>
+    <div className={`text-xs ${ok ? "text-emerald-300" : "text-slate-500"}`}>
       {ok ? "✓" : "•"} {texto}
     </div>
   );
@@ -279,29 +279,29 @@ async function handleAlterarSenha() {
             />
           </div>
         )}
-        <div className="fixed top-4 right-4 z-50">
+        <div className="fixed right-4 top-4 z-50">
           <div className="relative" ref={menuRef}>
             <button
               type="button"
               onClick={() => setMenuAberto(!menuAberto)}
-              className="flex items-center gap-3 rounded-full bg-white px-5 py-3 text-base font-semibold text-gray-700 shadow-md border border-gray-200 hover:bg-gray-50 transition"
+              className="group flex items-center gap-3 rounded-full border border-white/10 bg-[#171a23]/90 px-3 py-2 text-sm font-semibold text-slate-100 shadow-[0_18px_50px_rgba(0,0,0,0.32)] backdrop-blur-xl transition hover:border-white/20 hover:bg-[#202532]"
             >
               {avatar ? (
                 <img
                   src={`/avatars/${avatar}.png`}
                   alt="Avatar"
-                  className="h-9 w-9 rounded-full object-cover"
+                  className="h-10 w-10 rounded-full object-cover ring-2 ring-white/10"
                 />
               ) : (
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-400/15 text-sm font-bold text-blue-100 ring-1 ring-blue-300/25">
                   {nomeUsuario.charAt(0).toUpperCase()}
                 </div>
               )}
 
-              <span>{nomeUsuario}</span>
+              <span className="max-w-28 truncate">{nomeUsuario}</span>
               <svg
-                className={`h-4 w-4 text-gray-500 transition ${
-                  menuAberto ? "rotate-90" : ""
+                className={`h-4 w-4 text-slate-400 transition group-hover:text-white ${
+                  menuAberto ? "rotate-90 text-white" : ""
                 }`}
                 viewBox="0 0 24 24"
                 fill="none"
@@ -317,12 +317,12 @@ async function handleAlterarSenha() {
             </button>
 
             {menuAberto && (
-              <div className="absolute right-0 mt-2 w-52 rounded-2xl bg-white shadow-xl border border-gray-100 overflow-hidden">
-                <div className="px-4 py-3 border-b border-gray-100">
-                  <p className="text-sm font-semibold text-gray-800">
+              <div className="absolute right-0 mt-3 w-64 overflow-hidden rounded-[24px] border border-white/10 bg-[#171a23]/95 shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+                <div className="border-b border-white/10 bg-white/[0.035] px-4 py-4">
+                  <p className="text-sm font-semibold text-white">
                     {nomeUsuario}
                   </p>
-                  <p className="text-xs text-gray-400">{perfil}</p>
+                  <p className="mt-1 text-xs text-slate-400">{perfil}</p>
                 </div>
 
                 <button
@@ -331,8 +331,14 @@ async function handleAlterarSenha() {
                     setMenuAberto(false);
                     router.push("/inicio/perfil");
                   }}
-                  className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50"
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-200 transition hover:bg-white/[0.07] hover:text-white"
                 >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-400/10 text-blue-200 ring-1 ring-blue-300/15">
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <path d="M8 7a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" stroke="currentColor" strokeWidth="2" />
+                      <path d="M4 21a8 8 0 0 1 16 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                  </span>
                   Perfil
                 </button>
 
@@ -342,16 +348,29 @@ async function handleAlterarSenha() {
                     setMenuAberto(false);
                     setModalSenhaAberto(true); // abre o modal de alterar senha
                   }}
-                  className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50"
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-200 transition hover:bg-white/[0.07] hover:text-white"
                 >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-400/10 text-purple-200 ring-1 ring-purple-300/15">
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <path d="M7 11V8a5 5 0 0 1 10 0v3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                      <path d="M5 11h14v10H5V11Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                    </svg>
+                  </span>
                   Alterar senha
                 </button>
 
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="w-full px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 font-medium"
+                  className="flex w-full items-center gap-3 border-t border-white/10 px-4 py-3 text-left text-sm font-semibold text-red-200 transition hover:bg-red-400/10 hover:text-red-100"
                 >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-red-400/10 text-red-200 ring-1 ring-red-300/15">
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <path d="M10 17l5-5-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M15 12H3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                      <path d="M21 3v18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                  </span>
                   Sair
                 </button>
               </div>
@@ -360,19 +379,22 @@ async function handleAlterarSenha() {
         </div>
         {modalSenhaAberto && (
           <div
-            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 px-4"
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/65 px-4 backdrop-blur-sm"
             onMouseDown={() => setModalSenhaAberto(false)} // fecha clicando fora
           >
             <div
-              className="w-full max-w-md rounded-3xl bg-white p-7 shadow-2xl border border-gray-100"
+              className="w-full max-w-md rounded-[28px] border border-white/10 bg-[#171a23] p-7 text-slate-100 shadow-[0_28px_90px_rgba(0,0,0,0.5)]"
               onMouseDown={(e) => e.stopPropagation()} // impede fechar clicando dentro
             >
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-xl font-bold text-gray-800">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+            Segurança
+          </p>
+          <h2 className="mt-2 text-xl font-bold text-white">
             Alterar senha
           </h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-slate-400">
             Informe sua senha atual e cadastre uma nova senha.
           </p>
         </div>
@@ -380,7 +402,7 @@ async function handleAlterarSenha() {
         <button
           type="button"
           onClick={() => setModalSenhaAberto(false)}
-          className="rounded-full px-3 py-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          className="rounded-full px-3 py-1 text-slate-500 transition hover:bg-white/10 hover:text-white"
         >
           ×
         </button>
@@ -388,7 +410,7 @@ async function handleAlterarSenha() {
 
       <div className="mt-6 space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="mb-1 block text-sm font-medium text-slate-300">
             Senha atual
           </label>
           <div className="relative">
@@ -397,13 +419,13 @@ async function handleAlterarSenha() {
             placeholder="Digite sua senha atual"
             value={senhaAtual}
             onChange={(e) => setSenhaAtual(e.target.value)}
-            className="w-full h-11 px-4 pr-12 rounded-xl border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="h-11 w-full rounded-xl border border-white/10 bg-[#202532] px-4 pr-12 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-blue-300/40 focus:ring-2 focus:ring-blue-300/15"
           />
 
           <button
             type="button"
             onClick={() => setMostrarSenhaAtual(!mostrarSenhaAtual)}
-            className="absolute right-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center text-gray-500 hover:text-gray-700"
+            className="absolute right-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center text-slate-500 transition hover:text-white"
           >
             <IconeOlho aberto={mostrarSenhaAtual} />
           </button>
@@ -412,7 +434,7 @@ async function handleAlterarSenha() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="mb-1 block text-sm font-medium text-slate-300">
             Nova senha
           </label>
           <div className="relative">
@@ -421,13 +443,13 @@ async function handleAlterarSenha() {
             placeholder="Digite a nova senha"
             value={novaSenha}
             onChange={(e) => setNovaSenha(e.target.value)}
-            className="w-full h-11 px-4 pr-12 rounded-xl border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="h-11 w-full rounded-xl border border-white/10 bg-[#202532] px-4 pr-12 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-blue-300/40 focus:ring-2 focus:ring-blue-300/15"
           />
 
           <button
             type="button"
             onClick={() => setMostrarNovaSenha(!mostrarNovaSenha)}
-            className="absolute right-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center text-gray-500 hover:text-gray-700"
+            className="absolute right-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center text-slate-500 transition hover:text-white"
           >
             <IconeOlho aberto={mostrarNovaSenha} />
           </button>
@@ -443,7 +465,7 @@ async function handleAlterarSenha() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="mb-1 block text-sm font-medium text-slate-300">
             Confirmar nova senha
           </label>
           <div className="relative">
@@ -452,13 +474,13 @@ async function handleAlterarSenha() {
           placeholder="Digite novamente a nova senha"
           value={confirmarNovaSenha}
           onChange={(e) => setConfirmarNovaSenha(e.target.value)}
-          className="w-full h-11 px-4 pr-12 rounded-xl border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="h-11 w-full rounded-xl border border-white/10 bg-[#202532] px-4 pr-12 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-blue-300/40 focus:ring-2 focus:ring-blue-300/15"
         />
 
         <button
           type="button"
           onClick={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}
-          className="absolute right-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center text-gray-500 hover:text-gray-700"
+          className="absolute right-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center text-slate-500 transition hover:text-white"
         >
           <IconeOlho aberto={mostrarConfirmarSenha} />
         </button>
@@ -469,12 +491,12 @@ async function handleAlterarSenha() {
           type="button"
           onClick={handleAlterarSenha}
           disabled={salvandoSenha}
-          className="w-full h-11 rounded-xl bg-blue-700 text-white font-semibold shadow-lg shadow-blue-200 transition hover:bg-blue-800 active:scale-[0.98]"
+          className="h-11 w-full rounded-xl bg-white text-sm font-bold text-slate-950 shadow-[0_16px_40px_rgba(255,255,255,0.08)] transition hover:bg-slate-200 active:scale-[0.98] disabled:opacity-60"
         >
           {salvandoSenha ? "Salvando..." : "Salvar nova senha"}
         </button>
         {mensagemSenha && (
-          <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-center">
+          <div className="rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-center text-sm text-slate-200">
             {mensagemSenha}
           </div>
         )}
