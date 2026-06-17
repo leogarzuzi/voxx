@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useTema } from "@/contexts/TemaContext";
 
 type AdmissaoControle = {
   id: number;
@@ -151,7 +152,8 @@ function registroBadge(registro: string | null | undefined) {
   const valor = registro.toLowerCase();
 
   if (valor.includes("facial")) {
-    return (
+
+  return (
       <span className="ml-1 rounded-md border border-blue-300/25 bg-blue-300/10 px-1.5 py-0.5 text-[10px] font-bold text-blue-100">
         F
       </span>
@@ -169,18 +171,24 @@ function registroBadge(registro: string | null | undefined) {
   return null;
 }
 
-function statusClass(status: string | null | undefined) {
+function statusClass(status: string | null | undefined, temaDia = false) {
   const valor = String(status || "").toLowerCase();
 
   if (valor === "enviado" || valor === "subido") {
-    return "border border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
+    return temaDia
+      ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+      : "border border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
   }
 
   if (valor === "erro") {
-    return "border border-red-300/25 bg-red-400/10 text-red-100";
+    return temaDia
+      ? "border border-red-200 bg-red-50 text-red-700"
+      : "border border-red-300/25 bg-red-400/10 text-red-100";
   }
 
-  return "border border-yellow-300/25 bg-yellow-300/10 text-yellow-100";
+  return temaDia
+    ? "border border-yellow-200 bg-yellow-50 text-yellow-700"
+    : "border border-yellow-300/25 bg-yellow-300/10 text-yellow-100";
 }
 
 function validarCamposNumericos(formulario: FormularioAdmissao) {
@@ -317,9 +325,11 @@ function InputTexto({
   className = "",
   disabled = false,
 }: InputTextoProps) {
+  const { temaDia } = useTema();
+
   return (
     <label className={`block ${className}`}>
-      <span className="text-sm font-semibold text-slate-300">
+      <span className={temaDia ? "text-sm font-semibold text-slate-700" : "text-sm font-semibold text-slate-300"}>
         {label}
         {required && <span className="text-red-500"> *</span>}
       </span>
@@ -361,14 +371,16 @@ function SelectCampo({
   placeholder = "Selecione",
   className = "",
 }: SelectCampoProps) {
+  const { temaDia } = useTema();
+
   return (
     <label className={`block ${className}`}>
-      <span className="text-sm font-semibold text-slate-300">{label}</span>
+      <span className={temaDia ? "text-sm font-semibold text-slate-700" : "text-sm font-semibold text-slate-300"}>{label}</span>
 
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1 h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 text-sm text-slate-100 outline-none transition focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 [color-scheme:dark] [&>option]:bg-[#171a23] [&>option]:text-slate-100"
+        className={temaDia ? "mt-1 h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 [color-scheme:light] [&>option]:bg-white [&>option]:text-slate-900" : "mt-1 h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 text-sm text-slate-100 outline-none transition focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 [color-scheme:dark] [&>option]:bg-[#171a23] [&>option]:text-slate-100"}
       >
         <option value="">{placeholder}</option>
 
@@ -395,8 +407,10 @@ function CheckboxCampo({
   onChange,
   description,
 }: CheckboxCampoProps) {
+  const { temaDia } = useTema();
+
   return (
-    <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3 transition hover:bg-white/[0.07]">
+    <label className={temaDia ? "flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-white p-3 transition hover:bg-slate-50" : "flex cursor-pointer items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3 transition hover:bg-white/[0.07]"}>
       <input
         type="checkbox"
         checked={checked}
@@ -405,12 +419,12 @@ function CheckboxCampo({
       />
 
       <span>
-        <span className="block text-sm font-semibold text-slate-200">
+        <span className={temaDia ? "block text-sm font-semibold text-slate-800" : "block text-sm font-semibold text-slate-200"}>
           {label}
         </span>
 
         {description && (
-          <span className="mt-0.5 block text-xs text-slate-400">
+          <span className={temaDia ? "mt-0.5 block text-xs text-slate-500" : "mt-0.5 block text-xs text-slate-400"}>
             {description}
           </span>
         )}
@@ -420,6 +434,7 @@ function CheckboxCampo({
 }
 
 export default function ControleAdmissoesTabela() {
+  const { temaDia } = useTema();
   const [admissoes, setAdmissoes] = useState<AdmissaoControle[]>([]);
   const [busca, setBusca] = useState("");
   const [loading, setLoading] = useState(true);
@@ -736,7 +751,7 @@ export default function ControleAdmissoesTabela() {
       ...linhas.map((linha) => linha.map(formatarValorExcel).join(";")),
     ].join("\n");
 
-    const blob = new Blob(["﻿" + conteudoCsv], {
+    const blob = new Blob(["\uFEFF" + conteudoCsv], {
       type: "text/csv;charset=utf-8;",
     });
 
@@ -760,15 +775,21 @@ export default function ControleAdmissoesTabela() {
     buscarAdmissoes("");
   }
 
+  const campoBuscaClass = temaDia
+    ? "h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-center text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 xl:w-96"
+    : "h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 text-center text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/30 focus:bg-white/[0.08] focus:ring-2 focus:ring-blue-300/10 xl:w-96";
+
+  const textoSecundarioTabela = temaDia ? "text-slate-600" : "text-slate-300";
+  const textoDestaqueTabela = temaDia ? "text-slate-950" : "text-slate-100";
   return (
-    <section className="mt-6 min-w-0 overflow-hidden rounded-[26px] border border-white/10 bg-[#171a23] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]">
+    <section className={temaDia ? "mt-6 min-w-0 overflow-hidden rounded-[26px] border border-slate-200 bg-white p-5 shadow-[0_22px_60px_rgba(15,23,42,0.08)]" : "mt-6 min-w-0 overflow-hidden rounded-[26px] border border-white/10 bg-[#171a23] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]"}>
       <div className="mb-5 flex flex-col gap-4">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={abrirModalNovaAdmissao}
-              className="rounded-2xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_14px_35px_rgba(0,0,0,0.24)] transition hover:-translate-y-0.5 hover:bg-slate-200"
+              className={temaDia ? "rounded-2xl bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_14px_35px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:bg-slate-800" : "rounded-2xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_14px_35px_rgba(0,0,0,0.24)] transition hover:-translate-y-0.5 hover:bg-slate-200"}
             >
               Nova admissão
             </button>
@@ -777,7 +798,7 @@ export default function ControleAdmissoesTabela() {
               type="button"
               disabled
               title="Vamos ativar este botão em uma próxima etapa."
-              className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-slate-500"
+              className={temaDia ? "rounded-2xl border border-slate-200 bg-slate-100 px-5 py-2.5 text-sm font-semibold text-slate-400" : "rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-slate-500"}
             >
               Enviar para SEDE ({pendentesSede.length})
             </button>
@@ -786,7 +807,7 @@ export default function ControleAdmissoesTabela() {
               type="button"
               disabled
               title="Vamos ativar este botão em uma próxima etapa."
-              className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-slate-500"
+              className={temaDia ? "rounded-2xl border border-slate-200 bg-slate-100 px-5 py-2.5 text-sm font-semibold text-slate-400" : "rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-slate-500"}
             >
               Subir para Base de Dados ({pendentesBase.length})
             </button>
@@ -798,13 +819,13 @@ export default function ControleAdmissoesTabela() {
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               placeholder="Buscar por nome, matrícula, CPF, cargo ou e-mail"
-              className="h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 text-center text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/30 focus:bg-white/[0.08] focus:ring-2 focus:ring-blue-300/10 xl:w-96"
+              className={campoBuscaClass}
             />
 
             <button
               type="submit"
               disabled={loading}
-              className="h-11 rounded-2xl bg-white px-5 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60"
+              className={temaDia ? "h-11 rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60" : "h-11 rounded-2xl bg-white px-5 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60"}
             >
               Buscar
             </button>
@@ -813,7 +834,7 @@ export default function ControleAdmissoesTabela() {
               type="button"
               onClick={limparBusca}
               disabled={loading}
-              className="h-11 rounded-2xl border border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
+              className={temaDia ? "h-11 rounded-2xl border border-slate-200 bg-slate-50 px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60" : "h-11 rounded-2xl border border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"}
             >
               Limpar
             </button>
@@ -824,7 +845,7 @@ export default function ControleAdmissoesTabela() {
               disabled={loading || admissoes.length === 0}
               title="Baixar Excel"
               aria-label="Baixar Excel"
-              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-300/25 bg-emerald-300/10 text-emerald-100 transition hover:bg-emerald-300/20 disabled:cursor-not-allowed disabled:opacity-50"
+              className="voxx-export-button"
             >
               <svg
                 className="h-5 w-5"
@@ -854,16 +875,16 @@ export default function ControleAdmissoesTabela() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-200">
+          <span className={temaDia ? "rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700" : "rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-200"}>
             {admissoes.length} {admissoes.length === 1 ? "admissão" : "admissões"}
           </span>
 
-          <span className="rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-semibold text-yellow-100">
+          <span className={temaDia ? "rounded-full border border-yellow-200 bg-yellow-50 px-3 py-1 text-xs font-semibold text-yellow-700" : "rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-semibold text-yellow-100"}>
             {pendentesSede.length} pendente
             {pendentesSede.length === 1 ? "" : "s"} para SEDE
           </span>
 
-          <span className="rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-semibold text-yellow-100">
+          <span className={temaDia ? "rounded-full border border-yellow-200 bg-yellow-50 px-3 py-1 text-xs font-semibold text-yellow-700" : "rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-semibold text-yellow-100"}>
             {pendentesBase.length} pendente
             {pendentesBase.length === 1 ? "" : "s"} para Base
           </span>
@@ -871,26 +892,26 @@ export default function ControleAdmissoesTabela() {
       </div>
 
       {erro && !modalAberto && (
-        <div className="mb-5 rounded-2xl border border-red-300/25 bg-red-400/10 px-4 py-3 text-sm text-red-100">
+        <div className={temaDia ? "mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" : "mb-5 rounded-2xl border border-red-300/25 bg-red-400/10 px-4 py-3 text-sm text-red-100"}>
           {erro}
         </div>
       )}
 
       {sucesso && (
-        <div className="mb-5 rounded-2xl border border-emerald-300/25 bg-emerald-300/10 px-4 py-3 text-sm text-emerald-100">
+        <div className={temaDia ? "mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700" : "mb-5 rounded-2xl border border-emerald-300/25 bg-emerald-300/10 px-4 py-3 text-sm text-emerald-100"}>
           {sucesso}
         </div>
       )}
 
       {loading ? (
-        <div className="py-10 text-center text-sm text-slate-400">
+        <div className={temaDia ? "py-10 text-center text-sm text-slate-500" : "py-10 text-center text-sm text-slate-400"}>
           Carregando admissões...
         </div>
       ) : (
-        <div className="voxx-scrollbar w-full max-w-full overflow-x-auto rounded-[22px] border border-white/10 bg-[#202532] shadow-[0_18px_45px_rgba(0,0,0,0.2)]">
-          <table className="min-w-[2210px] text-center text-xs [&_td]:border-r [&_td]:border-white/10 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-white/10 [&_th:last-child]:border-r-0">
-            <thead className="sticky top-0 z-10 bg-[#2a3040]">
-              <tr className="border-b border-white/10 text-slate-300">
+        <div className={temaDia ? "voxx-scrollbar w-full max-w-full overflow-x-auto rounded-[22px] border border-slate-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.08)]" : "voxx-scrollbar w-full max-w-full overflow-x-auto rounded-[22px] border border-white/10 bg-[#202532] shadow-[0_18px_45px_rgba(0,0,0,0.2)]"}>
+          <table className={temaDia ? "min-w-[2210px] text-center text-xs [&_td]:border-r [&_td]:border-slate-200 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-slate-200 [&_th:last-child]:border-r-0" : "min-w-[2210px] text-center text-xs [&_td]:border-r [&_td]:border-white/10 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-white/10 [&_th:last-child]:border-r-0"}>
+            <thead className={temaDia ? "sticky top-0 z-10 bg-slate-100" : "sticky top-0 z-10 bg-[#2a3040]"}>
+              <tr className={temaDia ? "border-b border-slate-200 text-slate-600" : "border-b border-white/10 text-slate-300"}>
                 <th className="px-3 py-4 text-center">#</th>
                 <th className="px-3 py-4 text-center">Ações</th>
                 <th className="px-3 py-4 text-center">Pref.</th>  
@@ -922,10 +943,10 @@ export default function ControleAdmissoesTabela() {
               {admissoes.map((admissao, indice) => (
                 <tr
                   key={admissao.id}
-                  className="border-b border-white/10 align-middle text-slate-200 transition hover:bg-white/[0.055]"
+                  className={temaDia ? "border-b border-slate-200 align-middle text-slate-700 transition hover:bg-slate-50" : "border-b border-white/10 align-middle text-slate-200 transition hover:bg-white/[0.055]"}
                 >
                   <td className="px-3 py-4 text-center align-middle">
-                    <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] px-2 text-[11px] font-bold text-slate-200">
+                    <span className={temaDia ? "inline-flex h-7 min-w-7 items-center justify-center rounded-full border border-slate-200 bg-slate-100 px-2 text-[11px] font-bold text-slate-700" : "inline-flex h-7 min-w-7 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] px-2 text-[11px] font-bold text-slate-200"}>
                       {indice + 1}
                     </span>
                   </td>
@@ -934,74 +955,74 @@ export default function ControleAdmissoesTabela() {
                     <button
                       type="button"
                       onClick={() => abrirModalEditar(admissao)}
-                      className="rounded-xl border border-blue-300/25 bg-blue-300/10 px-3 py-1.5 text-xs font-semibold text-blue-100 transition hover:bg-blue-300/20"
+                      className={temaDia ? "rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-100" : "rounded-xl border border-blue-300/25 bg-blue-300/10 px-3 py-1.5 text-xs font-semibold text-blue-100 transition hover:bg-blue-300/20"}
                     >
                       Editar
                     </button>
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {texto(admissao.pref)}
                   </td>
 
-                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle font-semibold text-slate-100">
+                  <td className={`whitespace-nowrap px-3 py-4 text-center align-middle font-semibold ${textoDestaqueTabela}`}>
                     {texto(admissao.matricula)}
                     {registroBadge(admissao.registro_ponto)}
                   </td>
 
-                  <td className="min-w-[180px] px-3 py-4 text-center align-middle font-semibold text-slate-100">
+                  <td className={`min-w-[180px] px-3 py-4 text-center align-middle font-semibold ${textoDestaqueTabela}`}>
                     {texto(admissao.nome)}
                   </td>
 
-                  <td className="min-w-[180px] px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`min-w-[180px] px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {texto(admissao.cargo)}
                   </td>
 
-                  <td className="min-w-[80px] px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`min-w-[80px] px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {textoHoras(admissao.ch_edital)}
                   </td>
 
-                  <td className="min-w-[80px] px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`min-w-[80px] px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {textoHoras(admissao.alteracao_ch)}
                   </td>
 
-                  <td className="min-w-[80px] px-3 py-4 text-center align-middle font-semibold text-slate-100">
+                  <td className={`min-w-[80px] px-3 py-4 text-center align-middle font-semibold ${textoDestaqueTabela}`}>
                     {textoHoras(admissao.ch_final)}
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {texto(admissao.sirg)}
                   </td>
 
-                  <td className="min-w-[100px] px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`min-w-[100px] px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {texto(admissao.horario)}
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {formatarData(admissao.exercicio)}
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {formatarData(admissao.data_nascimento)}
                   </td>
 
-                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`whitespace-nowrap px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {texto(admissao.cpf)}
                   </td>
 
-                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`whitespace-nowrap px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {texto(admissao.pis)}
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {texto(admissao.edital)}
                   </td>
 
-                  <td className="min-w-[180px] px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`min-w-[180px] px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {texto(admissao.email)}
                   </td>
 
-                  <td className="w-[80px] px-2 py-4 text-center align-middle text-slate-300">
+                  <td className={`w-[80px] px-2 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     <input
                       type="checkbox"
                       checked={admissao.carta_banco === true}
@@ -1018,7 +1039,7 @@ export default function ControleAdmissoesTabela() {
                     />
                   </td>
 
-                  <td className="w-[80px] px-2 py-4 text-center align-middle text-slate-300">
+                  <td className={`w-[80px] px-2 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     <input
                       type="checkbox"
                       checked={admissao.acesso_ponto === true}
@@ -1035,18 +1056,19 @@ export default function ControleAdmissoesTabela() {
                     />
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {texto(admissao.registro_ponto)}
                   </td>
 
-                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`whitespace-nowrap px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {baseDestinoLabel(admissao.base_destino)}
                   </td>
 
                   <td className="px-3 py-4 text-center align-middle">
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-semibold ${statusClass(
-                        admissao.status_sede
+                        admissao.status_sede,
+                        temaDia
                       )}`}
                     >
                       {texto(admissao.status_sede)}
@@ -1056,14 +1078,15 @@ export default function ControleAdmissoesTabela() {
                   <td className="px-3 py-4 text-center align-middle">
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-semibold ${statusClass(
-                        admissao.status_script
+                        admissao.status_script,
+                        temaDia
                       )}`}
                     >
                       {texto(admissao.status_script)}
                     </span>
                   </td>
 
-                  <td className="min-w-[240px] px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`min-w-[240px] px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {texto(admissao.observacao)}
                   </td>
                 </tr>
@@ -1073,7 +1096,7 @@ export default function ControleAdmissoesTabela() {
                 <tr>
                   <td
                     colSpan={24}
-                    className="px-4 py-10 text-center text-slate-400"
+                    className={temaDia ? "px-4 py-10 text-center text-slate-500" : "px-4 py-10 text-center text-slate-400"}
                   >
                     Nenhuma admissão encontrada.
                   </td>
@@ -1092,20 +1115,20 @@ export default function ControleAdmissoesTabela() {
           <form
             onSubmit={salvarAdmissao}
             onMouseDown={(e) => e.stopPropagation()}
-            className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-3xl border border-white/10 bg-[#171a23] p-6 text-slate-100 shadow-2xl"
+            className={temaDia ? "max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-3xl border border-slate-200 bg-white p-6 text-slate-900 shadow-2xl" : "max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-3xl border border-white/10 bg-[#171a23] p-6 text-slate-100 shadow-2xl"}
           >
             <div className="flex items-start justify-between gap-4">
               <div>
                 {erro && (
-                  <div className="mt-5 rounded-2xl border border-red-300/25 bg-red-400/10 px-4 py-3 text-center text-sm font-medium text-red-100">
+                  <div className={temaDia ? "mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-700" : "mt-5 rounded-2xl border border-red-300/25 bg-red-400/10 px-4 py-3 text-center text-sm font-medium text-red-100"}>
                     {erro}
                   </div>
                 )}
-                <h3 className="text-2xl font-bold text-slate-100">
+                <h3 className={temaDia ? "text-2xl font-bold text-slate-950" : "text-2xl font-bold text-slate-100"}>
                   {admissaoEditando ? "Editar admissão" : "Nova admissão"}
                 </h3>
 
-                <p className="mt-1 text-sm text-slate-400">
+                <p className={temaDia ? "mt-1 text-sm text-slate-500" : "mt-1 text-sm text-slate-400"}>
                   {admissaoEditando
                     ? "Atualize os dados da admissão selecionada."
                     : "Preencha os dados do colaborador admitido."}
@@ -1115,7 +1138,7 @@ export default function ControleAdmissoesTabela() {
               <button
                 type="button"
                 onClick={fecharModal}
-                className="rounded-full px-3 py-1 text-slate-400 hover:bg-white/10 hover:text-white"
+                className={temaDia ? "rounded-full px-3 py-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700" : "rounded-full px-3 py-1 text-slate-400 hover:bg-white/10 hover:text-white"}
               >
                 ×
               </button>
@@ -1288,7 +1311,7 @@ export default function ControleAdmissoesTabela() {
             </div>
 
             <label className="mt-5 block">
-              <span className="text-sm font-semibold text-slate-300">
+              <span className={temaDia ? "text-sm font-semibold text-slate-700" : "text-sm font-semibold text-slate-300"}>
                 Observação
               </span>
 
@@ -1296,16 +1319,16 @@ export default function ControleAdmissoesTabela() {
                 value={formulario.observacao}
                 onChange={(e) => atualizarCampo("observacao", e.target.value)}
                 rows={4}
-                className="mt-1 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 py-3 text-center text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/30 focus:ring-2 focus:ring-blue-300/10"
+                className={temaDia ? "mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-center text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200" : "mt-1 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 py-3 text-center text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/30 focus:ring-2 focus:ring-blue-300/10"}
               />
             </label>
 
-            <div className="mt-6 flex justify-end gap-3 border-t border-white/10 pt-5">
+            <div className={temaDia ? "mt-6 flex justify-end gap-3 border-t border-slate-200 pt-5" : "mt-6 flex justify-end gap-3 border-t border-white/10 pt-5"}>
               <button
                 type="button"
                 onClick={fecharModal}
                 disabled={salvando}
-                className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
+                className={temaDia ? "rounded-2xl border border-slate-200 bg-slate-50 px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60" : "rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"}
               >
                 Cancelar
               </button>
@@ -1313,7 +1336,7 @@ export default function ControleAdmissoesTabela() {
               <button
                 type="submit"
                 disabled={salvando}
-                className="rounded-2xl bg-white px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60"
+                className={temaDia ? "rounded-2xl bg-slate-950 px-5 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60" : "rounded-2xl bg-white px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60"}
               >
                 {salvando
                   ? "Salvando..."
@@ -1328,3 +1351,4 @@ export default function ControleAdmissoesTabela() {
     </section>
   );
 }
+

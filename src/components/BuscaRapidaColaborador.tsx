@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FormEvent, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
@@ -51,10 +51,10 @@ function formatarData(valor: string | null | undefined) {
 function formatarNomeModulo(chave: string) {
   const mapa: Record<string, string> = {
     colaboradores: "Base de colaboradores",
-    gestaoRh: "Gestão e RH",
-    admissoes: "Admissões",
+    gestaoRh: "GestÃ£o e RH",
+    admissoes: "AdmissÃµes",
     desligamentos: "Desligamentos",
-    transferencias: "Transferências",
+    transferencias: "TransferÃªncias",
     permutas: "Permutas",
     atestados: "Atestados",
   };
@@ -62,7 +62,12 @@ function formatarNomeModulo(chave: string) {
   return mapa[chave] || chave;
 }
 
-export function BuscaRapidaColaborador() {
+type BuscaRapidaColaboradorProps = {
+  tema?: "dia" | "noite";
+};
+
+export function BuscaRapidaColaborador({ tema = "noite" }: BuscaRapidaColaboradorProps) {
+  const temaDia = tema === "dia";
   const [busca, setBusca] = useState("");
   const [modalAberto, setModalAberto] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -119,7 +124,7 @@ export function BuscaRapidaColaborador() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setErro(data.error || "Não foi possível consultar o colaborador.");
+        setErro(data.error || "NÃ£o foi possÃ­vel consultar o colaborador.");
         setResultado(null);
         setLoading(false);
         return;
@@ -131,7 +136,7 @@ export function BuscaRapidaColaborador() {
         historico: data.historico ?? {},
       });
     } catch {
-      setErro("Não foi possível consultar o colaborador.");
+      setErro("NÃ£o foi possÃ­vel consultar o colaborador.");
       setResultado(null);
     } finally {
       setLoading(false);
@@ -150,7 +155,11 @@ export function BuscaRapidaColaborador() {
         <label className="relative block">
           <button
             type="submit"
-            className="absolute left-2.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-xl text-slate-400 transition hover:bg-white/10 hover:text-white"
+            className={
+              temaDia
+                ? "absolute left-2.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                : "absolute left-2.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-xl text-slate-400 transition hover:bg-white/10 hover:text-white"
+            }
             aria-label="Buscar colaborador"
           >
             <svg
@@ -180,7 +189,11 @@ export function BuscaRapidaColaborador() {
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Buscar colaborador..."
-            className="h-11 w-full rounded-2xl border border-white/10 bg-white/[0.07] pl-11 pr-3 text-sm text-white shadow-inner shadow-black/10 outline-none placeholder:text-slate-500 transition focus:border-white/30 focus:bg-white/[0.1] focus:ring-2 focus:ring-blue-300/10"
+            className={
+              temaDia
+                ? "h-11 w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-3 text-sm text-slate-800 shadow-[0_10px_22px_rgba(15,23,42,0.06)] outline-none placeholder:text-slate-400 transition focus:border-slate-300 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                : "h-11 w-full rounded-2xl border border-white/10 bg-white/[0.07] pl-11 pr-3 text-sm text-white shadow-inner shadow-black/10 outline-none placeholder:text-slate-500 transition focus:border-white/30 focus:bg-white/[0.1] focus:ring-2 focus:ring-blue-300/10"
+            }
           />
         </label>
       </form>
@@ -201,7 +214,7 @@ export function BuscaRapidaColaborador() {
                   Busca de colaborador
                 </h3>
                 <p className="mt-1 text-sm text-slate-500">
-                  Resultado para “{busca.trim()}”
+                  Resultado para â€œ{busca.trim()}â€
                 </p>
               </div>
 
@@ -211,13 +224,13 @@ export function BuscaRapidaColaborador() {
                 className="rounded-full px-3 py-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
                 aria-label="Fechar busca"
               >
-                ×
+                Ã—
               </button>
             </div>
 
             {loading && (
               <div className="mt-8 rounded-xl border border-blue-100 bg-blue-50 px-4 py-8 text-center text-sm font-semibold text-blue-700">
-                Consultando histórico do colaborador...
+                Consultando histÃ³rico do colaborador...
               </div>
             )}
 
@@ -246,7 +259,7 @@ export function BuscaRapidaColaborador() {
                       {texto(resultado.dadosPrincipais?.nome)}
                     </p>
                     <p>
-                      <span className="font-semibold">Matrícula:</span>{" "}
+                      <span className="font-semibold">MatrÃ­cula:</span>{" "}
                       {texto(resultado.dadosPrincipais?.matricula)}
                     </p>
                     <p>
@@ -258,11 +271,11 @@ export function BuscaRapidaColaborador() {
                       {texto(resultado.dadosPrincipais?.cargo)}
                     </p>
                     <p>
-                      <span className="font-semibold">Carga horária:</span>{" "}
+                      <span className="font-semibold">Carga horÃ¡ria:</span>{" "}
                       {texto(resultado.dadosPrincipais?.cargaHoraria)}
                     </p>
                     <p>
-                      <span className="font-semibold">Admissão:</span>{" "}
+                      <span className="font-semibold">AdmissÃ£o:</span>{" "}
                       {formatarData(resultado.dadosPrincipais?.admissao)}
                     </p>
                     <p className="md:col-span-2">
@@ -286,7 +299,7 @@ export function BuscaRapidaColaborador() {
 
                       {registros.length === 0 ? (
                         <p className="mt-3 text-sm text-slate-400">
-                          Nenhum registro encontrado neste módulo.
+                          Nenhum registro encontrado neste mÃ³dulo.
                         </p>
                       ) : (
                         <div className="mt-3 space-y-2">
@@ -327,3 +340,5 @@ export function BuscaRapidaColaborador() {
     </>
   );
 }
+
+

@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useTema } from "@/contexts/TemaContext";
 
 type StatusTransferencia = "em_andamento" | "concluida" | "negada";
 type TipoMovimento = "entrada" | "saida";
@@ -142,16 +143,22 @@ function statusLabel(status: string | null | undefined) {
   return "Em andamento";
 }
 
-function statusClass(status: string | null | undefined) {
+function statusClass(status: string | null | undefined, temaDia = false) {
   if (status === "concluida") {
-    return "border border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
+    return temaDia
+      ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+      : "border border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
   }
 
   if (status === "negada") {
-    return "border border-red-300/25 bg-red-400/10 text-red-100";
+    return temaDia
+      ? "border border-red-200 bg-red-50 text-red-700"
+      : "border border-red-300/25 bg-red-400/10 text-red-100";
   }
 
-  return "border border-yellow-300/25 bg-yellow-300/10 text-yellow-100";
+  return temaDia
+    ? "border border-yellow-200 bg-yellow-50 text-yellow-700"
+    : "border border-yellow-300/25 bg-yellow-300/10 text-yellow-100";
 }
 
 function tipoMovimentoLabel(tipo: string | null | undefined) {
@@ -259,9 +266,11 @@ function InputTexto({
   className = "",
   disabled = false,
 }: InputTextoProps) {
+  const { temaDia } = useTema();
+
   return (
     <label className={`block ${className}`}>
-      <span className="text-sm font-semibold text-slate-300">
+      <span className={temaDia ? "text-sm font-semibold text-slate-700" : "text-sm font-semibold text-slate-300"}>
         {label}
         {required && <span className="text-red-500"> *</span>}
       </span>
@@ -276,9 +285,17 @@ function InputTexto({
         pattern={pattern}
         maxLength={maxLength}
         disabled={disabled}
-        className={`mt-1 h-11 w-full rounded-2xl border px-3 text-sm outline-none transition [color-scheme:dark] focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 ${
+        className={`mt-1 h-11 w-full rounded-2xl border px-3 text-sm outline-none transition ${
+          temaDia
+            ? "[color-scheme:light] focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+            : "[color-scheme:dark] focus:border-white/30 focus:ring-2 focus:ring-blue-300/10"
+        } ${
           disabled
-            ? "cursor-not-allowed border-white/10 bg-white/[0.035] text-slate-500"
+            ? temaDia
+              ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-500"
+              : "cursor-not-allowed border-white/10 bg-white/[0.035] text-slate-500"
+            : temaDia
+            ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-400"
             : "border-white/10 bg-white/[0.06] text-slate-100 placeholder:text-slate-500"
         }`}
       />
@@ -287,6 +304,7 @@ function InputTexto({
 }
 
 export default function ControleTransferenciasTabela() {
+  const { temaDia } = useTema();
   const [transferencias, setTransferencias] = useState<TransferenciaControle[]>(
     []
   );
@@ -739,15 +757,23 @@ export default function ControleTransferenciasTabela() {
     URL.revokeObjectURL(url);
   }
 
+  const campoBuscaClass = temaDia
+    ? "h-11 min-w-[260px] rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+    : "h-11 min-w-[260px] rounded-2xl border border-white/10 bg-white/[0.06] px-4 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-white/30 focus:ring-2 focus:ring-blue-300/10";
+  const selectFiltroClass = temaDia
+    ? "h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-700 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 [&>option]:bg-white [&>option]:text-slate-900"
+    : "h-11 rounded-2xl border border-white/10 bg-white/[0.06] px-4 text-sm font-semibold text-slate-200 outline-none transition [color-scheme:dark] focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 [&>option]:bg-[#171a23] [&>option]:text-slate-100";
+  const textoSecundarioTabela = temaDia ? "text-slate-600" : "text-slate-300";
+  const textoDestaqueTabela = temaDia ? "text-slate-950" : "text-slate-100";
   return (
-    <section className="mt-6 min-w-0 overflow-hidden rounded-[26px] border border-white/10 bg-[#171a23] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]">
+    <section className={temaDia ? "mt-6 min-w-0 overflow-hidden rounded-[26px] border border-slate-200 bg-white p-5 shadow-[0_22px_60px_rgba(15,23,42,0.08)]" : "mt-6 min-w-0 overflow-hidden rounded-[26px] border border-white/10 bg-[#171a23] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]"}>
       <div className="mb-5 flex flex-col gap-4">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={abrirModalNovaTransferencia}
-              className="rounded-2xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_14px_35px_rgba(0,0,0,0.24)] transition hover:-translate-y-0.5 hover:bg-slate-200"
+              className={temaDia ? "rounded-2xl bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_14px_35px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:bg-slate-800" : "rounded-2xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_14px_35px_rgba(0,0,0,0.24)] transition hover:-translate-y-0.5 hover:bg-slate-200"}
             >
               Nova transferência
             </button>
@@ -762,7 +788,7 @@ export default function ControleTransferenciasTabela() {
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               placeholder="Buscar por matrícula, nome, CPF, cargo ou unidade"
-              className="h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 text-center text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/30 focus:bg-white/[0.08] focus:ring-2 focus:ring-blue-300/10 xl:w-96"
+              className={campoBuscaClass}
             />
 
             <select
@@ -772,7 +798,7 @@ export default function ControleTransferenciasTabela() {
                 setStatusFiltro(valor);
                 buscarTransferencias(busca, valor);
               }}
-              className="h-11 rounded-2xl border border-white/10 bg-white/[0.06] px-3 text-sm text-slate-100 outline-none transition [color-scheme:dark] focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 [&>option]:bg-[#171a23] [&>option]:text-slate-100"
+              className={selectFiltroClass}
             >
               {STATUS_OPCOES.map((opcao) => (
                 <option key={opcao.value} value={opcao.value}>
@@ -784,7 +810,7 @@ export default function ControleTransferenciasTabela() {
             <button
               type="submit"
               disabled={loading}
-              className="h-11 rounded-2xl bg-white px-5 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60"
+              className={temaDia ? "h-11 rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60" : "h-11 rounded-2xl bg-white px-5 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60"}
             >
               Buscar
             </button>
@@ -793,7 +819,7 @@ export default function ControleTransferenciasTabela() {
               type="button"
               onClick={limparBusca}
               disabled={loading}
-              className="h-11 rounded-2xl border border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
+              className={temaDia ? "h-11 rounded-2xl border border-slate-200 bg-slate-50 px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60" : "h-11 rounded-2xl border border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"}
             >
               Limpar
             </button>
@@ -804,7 +830,7 @@ export default function ControleTransferenciasTabela() {
               disabled={loading || transferencias.length === 0}
               title="Baixar Excel/CSV"
               aria-label="Baixar Excel/CSV"
-              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-300/25 bg-emerald-300/10 text-emerald-100 transition hover:bg-emerald-300/20 disabled:cursor-not-allowed disabled:opacity-50"
+              className="voxx-export-button"
             >
               <svg
                 className="h-5 w-5"
@@ -834,44 +860,44 @@ export default function ControleTransferenciasTabela() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-200">
+          <span className={temaDia ? "rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700" : "rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-200"}>
             {resumoStatus.total}{" "}
             {resumoStatus.total === 1 ? "transferência" : "transferências"}
           </span>
 
-          <span className="rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-semibold text-yellow-100">
+          <span className={temaDia ? "rounded-full border border-yellow-200 bg-yellow-50 px-3 py-1 text-xs font-semibold text-yellow-700" : "rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-semibold text-yellow-100"}>
             {resumoStatus.emAndamento} em andamento
           </span>
 
-          <span className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1 text-xs font-semibold text-emerald-100">
+          <span className={temaDia ? "rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700" : "rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1 text-xs font-semibold text-emerald-100"}>
             {resumoStatus.concluidas} concluídas
           </span>
 
-          <span className="rounded-full border border-red-300/25 bg-red-400/10 px-3 py-1 text-xs font-semibold text-red-100">
+          <span className={temaDia ? "rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700" : "rounded-full border border-red-300/25 bg-red-400/10 px-3 py-1 text-xs font-semibold text-red-100"}>
             {resumoStatus.negadas} negadas
           </span>
         </div>
       </div>
 
       {erro && !modalAberto && (
-        <div className="mb-5 rounded-2xl border border-red-300/25 bg-red-400/10 px-4 py-3 text-sm text-red-100">
+        <div className={temaDia ? "mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" : "mb-5 rounded-2xl border border-red-300/25 bg-red-400/10 px-4 py-3 text-sm text-red-100"}>
           {erro}
         </div>
       )}
 
       {sucesso && (
-        <div className="mb-5 rounded-2xl border border-emerald-300/25 bg-emerald-300/10 px-4 py-3 text-sm text-emerald-100">
+        <div className={temaDia ? "mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700" : "mb-5 rounded-2xl border border-emerald-300/25 bg-emerald-300/10 px-4 py-3 text-sm text-emerald-100"}>
           {sucesso}
         </div>
       )}
 
       {loading ? (
-        <div className="py-10 text-center text-sm text-slate-400">
+        <div className={temaDia ? "py-10 text-center text-sm text-slate-500" : "py-10 text-center text-sm text-slate-400"}>
           Carregando transferências...
         </div>
       ) : (
-        <div className="voxx-scrollbar w-full max-w-full overflow-x-auto rounded-[22px] border border-white/10 bg-[#202532] shadow-[0_18px_45px_rgba(0,0,0,0.2)]">
-          <table className="min-w-[1890px] table-fixed text-center text-xs [&_td]:border-r [&_td]:border-white/10 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-white/10 [&_th:last-child]:border-r-0">
+        <div className={temaDia ? "voxx-scrollbar w-full max-w-full overflow-x-auto rounded-[22px] border border-slate-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.08)]" : "voxx-scrollbar w-full max-w-full overflow-x-auto rounded-[22px] border border-white/10 bg-[#202532] shadow-[0_18px_45px_rgba(0,0,0,0.2)]"}>
+          <table className={temaDia ? "min-w-[1890px] table-fixed text-center text-xs [&_td]:border-r [&_td]:border-slate-200 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-slate-200 [&_th:last-child]:border-r-0" : "min-w-[1890px] table-fixed text-center text-xs [&_td]:border-r [&_td]:border-white/10 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-white/10 [&_th:last-child]:border-r-0"}>
             <colgroup>
               <col className="w-[118px]" />
               <col className="w-[220px]" />
@@ -891,8 +917,8 @@ export default function ControleTransferenciasTabela() {
               <col className="w-[126px]" />
               <col className="w-[300px]" />
             </colgroup>
-            <thead className="sticky top-0 z-10 bg-[#2a3040]">
-              <tr className="border-b border-white/10 text-slate-300">
+            <thead className={temaDia ? "sticky top-0 z-10 bg-slate-100" : "sticky top-0 z-10 bg-[#2a3040]"}>
+              <tr className={temaDia ? "border-b border-slate-200 text-slate-600" : "border-b border-white/10 text-slate-300"}>
                 <th className="px-3 py-4 text-center">Status</th>
                 <th className="px-3 py-4 text-center">Ações</th>
                 <th className="px-3 py-4 text-center">Tipo</th>
@@ -919,12 +945,13 @@ export default function ControleTransferenciasTabela() {
               {transferencias.map((transferencia) => (
                 <tr
                   key={transferencia.id}
-                  className="border-b border-white/10 align-middle text-slate-200 transition hover:bg-white/[0.055]"
+                  className={temaDia ? "border-b border-slate-200 align-middle text-slate-700 transition hover:bg-slate-50" : "border-b border-white/10 align-middle text-slate-200 transition hover:bg-white/[0.055]"}
                 >
                   <td className="whitespace-nowrap px-3 py-4 text-center align-middle">
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-semibold ${statusClass(
-                        transferencia.status
+                        transferencia.status,
+                        temaDia
                       )}`}
                     >
                       {statusLabel(transferencia.status)}
@@ -936,7 +963,7 @@ export default function ControleTransferenciasTabela() {
                       <button
                         type="button"
                         onClick={() => abrirModalEditar(transferencia)}
-                        className="rounded-xl border border-blue-300/25 bg-blue-300/10 px-3 py-1.5 text-xs font-semibold text-blue-100 transition hover:bg-blue-300/20"
+                        className={temaDia ? "rounded-xl border border-slate-300 bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-200" : "rounded-xl border border-white/10 bg-white/[0.06] px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-white/[0.1]"}
                       >
                         Editar
                       </button>
@@ -967,63 +994,63 @@ export default function ControleTransferenciasTabela() {
                     </div>
                   </td>
 
-                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`whitespace-nowrap px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {tipoMovimentoLabel(transferencia.tipo_movimento)}
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {texto(transferencia.pref)}
                   </td>
 
-                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle font-semibold text-slate-100">
+                  <td className={`whitespace-nowrap px-3 py-4 text-center align-middle font-semibold ${textoDestaqueTabela}`}>
                     {texto(transferencia.matricula)}
                   </td>
 
-                  <td className="min-w-[220px] px-3 py-4 text-center align-middle font-semibold text-slate-100">
+                  <td className={`min-w-[220px] px-3 py-4 text-center align-middle font-semibold ${textoDestaqueTabela}`}>
                     {texto(transferencia.nome)}
                   </td>
 
-                  <td className="min-w-[180px] px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`min-w-[180px] px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {texto(transferencia.cargo)}
                   </td>
 
-                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`whitespace-nowrap px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {formatarCargaHorariaTabela(transferencia.carga_horaria)}
                   </td>
 
-                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`whitespace-nowrap px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {formatarData(transferencia.exercicio)}
                   </td>
 
-                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`whitespace-nowrap px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {texto(transferencia.cpf)}
                   </td>
 
-                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`whitespace-nowrap px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {texto(transferencia.pis)}
                   </td>
 
-                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`whitespace-nowrap px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {formatarData(transferencia.data_nascimento)}
                   </td>
 
-                  <td className="px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {texto(transferencia.email)}
                   </td>
 
-                  <td className="min-w-[160px] px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`min-w-[160px] px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {texto(transferencia.cedente)}
                   </td>
 
-                  <td className="min-w-[160px] px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`min-w-[160px] px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {texto(transferencia.cessionario)}
                   </td>
 
-                  <td className="whitespace-nowrap px-3 py-4 text-center align-middle font-semibold text-blue-100">
+                  <td className={temaDia ? "whitespace-nowrap px-3 py-4 text-center align-middle font-semibold text-slate-700" : "whitespace-nowrap px-3 py-4 text-center align-middle font-semibold text-blue-100"}>
                     {formatarData(transferencia.inicio_nova_unidade)}
                   </td>
 
-                  <td className="min-w-[260px] px-3 py-4 text-center align-middle text-slate-300">
+                  <td className={`min-w-[260px] px-3 py-4 text-center align-middle ${textoSecundarioTabela}`}>
                     {texto(transferencia.observacao)}
                   </td>
                 </tr>
@@ -1051,7 +1078,7 @@ export default function ControleTransferenciasTabela() {
         >
           <div
             onMouseDown={(e) => e.stopPropagation()}
-            className="w-full max-w-md rounded-[28px] border border-white/10 bg-[#171a23] p-6 text-center text-slate-100 shadow-[0_28px_90px_rgba(0,0,0,0.48)]"
+            className={temaDia ? "w-full max-w-md rounded-[28px] border border-slate-200 bg-white p-6 text-center text-slate-900 shadow-[0_28px_90px_rgba(15,23,42,0.18)]" : "w-full max-w-md rounded-[28px] border border-white/10 bg-[#171a23] p-6 text-center text-slate-100 shadow-[0_28px_90px_rgba(0,0,0,0.48)]"}
           >
             <div
               className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full ${
@@ -1098,13 +1125,13 @@ export default function ControleTransferenciasTabela() {
               )}
             </div>
 
-            <h3 className="mt-4 text-lg font-bold text-slate-100">
+            <h3 className={temaDia ? "mt-4 text-lg font-bold text-slate-950" : "mt-4 text-lg font-bold text-slate-100"}>
               {confirmacaoStatus.novoStatus === "concluida"
                 ? "Concluir transferência?"
                 : "Negar transferência?"}
             </h3>
 
-            <p className="mt-2 text-sm text-slate-400">
+            <p className={temaDia ? "mt-2 text-sm text-slate-500" : "mt-2 text-sm text-slate-400"}>
               {texto(confirmacaoStatus.transferencia.nome)} - matrícula{" "}
               {texto(confirmacaoStatus.transferencia.matricula)}
             </p>
@@ -1113,7 +1140,7 @@ export default function ControleTransferenciasTabela() {
               <button
                 type="button"
                 onClick={() => setConfirmacaoStatus(null)}
-                className="rounded-xl border border-white/10 bg-white/[0.06] px-5 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.1]"
+                className={temaDia ? "rounded-xl border border-slate-300 bg-white px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100" : "rounded-xl border border-white/10 bg-white/[0.06] px-5 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.1]"}
               >
                 Cancelar
               </button>
@@ -1144,17 +1171,17 @@ export default function ControleTransferenciasTabela() {
           <form
             onSubmit={salvarTransferencia}
             onMouseDown={(e) => e.stopPropagation()}
-            className="voxx-scrollbar max-h-[92vh] w-full max-w-7xl overflow-y-auto overflow-x-hidden rounded-[28px] border border-white/10 bg-[#171a23] p-6 text-slate-100 shadow-[0_28px_90px_rgba(0,0,0,0.48)]"
+            className={temaDia ? "voxx-scrollbar max-h-[92vh] w-full max-w-7xl overflow-y-auto overflow-x-hidden rounded-[28px] border border-slate-200 bg-white p-6 text-slate-900 shadow-[0_28px_90px_rgba(15,23,42,0.18)]" : "voxx-scrollbar max-h-[92vh] w-full max-w-7xl overflow-y-auto overflow-x-hidden rounded-[28px] border border-white/10 bg-[#171a23] p-6 text-slate-100 shadow-[0_28px_90px_rgba(0,0,0,0.48)]"}
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-2xl font-bold text-slate-100">
+                <h3 className={temaDia ? "text-2xl font-bold text-slate-950" : "text-2xl font-bold text-slate-100"}>
                   {transferenciaEditando
                     ? "Editar transferência"
                     : "Nova transferência"}
                 </h3>
 
-                <p className="mt-1 text-sm text-slate-400">
+                <p className={temaDia ? "mt-1 text-sm text-slate-500" : "mt-1 text-sm text-slate-400"}>
                   Informe o movimento, colaborador e unidade de destino.
                 </p>
               </div>
@@ -1162,14 +1189,14 @@ export default function ControleTransferenciasTabela() {
               <button
                 type="button"
                 onClick={fecharModal}
-                className="rounded-full px-3 py-1 text-slate-400 hover:bg-white/[0.04] hover:text-slate-300"
+                className={temaDia ? "rounded-full px-3 py-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800" : "rounded-full px-3 py-1 text-slate-400 hover:bg-white/[0.04] hover:text-slate-300"}
               >
                 ×
               </button>
             </div>
 
             {erro && (
-              <div className="mt-5 rounded-2xl border border-red-300/25 bg-red-400/10 px-4 py-3 text-center text-sm font-medium text-red-100">
+              <div className={temaDia ? "mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-700" : "mt-5 rounded-2xl border border-red-300/25 bg-red-400/10 px-4 py-3 text-center text-sm font-medium text-red-100"}>
                 {erro}
               </div>
             )}
@@ -1179,12 +1206,12 @@ export default function ControleTransferenciasTabela() {
                 <button
                   type="button"
                   onClick={() => escolherTipoMovimento("entrada")}
-                  className="rounded-[24px] border border-blue-300/25 bg-blue-300/10 px-6 py-8 text-left transition hover:-translate-y-0.5 hover:bg-blue-300/15"
+                  className={temaDia ? "rounded-[24px] border border-slate-200 bg-slate-50 px-6 py-8 text-left transition hover:-translate-y-0.5 hover:bg-slate-100" : "rounded-[24px] border border-blue-300/25 bg-blue-300/10 px-6 py-8 text-left transition hover:-translate-y-0.5 hover:bg-blue-300/15"}
                 >
-                  <span className="block text-lg font-bold text-blue-100">
+                  <span className={temaDia ? "block text-lg font-bold text-slate-950" : "block text-lg font-bold text-blue-100"}>
                     Está vindo para o HMRG
                   </span>
-                  <span className="mt-1 block text-sm text-blue-200/80">
+                  <span className={temaDia ? "mt-1 block text-sm text-slate-500" : "mt-1 block text-sm text-blue-200/80"}>
                     Entrada por transferência
                   </span>
                 </button>
@@ -1192,12 +1219,12 @@ export default function ControleTransferenciasTabela() {
                 <button
                   type="button"
                   onClick={() => escolherTipoMovimento("saida")}
-                  className="rounded-[24px] border border-white/10 bg-white/[0.06] px-6 py-8 text-left transition hover:-translate-y-0.5 hover:bg-white/[0.1]"
+                  className={temaDia ? "rounded-[24px] border border-slate-200 bg-white px-6 py-8 text-left transition hover:-translate-y-0.5 hover:bg-slate-50" : "rounded-[24px] border border-white/10 bg-white/[0.06] px-6 py-8 text-left transition hover:-translate-y-0.5 hover:bg-white/[0.1]"}
                 >
-                  <span className="block text-lg font-bold text-slate-100">
+                  <span className={temaDia ? "block text-lg font-bold text-slate-950" : "block text-lg font-bold text-slate-100"}>
                     Está saindo do HMRG
                   </span>
-                  <span className="mt-1 block text-sm text-slate-300">
+                  <span className={temaDia ? "mt-1 block text-sm text-slate-500" : "mt-1 block text-sm text-slate-300"}>
                     Saída por transferência
                   </span>
                 </button>
@@ -1225,7 +1252,7 @@ export default function ControleTransferenciasTabela() {
                           type="button"
                           onClick={buscarColaboradorPorMatricula}
                           disabled={buscandoColaborador || salvando}
-                          className="h-11 w-full rounded-2xl bg-blue-600 px-3 text-xs font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+                          className={temaDia ? "h-11 w-full rounded-2xl bg-slate-900 px-3 text-xs font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60" : "h-11 w-full rounded-2xl bg-blue-600 px-3 text-xs font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"}
                         >
                           {buscandoColaborador
                             ? "Buscando..."
@@ -1362,7 +1389,7 @@ export default function ControleTransferenciasTabela() {
                   />
 
                   <label className="block xl:col-span-2">
-                    <span className="text-sm font-semibold text-slate-300">
+                    <span className={temaDia ? "text-sm font-semibold text-slate-700" : "text-sm font-semibold text-slate-300"}>
                       Status
                     </span>
 
@@ -1374,7 +1401,7 @@ export default function ControleTransferenciasTabela() {
                           e.target.value as StatusTransferencia
                         )
                       }
-                      className="mt-1 h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 text-sm text-slate-100 outline-none transition [color-scheme:dark] focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 [&>option]:bg-[#171a23] [&>option]:text-slate-100"
+                      className={temaDia ? "mt-1 h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 [&>option]:bg-white [&>option]:text-slate-900" : "mt-1 h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 text-sm text-slate-100 outline-none transition [color-scheme:dark] focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 [&>option]:bg-[#171a23] [&>option]:text-slate-100"}
                     >
                       <option value="em_andamento">Em andamento</option>
                       <option value="concluida">Concluída</option>
@@ -1384,7 +1411,7 @@ export default function ControleTransferenciasTabela() {
                 </div>
 
                 <label className="mt-5 block">
-                  <span className="text-sm font-semibold text-slate-300">
+                  <span className={temaDia ? "text-sm font-semibold text-slate-700" : "text-sm font-semibold text-slate-300"}>
                     Observação
                   </span>
 
@@ -1394,16 +1421,16 @@ export default function ControleTransferenciasTabela() {
                       atualizarCampo("observacao", e.target.value)
                     }
                     rows={4}
-                    className="mt-1 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 py-3 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-white/30 focus:ring-2 focus:ring-blue-300/10"
+                    className={temaDia ? "mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200" : "mt-1 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 py-3 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-white/30 focus:ring-2 focus:ring-blue-300/10"}
                   />
                 </label>
 
-                <div className="mt-6 flex justify-end gap-3 border-t border-white/10 pt-5">
+                <div className={temaDia ? "mt-6 flex justify-end gap-3 border-t border-slate-200 pt-5" : "mt-6 flex justify-end gap-3 border-t border-white/10 pt-5"}>
                   <button
                     type="button"
                     onClick={fecharModal}
                     disabled={salvando || buscandoColaborador}
-                    className="rounded-xl border border-white/10 bg-white/[0.06] px-5 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-60"
+                    className={temaDia ? "rounded-xl border border-slate-300 bg-white px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60" : "rounded-xl border border-white/10 bg-white/[0.06] px-5 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-60"}
                   >
                     Cancelar
                   </button>
@@ -1428,4 +1455,5 @@ export default function ControleTransferenciasTabela() {
     </section>
   );
 }
+
 

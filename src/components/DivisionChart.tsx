@@ -17,12 +17,14 @@ type DivisionChartProps = {
   }[];
   selectedDivisao?: string | null;
   onSelectDivisao?: (divisao: string) => void;
+  temaDia?: boolean;
 };
 
 export function DivisionChart({
   data,
   selectedDivisao,
   onSelectDivisao,
+  temaDia = false,
 }: DivisionChartProps) {
   return (
     <div className="h-80 w-full">
@@ -33,24 +35,24 @@ export function DivisionChart({
             axisLine={false}
             tickLine={false}
             interval={0}
-            tick={{ fill: "#cbd5e1", fontSize: 11, fontWeight: 700 }}
+            tick={{ fill: temaDia ? "#475569" : "#cbd5e1", fontSize: 11, fontWeight: 700 }}
           />
           <YAxis
             allowDecimals={false}
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "#94a3b8", fontSize: 12 }}
+            tick={{ fill: temaDia ? "#64748b" : "#94a3b8", fontSize: 12 }}
           />
           <Tooltip
-            cursor={{ fill: "rgba(148,163,184,0.08)" }}
+            cursor={{ fill: temaDia ? "rgba(15,23,42,0.06)" : "rgba(148,163,184,0.08)" }}
             contentStyle={{
               background: "#171a23",
               border: "1px solid rgba(255,255,255,0.1)",
               borderRadius: 16,
               color: "#e2e8f0",
             }}
-            itemStyle={{ color: "#e2e8f0" }}
-            labelStyle={{ color: "#cbd5e1", fontWeight: 700 }}
+            itemStyle={{ color: temaDia ? "#0f172a" : "#e2e8f0" }}
+            labelStyle={{ color: temaDia ? "#334155" : "#cbd5e1", fontWeight: 700 }}
           />
           <Bar
             dataKey="total"

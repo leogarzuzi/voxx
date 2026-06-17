@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTema } from "@/contexts/TemaContext";
 
 type UploadCardProps = {
   label: string;
@@ -23,6 +24,8 @@ function UploadCard({
   onDragEnter,
   onDragLeave,
 }: UploadCardProps) {
+  const { temaDia } = useTema();
+
   return (
     <div
       className={`overflow-hidden rounded-[24px] border transition-all duration-300 ${
@@ -46,7 +49,7 @@ function UploadCard({
     >
       <div
         className={`h-1 w-full ${
-          file ? "bg-emerald-400" : isDrag ? "bg-blue-400" : "bg-white/10"
+          file ? "bg-emerald-400" : isDrag ? (temaDia ? "bg-slate-400" : "bg-blue-400") : temaDia ? "bg-slate-200" : "bg-white/10"
         }`}
       />
 
@@ -90,18 +93,18 @@ function UploadCard({
           )}
         </div>
 
-        <p className="text-lg font-black tracking-tight text-slate-100">
+        <p className={temaDia ? "text-lg font-black tracking-tight text-slate-950" : "text-lg font-black tracking-tight text-slate-100"}>
           {label}
         </p>
 
         {sublabel && (
-          <p className="mt-0.5 text-xs font-semibold uppercase tracking-widest text-slate-500">
+          <p className={temaDia ? "mt-0.5 text-xs font-semibold uppercase tracking-widest text-slate-500" : "mt-0.5 text-xs font-semibold uppercase tracking-widest text-slate-500"}>
             {sublabel}
           </p>
         )}
 
         {file ? (
-          <div className="mt-4 flex w-full max-w-xs items-center gap-2 rounded-2xl border border-emerald-300/25 bg-emerald-300/10 px-3 py-2">
+          <div className={temaDia ? "mt-4 flex w-full max-w-xs items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2" : "mt-4 flex w-full max-w-xs items-center gap-2 rounded-2xl border border-emerald-300/25 bg-emerald-300/10 px-3 py-2"}>
             <svg
               width="12"
               height="12"
@@ -109,18 +112,18 @@ function UploadCard({
               fill="none"
               stroke="currentColor"
               strokeWidth="2.5"
-              className="text-emerald-100"
+              className={temaDia ? "text-emerald-700" : "text-emerald-100"}
               aria-hidden="true"
             >
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
               <path d="M14 2v6h6" />
             </svg>
-            <p className="flex-1 truncate text-xs font-semibold text-emerald-100">
+            <p className={temaDia ? "flex-1 truncate text-xs font-semibold text-emerald-700" : "flex-1 truncate text-xs font-semibold text-emerald-100"}>
               {file.name}
             </p>
           </div>
         ) : (
-          <p className="mt-3 text-sm text-slate-400">
+          <p className={temaDia ? "mt-3 text-sm text-slate-500" : "mt-3 text-sm text-slate-400"}>
             {isDrag ? "Solte o arquivo aqui" : "Arraste o arquivo ou selecione abaixo"}
           </p>
         )}
@@ -128,7 +131,7 @@ function UploadCard({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="mt-4 rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-2 text-xs font-bold text-slate-200 transition hover:bg-white/[0.1] hover:text-white"
+          className={temaDia ? "mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100" : "mt-4 rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-2 text-xs font-bold text-slate-200 transition hover:bg-white/[0.1] hover:text-white"}
         >
           {file ? "Trocar arquivo" : "Selecionar arquivo"}
         </button>
@@ -146,6 +149,7 @@ function UploadCard({
 }
 
 export default function ConferenciaFolhaPage() {
+  const { temaDia } = useTema();
   const [fopag, setFopag] = useState<File | null>(null);
   const [previa, setPrevia] = useState<File | null>(null);
   const [competencia, setCompetencia] = useState("");
@@ -256,26 +260,26 @@ export default function ConferenciaFolhaPage() {
   const mensagemErro = mensagem?.startsWith("Erro") || mensagem?.startsWith("Envie");
 
   return (
-    <main className="min-h-screen min-w-0 bg-[#11141b] p-8 text-slate-100">
-      <section className="overflow-hidden rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_14%_0%,rgba(59,130,246,0.24),transparent_32%),linear-gradient(135deg,#242833_0%,#171a23_58%,#10131a_100%)] p-7 shadow-[0_24px_80px_rgba(0,0,0,0.32)]">
-        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-400">
+    <main className={temaDia ? "min-h-screen min-w-0 bg-[#f4f6fb] p-8 text-slate-950" : "min-h-screen min-w-0 bg-[#11141b] p-8 text-slate-100"}>
+      <section className={temaDia ? "overflow-hidden rounded-[30px] border border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#eef3fb_58%,#e8edf6_100%)] p-7 shadow-[0_24px_70px_rgba(15,23,42,0.08)]" : "overflow-hidden rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_14%_0%,rgba(59,130,246,0.24),transparent_32%),linear-gradient(135deg,#242833_0%,#171a23_58%,#10131a_100%)] p-7 shadow-[0_24px_80px_rgba(0,0,0,0.32)]"}>
+        <p className={temaDia ? "text-xs font-semibold uppercase tracking-[0.32em] text-slate-500" : "text-xs font-semibold uppercase tracking-[0.32em] text-slate-400"}>
           Módulo VOXX
         </p>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-white">
+        <h1 className={temaDia ? "mt-3 text-4xl font-semibold tracking-tight text-slate-950" : "mt-3 text-4xl font-semibold tracking-tight text-white"}>
           Análise FOPAG
         </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
+        <p className={temaDia ? "mt-2 max-w-2xl text-sm leading-6 text-slate-600" : "mt-2 max-w-2xl text-sm leading-6 text-slate-300"}>
           Compare a FOPAG com a prévia da folha e baixe o relatório de
           conferência em Excel.
         </p>
       </section>
 
       {mostrarInfo && (
-        <section className="mt-6 rounded-[24px] border border-blue-300/20 bg-blue-300/[0.07] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.22)]">
-          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-blue-100">
+        <section className={temaDia ? "mt-6 rounded-[24px] border border-slate-200 bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.08)]" : "mt-6 rounded-[24px] border border-blue-300/20 bg-blue-300/[0.07] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.22)]"}>
+          <p className={temaDia ? "mb-3 text-xs font-bold uppercase tracking-widest text-slate-700" : "mb-3 text-xs font-bold uppercase tracking-widest text-blue-100"}>
             Requisitos da prévia
           </p>
-          <ul className="grid gap-2 text-sm text-blue-50 md:grid-cols-2">
+          <ul className={temaDia ? "grid gap-2 text-sm text-slate-600 md:grid-cols-2" : "grid gap-2 text-sm text-blue-50 md:grid-cols-2"}>
             {[
               "A aba DINAMICA é ignorada automaticamente.",
               "O sistema detecta automaticamente a aba principal da prévia.",
@@ -284,7 +288,7 @@ export default function ConferenciaFolhaPage() {
               "Competência no formato MM/AAAA.",
             ].map((item) => (
               <li key={item} className="flex items-start gap-2">
-                <span className="mt-1 text-blue-200">•</span>
+                <span className={temaDia ? "mt-1 text-slate-400" : "mt-1 text-blue-200"}>•</span>
                 <span>{item}</span>
               </li>
             ))}
@@ -293,13 +297,13 @@ export default function ConferenciaFolhaPage() {
       )}
 
       <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(360px,520px)_1fr]">
-        <div className="rounded-[28px] border border-white/10 bg-[#171a23] p-6 shadow-[0_22px_70px_rgba(0,0,0,0.28)]">
+        <div className={temaDia ? "rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_22px_60px_rgba(15,23,42,0.08)]" : "rounded-[28px] border border-white/10 bg-[#171a23] p-6 shadow-[0_22px_70px_rgba(0,0,0,0.28)]"}>
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.24em] text-slate-500">
                 Competência
               </p>
-              <p className="mt-1 text-sm text-slate-300">
+              <p className={temaDia ? "mt-1 text-sm text-slate-600" : "mt-1 text-sm text-slate-300"}>
                 Selecione o mês da conferência.
               </p>
             </div>
@@ -307,7 +311,7 @@ export default function ConferenciaFolhaPage() {
             <select
               value={competencia}
               onChange={(event) => setCompetencia(event.target.value)}
-              className="h-11 rounded-2xl border border-white/10 bg-white/[0.06] px-4 text-sm font-bold text-slate-100 outline-none transition [color-scheme:dark] focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 [&>option]:bg-[#171a23] [&>option]:text-slate-100"
+              className={temaDia ? "h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-bold text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 [&>option]:bg-white [&>option]:text-slate-900" : "h-11 rounded-2xl border border-white/10 bg-white/[0.06] px-4 text-sm font-bold text-slate-100 outline-none transition [color-scheme:dark] focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 [&>option]:bg-[#171a23] [&>option]:text-slate-100"}
             >
               {competencias.map((item) => (
                 <option key={item} value={item}>
@@ -321,7 +325,7 @@ export default function ConferenciaFolhaPage() {
             <a
               href="/modelos/modelo_fopag.xlsx"
               download
-              className="flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-center text-sm font-semibold text-slate-200 transition hover:bg-white/[0.1]"
+              className={temaDia ? "flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-100" : "flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-center text-sm font-semibold text-slate-200 transition hover:bg-white/[0.1]"}
             >
               Modelo FOPAG
             </a>
@@ -329,7 +333,7 @@ export default function ConferenciaFolhaPage() {
             <button
               type="button"
               onClick={() => setMostrarInfo((valorAtual) => !valorAtual)}
-              className="rounded-2xl border border-blue-300/25 bg-blue-300/10 px-4 py-3 text-sm font-semibold text-blue-100 transition hover:bg-blue-300/20"
+              className={temaDia ? "rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100" : "rounded-2xl border border-blue-300/25 bg-blue-300/10 px-4 py-3 text-sm font-semibold text-blue-100 transition hover:bg-blue-300/20"}
             >
               Requisitos
             </button>
@@ -362,16 +366,16 @@ export default function ConferenciaFolhaPage() {
           {loading && (
             <div className="mt-6">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-400">
+                <span className={temaDia ? "text-xs font-semibold text-slate-500" : "text-xs font-semibold text-slate-400"}>
                   Analisando arquivos...
                 </span>
-                <span className="text-xs font-bold text-slate-200">
+                <span className={temaDia ? "text-xs font-bold text-slate-700" : "text-xs font-bold text-slate-200"}>
                   {progresso}%
                 </span>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.08]">
+              <div className={temaDia ? "h-2 w-full overflow-hidden rounded-full bg-slate-200" : "h-2 w-full overflow-hidden rounded-full bg-white/[0.08]"}>
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-blue-500 to-blue-300 transition-all duration-300"
+                  className={temaDia ? "h-full rounded-full bg-gradient-to-r from-slate-950 to-slate-600 transition-all duration-300" : "h-full rounded-full bg-gradient-to-r from-blue-500 to-blue-300 transition-all duration-300"}
                   style={{ width: `${progresso}%` }}
                 />
               </div>
@@ -382,7 +386,7 @@ export default function ConferenciaFolhaPage() {
             type="button"
             onClick={analisar}
             disabled={loading}
-            className="mt-6 w-full rounded-2xl bg-blue-600 py-4 text-sm font-bold text-white shadow-[0_12px_34px_rgba(37,99,235,0.24)] transition hover:-translate-y-0.5 hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className={temaDia ? "mt-6 w-full rounded-2xl bg-slate-950 py-4 text-sm font-bold text-white shadow-[0_12px_34px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50" : "mt-6 w-full rounded-2xl bg-white py-4 text-sm font-bold text-slate-950 shadow-[0_12px_34px_rgba(0,0,0,0.24)] transition hover:-translate-y-0.5 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"}
           >
             {loading ? "Analisando..." : "Analisar e baixar relatório"}
           </button>
@@ -432,11 +436,11 @@ export default function ConferenciaFolhaPage() {
           )}
         </div>
 
-        <aside className="rounded-[28px] border border-white/10 bg-[#171a23] p-6 shadow-[0_22px_70px_rgba(0,0,0,0.22)]">
+        <aside className={temaDia ? "rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_22px_60px_rgba(15,23,42,0.08)]" : "rounded-[28px] border border-white/10 bg-[#171a23] p-6 shadow-[0_22px_70px_rgba(0,0,0,0.22)]"}>
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-slate-500">
             Fluxo da análise
           </p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+          <h2 className={temaDia ? "mt-3 text-2xl font-semibold tracking-tight text-slate-950" : "mt-3 text-2xl font-semibold tracking-tight text-white"}>
             Conferência em três passos
           </h2>
 
@@ -448,15 +452,15 @@ export default function ConferenciaFolhaPage() {
             ].map(([numero, titulo, descricao]) => (
               <div
                 key={numero}
-                className="rounded-[22px] border border-white/10 bg-white/[0.05] p-4"
+                className={temaDia ? "rounded-[22px] border border-slate-200 bg-slate-50 p-4" : "rounded-[22px] border border-white/10 bg-white/[0.05] p-4"}
               >
                 <div className="flex items-start gap-3">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-blue-300/25 bg-blue-300/10 text-sm font-bold text-blue-100">
+                  <span className={temaDia ? "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-sm font-bold text-slate-700" : "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-blue-300/25 bg-blue-300/10 text-sm font-bold text-blue-100"}>
                     {numero}
                   </span>
                   <div>
-                    <p className="font-semibold text-slate-100">{titulo}</p>
-                    <p className="mt-1 text-sm leading-6 text-slate-400">
+                    <p className={temaDia ? "font-semibold text-slate-950" : "font-semibold text-slate-100"}>{titulo}</p>
+                    <p className={temaDia ? "mt-1 text-sm leading-6 text-slate-600" : "mt-1 text-sm leading-6 text-slate-400"}>
                       {descricao}
                     </p>
                   </div>

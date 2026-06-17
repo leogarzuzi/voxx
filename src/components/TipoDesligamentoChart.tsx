@@ -16,6 +16,7 @@ interface TipoDesligamentoChartProps {
   }[];
   selectedTipo?: string | null;
   onSelectTipo?: (tipo: string) => void;
+  temaDia?: boolean;
 }
 
 const COLORS = [
@@ -31,6 +32,7 @@ export function TipoDesligamentoChart({
   data,
   selectedTipo,
   onSelectTipo,
+  temaDia = false,
 }: TipoDesligamentoChartProps) {
   return (
     <div className="h-[440px] w-full">
@@ -43,7 +45,7 @@ export function TipoDesligamentoChart({
             innerRadius={76}
             outerRadius={126}
             paddingAngle={3}
-            stroke="#171a23"
+            stroke={temaDia ? "#ffffff" : "#171a23"}
             strokeWidth={3}
             cursor={onSelectTipo ? "pointer" : "default"}
             onClick={(item) => {
@@ -63,20 +65,20 @@ export function TipoDesligamentoChart({
           <Tooltip
             formatter={(value) => [`${value}`, "Desligamentos"]}
             contentStyle={{
-              background: "#171a23",
-              border: "1px solid rgba(255,255,255,0.1)",
+              background: temaDia ? "#ffffff" : "#171a23",
+              border: temaDia ? "1px solid rgba(15,23,42,0.12)" : "1px solid rgba(255,255,255,0.1)",
               borderRadius: 16,
-              color: "#e2e8f0",
+              color: temaDia ? "#0f172a" : "#e2e8f0",
             }}
-            itemStyle={{ color: "#e2e8f0" }}
-            labelStyle={{ color: "#cbd5e1", fontWeight: 700 }}
+            itemStyle={{ color: temaDia ? "#0f172a" : "#e2e8f0" }}
+            labelStyle={{ color: temaDia ? "#334155" : "#cbd5e1", fontWeight: 700 }}
           />
           <Legend
             verticalAlign="bottom"
             height={72}
             iconType="circle"
             wrapperStyle={{
-              color: "#cbd5e1",
+              color: temaDia ? "#475569" : "#cbd5e1",
               fontSize: 12,
               paddingTop: 16,
             }}

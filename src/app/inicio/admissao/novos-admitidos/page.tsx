@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { PERMISSOES, temPermissao } from "@/lib/perfis";
-import BaseGestaoRhClient from "./BaseGestaoRhClient";
+import NovosAdmitidosManutencao from "./NovosAdmitidosManutencao";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function BaseDadosGestaoRhPage() {
+export default async function NovosAdmitidosPage() {
   const supabase = await createSupabaseServerClient();
 
   const {
@@ -15,22 +15,19 @@ export default async function BaseDadosGestaoRhPage() {
 
   if (!user?.email) redirect("/login");
 
-  const emailLogado = user.email.toLowerCase();
-
   const { data: usuarioLogado } = await supabase
     .from("usuarios")
     .select("perfil, status")
-    .eq("email", emailLogado)
+    .eq("email", user.email.toLowerCase())
     .single();
 
   if (
     !usuarioLogado ||
     usuarioLogado.status !== "ativo" ||
-    !temPermissao(usuarioLogado.perfil, PERMISSOES.BASE_DADOS_GESTAO_RH)
+    !temPermissao(usuarioLogado.perfil, PERMISSOES.NOVOS_ADMITIDOS_VISUALIZAR)
   ) {
     redirect("/inicio");
   }
 
-  return <BaseGestaoRhClient />;
+  return <NovosAdmitidosManutencao />;
 }
-

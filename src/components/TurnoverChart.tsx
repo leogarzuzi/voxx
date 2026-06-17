@@ -12,13 +12,14 @@ import {
 } from "recharts";
 
 interface TurnoverChartProps {
+  temaDia?: boolean;
   data: {
     mes: string;
     turnover: number;
   }[];
 }
 
-export function TurnoverChart({ data }: TurnoverChartProps) {
+export function TurnoverChart({ data, temaDia = false }: TurnoverChartProps) {
   // ALTERE AQUI A META DO TURNOVER
   const metaTurnover = 5;
 
@@ -29,13 +30,13 @@ export function TurnoverChart({ data }: TurnoverChartProps) {
           data={data}
           margin={{ top: 20, right: 30, left: 10, bottom: 10 }}
         >
-          <CartesianGrid stroke="rgba(148,163,184,0.16)" strokeDasharray="3 3" />
+          <CartesianGrid stroke={temaDia ? "rgba(15,23,42,0.12)" : "rgba(148,163,184,0.16)"} strokeDasharray="3 3" />
 
           <XAxis
             dataKey="mes"
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "#cbd5e1", fontSize: 12, fontWeight: 700 }}
+            tick={{ fill: temaDia ? "#475569" : "#cbd5e1", fontSize: 12, fontWeight: 700 }}
           />
 
           <YAxis
@@ -45,7 +46,7 @@ export function TurnoverChart({ data }: TurnoverChartProps) {
             tickFormatter={(value) => `${value}%`}
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "#94a3b8", fontSize: 12 }}
+            tick={{ fill: temaDia ? "#64748b" : "#94a3b8", fontSize: 12 }}
           />
 
           <Tooltip
@@ -56,9 +57,9 @@ export function TurnoverChart({ data }: TurnoverChartProps) {
               borderRadius: 16,
               color: "#e2e8f0",
             }}
-            itemStyle={{ color: "#e2e8f0" }}
-            labelStyle={{ color: "#cbd5e1", fontWeight: 700 }}
-            cursor={{ stroke: "rgba(96,165,250,0.28)" }}
+            itemStyle={{ color: temaDia ? "#0f172a" : "#e2e8f0" }}
+            labelStyle={{ color: temaDia ? "#334155" : "#cbd5e1", fontWeight: 700 }}
+            cursor={{ stroke: temaDia ? "rgba(15,23,42,0.22)" : "rgba(96,165,250,0.28)" }}
           />
 
           <ReferenceLine
@@ -77,10 +78,10 @@ export function TurnoverChart({ data }: TurnoverChartProps) {
           <Line
             type="monotone"
             dataKey="turnover"
-            stroke="#60a5fa"
+            stroke={temaDia ? "#0f172a" : "#60a5fa"}
             strokeWidth={3}
-            dot={{ r: 4, fill: "#60a5fa", stroke: "#172033", strokeWidth: 2 }}
-            activeDot={{ r: 6, fill: "#93c5fd", stroke: "#172033", strokeWidth: 2 }}
+            dot={{ r: 4, fill: temaDia ? "#0f172a" : "#60a5fa", stroke: temaDia ? "#ffffff" : "#172033", strokeWidth: 2 }}
+            activeDot={{ r: 6, fill: temaDia ? "#334155" : "#93c5fd", stroke: temaDia ? "#ffffff" : "#172033", strokeWidth: 2 }}
           />
         </LineChart>
       </ResponsiveContainer>

@@ -17,12 +17,14 @@ type PrefixChartProps = {
   }[];
   selectedPrefixo?: string | null;
   onSelectPrefixo?: (prefixo: string) => void;
+  temaDia?: boolean;
 };
 
 export function PrefixChart({
   data,
   selectedPrefixo,
   onSelectPrefixo,
+  temaDia = false,
 }: PrefixChartProps) {
   return (
     <div className="h-72 w-full">
@@ -32,24 +34,24 @@ export function PrefixChart({
             dataKey="prefixo"
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "#cbd5e1", fontSize: 12, fontWeight: 700 }}
+            tick={{ fill: temaDia ? "#475569" : "#cbd5e1", fontSize: 12, fontWeight: 700 }}
           />
           <YAxis
             allowDecimals={false}
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "#94a3b8", fontSize: 12 }}
+            tick={{ fill: temaDia ? "#64748b" : "#94a3b8", fontSize: 12 }}
           />
           <Tooltip
-            cursor={{ fill: "rgba(148,163,184,0.08)" }}
+            cursor={{ fill: temaDia ? "rgba(15,23,42,0.06)" : "rgba(148,163,184,0.08)" }}
             contentStyle={{
               background: "#171a23",
               border: "1px solid rgba(255,255,255,0.1)",
               borderRadius: 16,
               color: "#e2e8f0",
             }}
-            itemStyle={{ color: "#e2e8f0" }}
-            labelStyle={{ color: "#cbd5e1", fontWeight: 700 }}
+            itemStyle={{ color: temaDia ? "#0f172a" : "#e2e8f0" }}
+            labelStyle={{ color: temaDia ? "#334155" : "#cbd5e1", fontWeight: 700 }}
           />
           <Bar
             dataKey="total"

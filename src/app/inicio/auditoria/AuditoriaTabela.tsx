@@ -1,6 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
+import { useTema } from "@/contexts/TemaContext";
 
 type AuditoriaLog = {
   id: number;
@@ -61,8 +62,8 @@ function formatarModulo(modulo: string) {
   return mapa[modulo] || modulo;
 }
 
-function corModulo(modulo: string) {
-  const mapa: Record<string, string> = {
+function corModulo(modulo: string, temaDia: boolean) {
+  const mapaNoite: Record<string, string> = {
     solicitacoes_acesso: "border-sky-300/25 bg-sky-300/10 text-sky-100",
     conferencia_folha: "border-violet-300/25 bg-violet-300/10 text-violet-100",
     admissao: "border-emerald-300/25 bg-emerald-300/10 text-emerald-100",
@@ -71,7 +72,18 @@ function corModulo(modulo: string) {
     permuta: "border-amber-300/25 bg-amber-300/10 text-amber-100",
   };
 
-  return mapa[modulo] || "border-white/15 bg-white/[0.06] text-slate-200";
+  const mapaDia: Record<string, string> = {
+    solicitacoes_acesso: "border-sky-200 bg-sky-50 text-sky-700",
+    conferencia_folha: "border-violet-200 bg-violet-50 text-violet-700",
+    admissao: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    desligamento: "border-red-200 bg-red-50 text-red-700",
+    transferencia: "border-blue-200 bg-blue-50 text-blue-700",
+    permuta: "border-amber-200 bg-amber-50 text-amber-700",
+  };
+
+  return temaDia
+    ? mapaDia[modulo] || "border-slate-200 bg-slate-50 text-slate-700"
+    : mapaNoite[modulo] || "border-white/15 bg-white/[0.06] text-slate-200";
 }
 
 function formatarDetalhes(detalhes: Record<string, any> | null) {
@@ -183,7 +195,7 @@ function formatarValorVisual(valor: unknown) {
 
   if (texto === "VAZIO") return "Vazio";
   if (texto === "SIM") return "Sim";
-  if (texto === "NAO" || texto === "NÃO" || texto === "NÃƒO") return "Não";
+  if (texto === "NAO" || texto === "NÃƒO" || texto === "NÃƒÆ’O") return "Não";
 
   return texto;
 }
@@ -229,6 +241,7 @@ function obterCamposAlteradosSemComparacao(
 }
 
 export default function AuditoriaTabela() {
+  const { temaDia } = useTema();
   const [logs, setLogs] = useState<AuditoriaLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
@@ -302,23 +315,24 @@ export default function AuditoriaTabela() {
     buscarLogs();
   }
 
-  const camposFormulario =
-    "mt-1 h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/30 focus:bg-white/[0.08] focus:ring-2 focus:ring-blue-300/10 [color-scheme:dark] [&>option]:bg-[#171a23] [&>option]:text-slate-100";
+  const camposFormulario = temaDia
+    ? "mt-1 h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 [color-scheme:light] [&>option]:bg-white [&>option]:text-slate-900"
+    : "mt-1 h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/30 focus:bg-white/[0.08] focus:ring-2 focus:ring-blue-300/10 [color-scheme:dark] [&>option]:bg-[#171a23] [&>option]:text-slate-100";
 
   return (
     <>
-      <section className="mt-6 rounded-[26px] border border-white/10 bg-[#171a23] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]">
+      <section className={temaDia ? "mt-6 rounded-[26px] border border-slate-200 bg-white p-5 shadow-[0_22px_60px_rgba(15,23,42,0.08)]" : "mt-6 rounded-[26px] border border-white/10 bg-[#171a23] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]"}>
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
               Filtros
             </p>
-            <h2 className="mt-1 text-xl font-bold text-white">
+            <h2 className={temaDia ? "mt-1 text-xl font-bold text-slate-950" : "mt-1 text-xl font-bold text-white"}>
               Refinar registros
             </h2>
           </div>
 
-          <p className="text-sm text-slate-400">
+          <p className={temaDia ? "text-sm text-slate-500" : "text-sm text-slate-400"}>
             Exibindo até 50 registros encontrados no banco.
           </p>
         </div>
@@ -422,7 +436,7 @@ export default function AuditoriaTabela() {
           <button
             type="button"
             onClick={limparFiltros}
-            className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08]"
+            className={temaDia ? "rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100" : "rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08]"}
           >
             Limpar filtros
           </button>
@@ -430,20 +444,20 @@ export default function AuditoriaTabela() {
           <button
             type="button"
             onClick={aplicarFiltros}
-            className="rounded-2xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_14px_35px_rgba(0,0,0,0.24)] transition hover:-translate-y-0.5 hover:bg-slate-200"
+            className={temaDia ? "rounded-2xl bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_14px_35px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:bg-slate-800" : "rounded-2xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_14px_35px_rgba(0,0,0,0.24)] transition hover:-translate-y-0.5 hover:bg-slate-200"}
           >
             Buscar
           </button>
         </div>
       </section>
 
-      <section className="mt-6 overflow-hidden rounded-[26px] border border-white/10 bg-[#171a23] shadow-[0_22px_70px_rgba(0,0,0,0.28)]">
-        <div className="flex flex-col gap-2 border-b border-white/10 px-6 py-5 md:flex-row md:items-end md:justify-between">
+      <section className={temaDia ? "mt-6 overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-[0_22px_60px_rgba(15,23,42,0.08)]" : "mt-6 overflow-hidden rounded-[26px] border border-white/10 bg-[#171a23] shadow-[0_22px_70px_rgba(0,0,0,0.28)]"}>
+        <div className={temaDia ? "flex flex-col gap-2 border-b border-slate-200 px-6 py-5 md:flex-row md:items-end md:justify-between" : "flex flex-col gap-2 border-b border-white/10 px-6 py-5 md:flex-row md:items-end md:justify-between"}>
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
               Histórico
             </p>
-            <h2 className="mt-1 text-xl font-bold text-white">
+            <h2 className={temaDia ? "mt-1 text-xl font-bold text-slate-950" : "mt-1 text-xl font-bold text-white"}>
               Registros de auditoria
             </h2>
             <p className="mt-1 text-sm text-slate-400">
@@ -451,7 +465,7 @@ export default function AuditoriaTabela() {
             </p>
           </div>
 
-          <div className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-semibold text-slate-200">
+          <div className={temaDia ? "rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700" : "rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-semibold text-slate-200"}>
             {logs.length} registro{logs.length === 1 ? "" : "s"}
           </div>
         </div>
@@ -463,13 +477,13 @@ export default function AuditoriaTabela() {
         )}
 
         {loading ? (
-          <p className="px-6 py-10 text-center text-sm text-slate-400">
+          <p className={temaDia ? "px-6 py-10 text-center text-sm text-slate-500" : "px-6 py-10 text-center text-sm text-slate-400"}>
             Carregando auditoria...
           </p>
         ) : (
           <div className="space-y-3 p-4">
             {logs.length === 0 ? (
-              <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-10 text-center text-sm text-slate-400">
+              <div className={temaDia ? "rounded-2xl border border-slate-200 bg-slate-50 px-5 py-10 text-center text-sm text-slate-500" : "rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-10 text-center text-sm text-slate-400"}>
                 Nenhum registro encontrado com os filtros selecionados.
               </div>
             ) : (
@@ -499,14 +513,14 @@ export default function AuditoriaTabela() {
                 return (
                   <article
                     key={log.id}
-                    className="rounded-2xl border border-white/10 bg-white/[0.045] p-4 transition hover:border-white/20 hover:bg-white/[0.07]"
+                    className={temaDia ? "rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_10px_26px_rgba(15,23,42,0.04)] transition hover:border-slate-300 hover:bg-slate-50" : "rounded-2xl border border-white/10 bg-white/[0.045] p-4 transition hover:border-white/20 hover:bg-white/[0.07]"}
                   >
                     <div className="grid gap-4 lg:grid-cols-[170px_minmax(210px,1fr)_minmax(180px,0.9fr)_150px]">
                       <div>
                         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
                           Data/Hora
                         </p>
-                        <p className="mt-2 text-sm font-medium text-slate-200">
+                        <p className={temaDia ? "mt-2 text-sm font-medium text-slate-700" : "mt-2 text-sm font-medium text-slate-200"}>
                           {new Date(log.criado_em).toLocaleString("pt-BR")}
                         </p>
                       </div>
@@ -515,7 +529,7 @@ export default function AuditoriaTabela() {
                         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
                           Usuário
                         </p>
-                        <p className="mt-2 break-all text-sm text-slate-300">
+                        <p className={temaDia ? "mt-2 break-all text-sm text-slate-600" : "mt-2 break-all text-sm text-slate-300"}>
                           {log.usuario_email || "Sistema"}
                         </p>
                       </div>
@@ -524,7 +538,7 @@ export default function AuditoriaTabela() {
                         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
                           Ação
                         </p>
-                        <p className="mt-2 text-sm font-semibold text-white">
+                        <p className={temaDia ? "mt-2 text-sm font-semibold text-slate-950" : "mt-2 text-sm font-semibold text-white"}>
                           {formatarAcao(log.acao)}
                         </p>
                       </div>
@@ -535,7 +549,8 @@ export default function AuditoriaTabela() {
                         </p>
                         <span
                           className={`mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-bold ${corModulo(
-                            log.modulo
+                            log.modulo,
+                            temaDia
                           )}`}
                         >
                           {formatarModulo(log.modulo)}
@@ -543,9 +558,9 @@ export default function AuditoriaTabela() {
                       </div>
                     </div>
 
-                    <div className="mt-4 space-y-4 rounded-2xl border border-white/10 bg-black/[0.16] p-4">
+                    <div className={temaDia ? "mt-4 space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4" : "mt-4 space-y-4 rounded-2xl border border-white/10 bg-black/[0.16] p-4"}>
                       {!temDetalhes ? (
-                        <span className="text-sm text-slate-500">
+                        <span className={temaDia ? "text-sm text-slate-500" : "text-sm text-slate-500"}>
                           Sem detalhes.
                         </span>
                       ) : (
@@ -557,15 +572,15 @@ export default function AuditoriaTabela() {
                                   <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
                                     O que mudou
                                   </p>
-                                  <p className="mt-1 text-sm text-slate-300">
+                                  <p className={temaDia ? "mt-1 text-sm text-slate-600" : "mt-1 text-sm text-slate-300"}>
                                     Comparação direta entre o valor anterior e o
                                     valor salvo.
                                   </p>
                                 </div>
                               </div>
 
-                              <div className="overflow-hidden rounded-2xl border border-white/10">
-                                <div className="grid grid-cols-[minmax(130px,0.8fr)_minmax(160px,1fr)_minmax(160px,1fr)] bg-white/[0.06] text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                              <div className={temaDia ? "overflow-hidden rounded-2xl border border-slate-200" : "overflow-hidden rounded-2xl border border-white/10"}>
+                                <div className={temaDia ? "grid grid-cols-[minmax(130px,0.8fr)_minmax(160px,1fr)_minmax(160px,1fr)] bg-slate-100 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500" : "grid grid-cols-[minmax(130px,0.8fr)_minmax(160px,1fr)_minmax(160px,1fr)] bg-white/[0.06] text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400"}>
                                   <div className="px-3 py-2">Campo</div>
                                   <div className="border-l border-white/10 px-3 py-2">
                                     Antes
@@ -578,15 +593,15 @@ export default function AuditoriaTabela() {
                                 {alteracoesDetalhadas.map((item, index) => (
                                   <div
                                     key={`${item.campo}-${index}`}
-                                    className="grid grid-cols-[minmax(130px,0.8fr)_minmax(160px,1fr)_minmax(160px,1fr)] border-t border-white/10 text-xs"
+                                    className={temaDia ? "grid grid-cols-[minmax(130px,0.8fr)_minmax(160px,1fr)_minmax(160px,1fr)] border-t border-slate-200 text-xs" : "grid grid-cols-[minmax(130px,0.8fr)_minmax(160px,1fr)_minmax(160px,1fr)] border-t border-white/10 text-xs"}
                                   >
-                                    <div className="px-3 py-3 font-semibold text-white">
+                                    <div className={temaDia ? "px-3 py-3 font-semibold text-slate-950" : "px-3 py-3 font-semibold text-white"}>
                                       {item.campo}
                                     </div>
-                                    <div className="break-words border-l border-white/10 px-3 py-3 text-slate-400">
+                                    <div className={temaDia ? "break-words border-l border-slate-200 px-3 py-3 text-slate-500" : "break-words border-l border-white/10 px-3 py-3 text-slate-400"}>
                                       {item.antes}
                                     </div>
-                                    <div className="break-words border-l border-white/10 px-3 py-3 font-semibold text-emerald-100">
+                                    <div className={temaDia ? "break-words border-l border-slate-200 px-3 py-3 font-semibold text-emerald-700" : "break-words border-l border-white/10 px-3 py-3 font-semibold text-emerald-100"}>
                                       {item.depois}
                                     </div>
                                   </div>
@@ -600,7 +615,7 @@ export default function AuditoriaTabela() {
                               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
                                 Campos alterados
                               </p>
-                              <p className="mt-1 text-sm text-slate-300">
+                              <p className={temaDia ? "mt-1 text-sm text-slate-600" : "mt-1 text-sm text-slate-300"}>
                                 Esse registro informa quais campos mudaram, mas
                                 ainda não trouxe o antes/depois salvo na
                                 auditoria.
@@ -609,7 +624,7 @@ export default function AuditoriaTabela() {
                                 {camposAlteradosSemComparacao.map((campo) => (
                                   <span
                                     key={campo}
-                                    className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-200"
+                                    className={temaDia ? "rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700" : "rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-200"}
                                   >
                                     {campo}
                                   </span>
@@ -628,12 +643,12 @@ export default function AuditoriaTabela() {
                                 {detalhesFormatados.map((item) => (
                                   <div
                                     key={item.label}
-                                    className="min-w-0 rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2"
+                                    className={temaDia ? "min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2" : "min-w-0 rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2"}
                                   >
                                     <p className="text-[11px] font-semibold text-slate-400">
                                       {item.label}
                                     </p>
-                                    <p className="mt-1 break-words text-xs leading-5 text-slate-100">
+                                    <p className={temaDia ? "mt-1 break-words text-xs leading-5 text-slate-700" : "mt-1 break-words text-xs leading-5 text-slate-100"}>
                                       {item.valor || "-"}
                                     </p>
                                   </div>
@@ -654,3 +669,8 @@ export default function AuditoriaTabela() {
     </>
   );
 }
+
+
+
+
+

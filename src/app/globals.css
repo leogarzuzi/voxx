@@ -57,3 +57,62 @@ body {
   scrollbar-color: rgba(148, 163, 184, 0.52) rgba(15, 18, 26, 0.85);
   scrollbar-width: thin;
 }
+
+/* transicao suave de tema */
+html.tema-dia *,
+html.tema-noite * {
+  transition-property: background-color, border-color, color, box-shadow, opacity;
+  transition-duration: 180ms;
+  transition-timing-function: ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.tema-dia *,
+  html.tema-noite * {
+    transition-duration: 0ms;
+  }
+}
+.voxx-export-button {
+  display: inline-flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  background: rgba(52, 211, 153, 0.10);
+  color: rgb(209, 250, 229);
+  box-shadow: none;
+}
+
+.voxx-export-button:hover {
+  background: rgba(52, 211, 153, 0.20);
+}
+
+.voxx-export-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+html.tema-dia .voxx-export-button {
+  border-color: rgba(4, 120, 87, 0.22);
+  background: rgb(4, 120, 87);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(4, 120, 87, 0.22);
+}
+
+html.tema-dia .voxx-export-button:hover {
+  background: rgb(6, 95, 70);
+}
+
+html.tema-noite .voxx-export-button {
+  border-color: rgba(52, 211, 153, 0.25);
+  background: rgba(52, 211, 153, 0.10);
+  color: rgb(209, 250, 229);
+  box-shadow: none;
+}
+
+html.tema-noite .voxx-export-button:hover {
+  background: rgba(52, 211, 153, 0.20);
+}
+

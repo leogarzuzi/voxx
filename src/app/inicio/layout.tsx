@@ -1,10 +1,11 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
 import { PERFIS_CONFIG } from "@/lib/perfis";
+import { useTema } from "@/contexts/TemaContext";
 
 type UsuarioSistema = {
   nome: string;
@@ -21,6 +22,7 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { temaDia } = useTema();
 
   const [verificando, setVerificando] = useState(true);
   const [nomeUsuario, setNomeUsuario] = useState("");
@@ -31,14 +33,14 @@ export default function DashboardLayout({
   const [modalSenhaAberto, setModalSenhaAberto] = useState(false); // controla o modal de senha
   const [senhaAtual, setSenhaAtual] = useState(""); // senha atual digitada
   const [novaSenha, setNovaSenha] = useState(""); // nova senha
-  const [confirmarNovaSenha, setConfirmarNovaSenha] = useState(""); // confirmação da nova senha
-  const [salvandoSenha, setSalvandoSenha] = useState(false); // loading do botão
+  const [confirmarNovaSenha, setConfirmarNovaSenha] = useState(""); // confirmaÃ§Ã£o da nova senha
+  const [salvandoSenha, setSalvandoSenha] = useState(false); // loading do botÃ£o
   const [mensagemSenha, setMensagemSenha] = useState(""); // mensagem do modal
-  const [emailUsuario, setEmailUsuario] = useState(""); // e-mail do usuário logado pra trocar a senha
+  const [emailUsuario, setEmailUsuario] = useState(""); // e-mail do usuÃ¡rio logado pra trocar a senha
   const [mostrarSenhaAtual, setMostrarSenhaAtual] = useState(false); // mostra/oculta senha atual
   const [mostrarNovaSenha, setMostrarNovaSenha] = useState(false); // mostra/oculta nova senha
-  const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false); // mostra/oculta confirmação
-  const [carregandoRota, setCarregandoRota] = useState(false); // loading ao trocar de módulo
+  const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false); // mostra/oculta confirmaÃ§Ã£o
+  const [carregandoRota, setCarregandoRota] = useState(false); // loading ao trocar de mÃ³dulo
 
 
 
@@ -66,9 +68,9 @@ export default function DashboardLayout({
         return;
       }
 
-      // bloqueia usuário inativo antes de carregar qualquer tela do sistema
+      // bloqueia usuÃ¡rio inativo antes de carregar qualquer tela do sistema
       if (usuario.status !== "ativo") {
-        await supabase.auth.signOut(); // encerra a sessão mesmo que o login ainda exista no Supabase Auth
+        await supabase.auth.signOut(); // encerra a sessÃ£o mesmo que o login ainda exista no Supabase Auth
         router.push("/login");
         return;
       }
@@ -78,15 +80,15 @@ export default function DashboardLayout({
       const rotaAuditoria = pathname.startsWith("/inicio/auditoria"); // somente Admin
 
       const permissoes =
-        PERFIS_CONFIG[usuario.perfil as keyof typeof PERFIS_CONFIG]; // pega permissões do perfil
+        PERFIS_CONFIG[usuario.perfil as keyof typeof PERFIS_CONFIG]; // pega permissÃµes do perfil
 
-      // bloqueia Solicitações para quem não tem permissão
+      // bloqueia SolicitaÃ§Ãµes para quem nÃ£o tem permissÃ£o
       if (rotaSolicitacoes && !permissoes?.solicitacoes) {
         router.push("/inicio");
         return;
       }
 
-      // bloqueia Auditoria para quem não for Admin
+      // bloqueia Auditoria para quem nÃ£o for Admin
       if (rotaAuditoria && usuario.perfil !== "Admin") {
         router.push("/inicio");
         return;
@@ -95,7 +97,7 @@ export default function DashboardLayout({
       setNomeUsuario(
         usuario.nome_exibicao?.trim() ||
           usuario.nome?.trim().split(" ")[0] ||
-          "Usuário"
+          "UsuÃ¡rio"
       );
 
       setPerfil(usuario.perfil);
@@ -175,7 +177,7 @@ function RequisitoSenha({
 }) {
   return (
     <div className={`text-xs ${ok ? "text-emerald-300" : "text-slate-500"}`}>
-      {ok ? "✓" : "•"} {texto}
+      {ok ? "âœ“" : "â€¢"} {texto}
     </div>
   );
 }
@@ -194,20 +196,20 @@ async function handleAlterarSenha() {
     return;
   }
 
-  const temMinimo = novaSenha.length >= 8; // mínimo de caracteres
-  const temMaiuscula = /[A-Z]/.test(novaSenha); // letra maiúscula
-  const temNumero = /[0-9]/.test(novaSenha); // número
+  const temMinimo = novaSenha.length >= 8; // mÃ­nimo de caracteres
+  const temMaiuscula = /[A-Z]/.test(novaSenha); // letra maiÃºscula
+  const temNumero = /[0-9]/.test(novaSenha); // nÃºmero
   const temEspecial = /[^A-Za-z0-9]/.test(novaSenha); // caractere especial
 
   if (!temMinimo || !temMaiuscula || !temNumero || !temEspecial) {
     setMensagemSenha(
-      "A senha deve ter pelo menos 8 caracteres, 1 letra maiúscula, 1 número e 1 caractere especial."
+      "A senha deve ter pelo menos 8 caracteres, 1 letra maiÃºscula, 1 nÃºmero e 1 caractere especial."
     );
     return;
   }
 
   if (novaSenha !== confirmarNovaSenha) {
-    setMensagemSenha("As senhas não coincidem.");
+    setMensagemSenha("As senhas nÃ£o coincidem.");
     return;
   }
 
@@ -216,7 +218,7 @@ async function handleAlterarSenha() {
   const { error: loginError } = await supabase.auth.signInWithPassword({
     email: emailUsuario,
     password: senhaAtual,
-  }); // confere se a senha atual está certa
+  }); // confere se a senha atual estÃ¡ certa
 
   if (loginError) {
     setSalvandoSenha(false);
@@ -239,7 +241,7 @@ async function handleAlterarSenha() {
 
   setSenhaAtual(""); // limpa senha atual
   setNovaSenha(""); // limpa nova senha
-  setConfirmarNovaSenha(""); // limpa confirmação
+  setConfirmarNovaSenha(""); // limpa confirmaÃ§Ã£o
 
   setTimeout(() => {
     setModalSenhaAberto(false); // fecha modal
@@ -249,7 +251,7 @@ async function handleAlterarSenha() {
   
   if (verificando) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#11141b]">
+      <div className={temaDia ? "min-h-screen flex items-center justify-center bg-[#f4f7fb]" : "min-h-screen flex items-center justify-center bg-[#11141b]"}>
         <img
           src="/logo-simbolo.png"
           alt="VOXX"
@@ -260,7 +262,7 @@ async function handleAlterarSenha() {
   }
 
   return (
-    <div className="flex min-h-screen overflow-x-hidden bg-[#11141b]">
+    <div className={temaDia ? "flex min-h-screen overflow-x-hidden bg-[#f4f7fb]" : "flex min-h-screen overflow-x-hidden bg-[#11141b]"}>
       <div className="sticky top-0 h-screen shrink-0">
         <Sidebar
           perfil={perfil}
@@ -268,8 +270,8 @@ async function handleAlterarSenha() {
         />
       </div>
 
-      <div className="relative min-h-screen min-w-0 flex-1 overflow-x-hidden">
-        {/* loading visual ao trocar de módulo */}
+      <div className={temaDia ? "relative min-h-screen min-w-0 flex-1 overflow-x-hidden bg-[#f4f7fb]" : "relative min-h-screen min-w-0 flex-1 overflow-x-hidden bg-[#11141b]"}>
+        {/* loading visual ao trocar de mÃ³dulo */}
         {carregandoRota && (
           <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-900/20 backdrop-blur-[1.5px]">
             <img
@@ -389,7 +391,7 @@ async function handleAlterarSenha() {
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
-            Segurança
+            SeguranÃ§a
           </p>
           <h2 className="mt-2 text-xl font-bold text-white">
             Alterar senha
@@ -404,7 +406,7 @@ async function handleAlterarSenha() {
           onClick={() => setModalSenhaAberto(false)}
           className="rounded-full px-3 py-1 text-slate-500 transition hover:bg-white/10 hover:text-white"
         >
-          ×
+          Ã—
         </button>
       </div>
 
@@ -458,9 +460,9 @@ async function handleAlterarSenha() {
         </div>
             
         <div className="mt-2 grid grid-cols-1 gap-1">
-          <RequisitoSenha ok={novaSenha.length >= 8} texto="Mínimo de 8 caracteres" />
-          <RequisitoSenha ok={/[A-Z]/.test(novaSenha)} texto="Uma letra maiúscula" />
-          <RequisitoSenha ok={/[0-9]/.test(novaSenha)} texto="Um número" />
+          <RequisitoSenha ok={novaSenha.length >= 8} texto="MÃ­nimo de 8 caracteres" />
+          <RequisitoSenha ok={/[A-Z]/.test(novaSenha)} texto="Uma letra maiÃºscula" />
+          <RequisitoSenha ok={/[0-9]/.test(novaSenha)} texto="Um nÃºmero" />
           <RequisitoSenha ok={/[^A-Za-z0-9]/.test(novaSenha)} texto="Um caractere especial" />
         </div>
 
@@ -510,3 +512,4 @@ async function handleAlterarSenha() {
     </div>
   );
 }
+
