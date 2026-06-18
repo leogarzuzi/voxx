@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -135,8 +135,8 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
   const dashboardAtivo = pathname.startsWith("/inicio/dashboard");
   const iconClass = temaDia ? "h-5 w-5 text-slate-400" : "h-5 w-5 text-blue-100";
   const chevronClass = temaDia
-    ? "text-xs text-slate-400 transition"
-    : "text-xs text-blue-100 transition";
+    ? "inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition group-hover:border-slate-300 group-hover:text-slate-700"
+    : "inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-blue-100 transition group-hover:border-white/20 group-hover:text-white";
   const subMenuClass = temaDia
     ? "ml-8 mt-1 space-y-1 border-l border-slate-200 pl-3"
     : "ml-8 mt-1 space-y-1 border-l border-blue-600 pl-3";
@@ -153,7 +153,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
         <div className="px-4 pb-3 pt-5">
           <Link
             href="/inicio"
-            title="Ir para o início"
+            title="Ir para o inÃ­cio"
             onClick={() => iniciarNavegacao("/inicio")}
             className={
               temaDia
@@ -204,7 +204,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                 <path d="M19 8v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 <path d="M22 11h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
-              Solicitações
+              SolicitaÃ§Ãµes
             </Link>
           )}
 
@@ -234,7 +234,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              Usuários
+              UsuÃ¡rios
             </Link>
           )}
 
@@ -254,7 +254,9 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                   Base de Dados
                 </span>
                 <span className={`${chevronClass} ${baseDadosOpen ? "rotate-90" : ""}`}>
-                  ›
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="m9 6 6 6-6 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </span>
               </button>
 
@@ -282,7 +284,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                       href="/inicio/base-dados/gestao-rh"
                       onClick={() => iniciarNavegacao("/inicio/base-dados/gestao-rh")}
                     >
-                      Gestão e RH
+                      GestÃ£o e RH
                     </Link>
                   )}
                 </div>
@@ -304,10 +306,12 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                     <path d="M19 8v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                     <path d="M22 11h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                   </svg>
-                  Admissão
+                  AdmissÃ£o
                 </span>
                 <span className={`${chevronClass} ${admissaoOpen ? "rotate-90" : ""}`}>
-                  ›
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="m9 6 6 6-6 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </span>
               </button>
 
@@ -320,7 +324,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                       href="/inicio/admissao/controle"
                       onClick={() => iniciarNavegacao("/inicio/admissao/controle")}
                     >
-                      Controle de Admissões
+                      Controle de AdmissÃµes
                     </Link>
                   )}
 
@@ -369,7 +373,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                 <path d="M6 17l3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 <circle cx="12" cy="12" r="2.5" stroke="currentColor" strokeWidth="2" />
               </svg>
-              Transferência
+              TransferÃªncia
             </Link>
           )}
 
@@ -407,7 +411,9 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                   Dashboard
                 </span>
                 <span className={`${chevronClass} ${dashboardOpen ? "rotate-90" : ""}`}>
-                  ›
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="m9 6 6 6-6 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </span>
               </button>
 
@@ -419,7 +425,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                       href="/inicio/dashboard/visao-geral"
                       onClick={() => iniciarNavegacao("/inicio/dashboard/visao-geral")}
                     >
-                      Visão Geral
+                      VisÃ£o Geral
                     </Link>
                   )}
 
@@ -429,7 +435,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                       href="/inicio/dashboard/admissoes"
                       onClick={() => iniciarNavegacao("/inicio/dashboard/admissoes")}
                     >
-                      Admissões
+                      AdmissÃµes
                     </Link>
                   )}
 
@@ -469,7 +475,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                 <path d="M8.5 12h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 <path d="M8.5 16h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
-              Análise FOPAG
+              AnÃ¡lise FOPAG
             </Link>
           )}
 
@@ -494,7 +500,9 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                     centralMemorandosOpen ? "rotate-90" : ""
                   }`}
                 >
-                  ›
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="m9 6 6 6-6 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </span>
               </button>
 
@@ -520,6 +528,18 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                     }
                   >
                     Troca de plantao
+                  </Link>
+                  <Link
+                    prefetch={false}
+                    className={subItemMenuClass(
+                      rotaAtiva("/inicio/central-memorandos/banco-horas")
+                    )}
+                    href="/inicio/central-memorandos/banco-horas"
+                    onClick={() =>
+                      iniciarNavegacao("/inicio/central-memorandos/banco-horas")
+                    }
+                  >
+                    Banco de horas
                   </Link>
                 </div>
               )}
@@ -550,6 +570,11 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
     </aside>
   );
 }
+
+
+
+
+
 
 
 

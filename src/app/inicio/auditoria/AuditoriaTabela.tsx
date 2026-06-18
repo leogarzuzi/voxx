@@ -45,6 +45,9 @@ function formatarAcao(acao: string) {
     TROCA_PLANTAO_CRIADA: "Troca de plantão criada",
     TROCA_PLANTAO_EDITADA: "Troca de plantão editada",
     TROCA_PLANTAO_CANCELADA: "Troca de plantão cancelada",
+    BANCO_HORAS_CRIADO: "Banco de horas criado",
+    BANCO_HORAS_EDITADO: "Banco de horas editado",
+    BANCO_HORAS_CANCELADO: "Banco de horas cancelado",
 
     ADMISSAO_CRIADA: "Nova admissão cadastrada",
     ADMISSAO_EDITADA: "Admissão editada",
@@ -123,11 +126,16 @@ function formatarDetalhes(detalhes: Record<string, any> | null) {
     transferenciaId: "ID da transferência",
     permutaId: "ID da permuta",
     trocaPlantaoId: "ID da troca de plantão",
+    bancoHorasId: "ID do banco de horas",
     protocolo: "Protocolo",
     dataPlantaoSolicitante: "Plantão solicitante",
     dataPlantaoSolicitado: "Plantão solicitado",
     tipoPlantaoSolicitante: "Tipo do plantão solicitante",
     tipoPlantaoSolicitado: "Tipo do plantão solicitado",
+    dataPlantaoOriginal: "Plantão original",
+    tipoPlantaoOriginal: "Tipo do plantão original",
+    dataNovoPlantao: "Novo plantão",
+    tipoNovoPlantao: "Tipo do novo plantão",
     matriculaSaida: "Matrícula de quem sai",
     nomeSaida: "Nome de quem sai",
     matriculaEntrada: "Matrícula de quem entra",
@@ -682,6 +690,8 @@ export default function AuditoriaTabela() {
     </>
   );
 }
+
+
 
 
 

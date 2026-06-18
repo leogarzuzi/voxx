@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+﻿import { createClient } from "@supabase/supabase-js";
 
 export const MODULOS_AUDITORIA = {
   ADMISSAO: "admissao",
@@ -34,6 +34,9 @@ export const ACOES_AUDITORIA = {
   TROCA_PLANTAO_CRIADA: "TROCA_PLANTAO_CRIADA",
   TROCA_PLANTAO_EDITADA: "TROCA_PLANTAO_EDITADA",
   TROCA_PLANTAO_CANCELADA: "TROCA_PLANTAO_CANCELADA",
+  BANCO_HORAS_CRIADO: "BANCO_HORAS_CRIADO",
+  BANCO_HORAS_EDITADO: "BANCO_HORAS_EDITADO",
+  BANCO_HORAS_CANCELADO: "BANCO_HORAS_CANCELADO",
 } as const;
 
 export async function registrarAuditoria({
@@ -66,3 +69,5 @@ export async function registrarAuditoria({
     console.error("Erro ao registrar auditoria:", error);
   }
 }
+
+
