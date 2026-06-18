@@ -4,6 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 
 type TrocaPlantaoModalProps = {
   onClose: () => void;
+  modo?: "criar" | "editar";
+  registro?: any;
+  onSaved?: () => void | Promise<void>;
 };
 
 type TipoPlantao = "" | "SD" | "SN" | "24 horas";
