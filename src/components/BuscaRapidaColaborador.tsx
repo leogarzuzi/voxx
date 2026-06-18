@@ -5,17 +5,17 @@ import { createPortal } from "react-dom";
 
 type DadosPrincipais = {
   nome: string | null;
-  matricula: string | null;
+  Matrícula: string | null;
   cpf: string | null;
   cargo: string | null;
   cargaHoraria: string | null;
-  admissao: string | null;
+  Admissão: string | null;
   statusAtual: string | null;
 };
 
-type RegistroHistorico = {
+type Registrohistórico = {
   id: string;
-  modulo: string;
+  módulo: string;
   titulo: string;
   descricao: string;
   data: string | null;
@@ -25,7 +25,7 @@ type RegistroHistorico = {
 type ResultadoConsulta = {
   encontrado: boolean;
   dadosPrincipais: DadosPrincipais | null;
-  historico: Record<string, RegistroHistorico[]>;
+  histórico: Record<string, Registrohistórico[]>;
 };
 
 function texto(valor: string | null | undefined) {
@@ -48,13 +48,13 @@ function formatarData(valor: string | null | undefined) {
   return textoData;
 }
 
-function formatarNomeModulo(chave: string) {
+function formatarNomemódulo(chave: string) {
   const mapa: Record<string, string> = {
     colaboradores: "Base de colaboradores",
-    gestaoRh: "GestÃ£o e RH",
-    admissoes: "AdmissÃµes",
+    gestaoRh: "Gestão e RH",
+    admissoes: "Admissões",
     desligamentos: "Desligamentos",
-    transferencias: "TransferÃªncias",
+    transferencias: "Transferências",
     permutas: "Permutas",
     atestados: "Atestados",
   };
@@ -124,7 +124,7 @@ export function BuscaRapidaColaborador({ tema = "noite" }: BuscaRapidaColaborado
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setErro(data.error || "NÃ£o foi possÃ­vel consultar o colaborador.");
+        setErro(data.error || "Não foi possível consultar o colaborador.");
         setResultado(null);
         setLoading(false);
         return;
@@ -133,18 +133,18 @@ export function BuscaRapidaColaborador({ tema = "noite" }: BuscaRapidaColaborado
       setResultado({
         encontrado: Boolean(data.encontrado),
         dadosPrincipais: data.dadosPrincipais ?? null,
-        historico: data.historico ?? {},
+        histórico: data.histórico ?? {},
       });
     } catch {
-      setErro("NÃ£o foi possÃ­vel consultar o colaborador.");
+      setErro("Não foi possível consultar o colaborador.");
       setResultado(null);
     } finally {
       setLoading(false);
     }
   }
 
-  const modulos = resultado
-    ? Object.entries(resultado.historico).filter(
+  const módulos = resultado
+    ? Object.entries(resultado.histórico).filter(
         ([, registros]) => registros.length > 0
       )
     : [];
@@ -224,13 +224,13 @@ export function BuscaRapidaColaborador({ tema = "noite" }: BuscaRapidaColaborado
                 className="rounded-full px-3 py-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
                 aria-label="Fechar busca"
               >
-                Ã—
+                x
               </button>
             </div>
 
             {loading && (
               <div className="mt-8 rounded-xl border border-blue-100 bg-blue-50 px-4 py-8 text-center text-sm font-semibold text-blue-700">
-                Consultando histÃ³rico do colaborador...
+                Consultando histórico do colaborador...
               </div>
             )}
 
@@ -259,8 +259,8 @@ export function BuscaRapidaColaborador({ tema = "noite" }: BuscaRapidaColaborado
                       {texto(resultado.dadosPrincipais?.nome)}
                     </p>
                     <p>
-                      <span className="font-semibold">MatrÃ­cula:</span>{" "}
-                      {texto(resultado.dadosPrincipais?.matricula)}
+                      <span className="font-semibold">Matrícula:</span>{" "}
+                      {texto(resultado.dadosPrincipais?.Matrícula)}
                     </p>
                     <p>
                       <span className="font-semibold">CPF:</span>{" "}
@@ -271,12 +271,12 @@ export function BuscaRapidaColaborador({ tema = "noite" }: BuscaRapidaColaborado
                       {texto(resultado.dadosPrincipais?.cargo)}
                     </p>
                     <p>
-                      <span className="font-semibold">Carga horÃ¡ria:</span>{" "}
+                      <span className="font-semibold">Carga horária:</span>{" "}
                       {texto(resultado.dadosPrincipais?.cargaHoraria)}
                     </p>
                     <p>
-                      <span className="font-semibold">AdmissÃ£o:</span>{" "}
-                      {formatarData(resultado.dadosPrincipais?.admissao)}
+                      <span className="font-semibold">Admissão:</span>{" "}
+                      {formatarData(resultado.dadosPrincipais?.Admissão)}
                     </p>
                     <p className="md:col-span-2">
                       <span className="font-semibold">Status atual:</span>{" "}
@@ -286,11 +286,11 @@ export function BuscaRapidaColaborador({ tema = "noite" }: BuscaRapidaColaborado
                 </div>
 
                 <div className="mt-5 space-y-4">
-                  {modulos.map(([chave, registros]) => (
+                  {módulos.map(([chave, registros]) => (
                     <div key={chave} className="rounded-xl border p-4">
                       <div className="flex items-center justify-between gap-3">
                         <h4 className="text-sm font-bold text-slate-800">
-                          {formatarNomeModulo(chave)}
+                          {formatarNomemódulo(chave)}
                         </h4>
                         <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500">
                           {registros.length}
@@ -299,7 +299,7 @@ export function BuscaRapidaColaborador({ tema = "noite" }: BuscaRapidaColaborado
 
                       {registros.length === 0 ? (
                         <p className="mt-3 text-sm text-slate-400">
-                          Nenhum registro encontrado neste mÃ³dulo.
+                          Nenhum registro encontrado neste módulo.
                         </p>
                       ) : (
                         <div className="mt-3 space-y-2">
@@ -340,5 +340,7 @@ export function BuscaRapidaColaborador({ tema = "noite" }: BuscaRapidaColaborado
     </>
   );
 }
+
+
 
 

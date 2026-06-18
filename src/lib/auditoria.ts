@@ -7,6 +7,7 @@ export const MODULOS_AUDITORIA = {
   DESLIGAMENTO: "desligamento",
   TRANSFERENCIA: "transferencia",
   PERMUTA: "permuta",
+  CENTRAL_MEMORANDOS: "central_memorandos",
 } as const;
 
 export const ACOES_AUDITORIA = {
@@ -29,6 +30,10 @@ export const ACOES_AUDITORIA = {
   PERMUTA_CRIADA: "PERMUTA_CRIADA",
   PERMUTA_EDITADA: "PERMUTA_EDITADA",
   PERMUTA_STATUS_ALTERADO: "PERMUTA_STATUS_ALTERADO",
+
+  TROCA_PLANTAO_CRIADA: "TROCA_PLANTAO_CRIADA",
+  TROCA_PLANTAO_EDITADA: "TROCA_PLANTAO_EDITADA",
+  TROCA_PLANTAO_CANCELADA: "TROCA_PLANTAO_CANCELADA",
 } as const;
 
 export async function registrarAuditoria({

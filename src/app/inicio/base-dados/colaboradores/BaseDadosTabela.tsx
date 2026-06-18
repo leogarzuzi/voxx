@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useTema } from "@/contexts/TemaContext";
@@ -27,16 +27,16 @@ type FiltroAtivo = {
 
 const CAMPOS_FILTRO = [
   { campo: "pref", label: "Pref." },
-  { campo: "matricula", label: "Matr�cula" },
+  { campo: "matricula", label: "Matrícula" },
   { campo: "nome", label: "Nome" },
-  { campo: "cargo", label: "Cargo/Fun��o" },
-  { campo: "carga_horaria", label: "Carga hor�ria" },
-  { campo: "exercicio", label: "Exerc�cio" },
+  { campo: "cargo", label: "Cargo/Função" },
+  { campo: "carga_horaria", label: "Carga horária" },
+  { campo: "exercicio", label: "Exercício" },
   { campo: "cpf", label: "CPF" },
   { campo: "pis", label: "PIS" },
   { campo: "data_nascimento", label: "Data nasc." },
   { campo: "email", label: "E-mail" },
-  { campo: "observacao", label: "Observa��o" },
+  { campo: "observacao", label: "Observação" },
 ];
 
 function texto(valor: string | number | null | undefined) {
@@ -84,7 +84,7 @@ export default function BaseDadosTabela() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
   const [modoTodos, setModoTodos] = useState(false); // controla se carregou a base inteira
-  const [exportando, setExportando] = useState(false); // controla o bot�o de exportar
+  const [exportando, setExportando] = useState(false); // controla o botão de exportar
 
   const [filtrosAtivos, setFiltrosAtivos] = useState<FiltroAtivo[]>([]);
 
@@ -164,7 +164,7 @@ export default function BaseDadosTabela() {
     setLoading(false);
   }
 
-  // carrega os primeiros 100 registros ao abrir a p�gina
+  // carrega os primeiros 100 registros ao abrir a página
   useEffect(() => {
     buscarColaboradores("");
   }, []);
@@ -199,7 +199,7 @@ export default function BaseDadosTabela() {
   function handleBuscar(e: React.FormEvent) {
     e.preventDefault();
 
-    // busca normal: retorna at� 100 resultados respeitando os filtros ativos
+    // busca normal: retorna até 100 resultados respeitando os filtros ativos
     buscarColaboradores(busca, false, filtrosAtivos);
   }
 
@@ -225,7 +225,7 @@ export default function BaseDadosTabela() {
       params.set("busca", busca.trim());
     }
 
-    // for�a exportar a base completa respeitando busca e filtros
+    // força exportar a base completa respeitando busca e filtros
     params.set("todos", "1");
 
     if (filtrosAtivos.length > 0) {
@@ -257,16 +257,16 @@ export default function BaseDadosTabela() {
 
     const cabecalho = [
       "Pref.",
-      "Matr�cula",
+      "Matrícula",
       "Nome",
-      "Cargo/Fun��o",
+      "Cargo/Função",
       "CH",
-      "Exerc�cio",
+      "Exercício",
       "CPF",
       "PIS",
       "Data nasc.",
       "E-mail",
-      "Observa��o",
+      "Observação",
     ];
 
     const linhas = dados.map((colaborador) => [
@@ -330,7 +330,7 @@ export default function BaseDadosTabela() {
     const params = new URLSearchParams();
     params.set("campo", campo);
 
-    // envia os filtros ativos para a API montar op��es dependentes
+    // envia os filtros ativos para a API montar opções dependentes
     if (filtrosAtivos.length > 0) {
       params.set(
         "filtros",
@@ -356,14 +356,14 @@ export default function BaseDadosTabela() {
     setLoadingOpcoes(false);
 
     if (!response.ok || !resultado.success) {
-      setErroOpcoes(resultado.error || "Erro ao carregar op��es do filtro.");
+      setErroOpcoes(resultado.error || "Erro ao carregar opções do filtro.");
       return;
     }
 
     const valores = resultado.valores ?? [];
     setOpcoesFiltro(valores);
 
-    // se j� existir filtro nesse campo, abre com os valores j� marcados
+    // se já existir filtro nesse campo, abre com os valores já marcados
     const filtroExistente = filtrosAtivos.find(
       (filtro) => filtro.campo === campo
     );
@@ -403,7 +403,7 @@ export default function BaseDadosTabela() {
     }
 
     if (opcoesSelecionadas.length === 0) {
-      setMensagemFiltro("Selecione pelo menos uma op��o.");
+      setMensagemFiltro("Selecione pelo menos uma opção.");
       return;
     }
 
@@ -417,7 +417,7 @@ export default function BaseDadosTabela() {
       valores: opcoesSelecionadas,
     };
 
-    // se j� existir filtro do mesmo campo, substitui
+    // se já existir filtro do mesmo campo, substitui
     const novosFiltros = [
       ...filtrosAtivos.filter((filtro) => filtro.campo !== campoSelecionado),
       novoFiltro,
@@ -427,7 +427,7 @@ export default function BaseDadosTabela() {
     setModalFiltroAberto(false);
     setModoTodos(false);
 
-    // aplica no banco, retornando at� 100 resultados
+    // aplica no banco, retornando até 100 resultados
     buscarColaboradores(busca, false, novosFiltros);
   }
 
@@ -531,7 +531,7 @@ export default function BaseDadosTabela() {
                   className={temaDia ? "rounded-full px-1 text-blue-600 hover:bg-blue-100 hover:text-blue-800" : "rounded-full px-1 text-blue-200 hover:bg-white/10 hover:text-white"}
                   title="Remover filtro"
                 >
-                  �
+                  x
                 </button>
               </div>
             ))}
@@ -564,7 +564,7 @@ export default function BaseDadosTabela() {
                 </span>
               ) : (
                 <span className={temaDia ? "rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600" : "rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-slate-300"}>
-                  Exibindo at� 100 registros
+                  Exibindo até 100 registros
                 </span>
               )}
             </div>
@@ -638,15 +638,15 @@ export default function BaseDadosTabela() {
                   <th className="px-2 py-4 text-center align-middle">#</th>
                   <th className="px-2 py-4 text-center align-middle">Pref.</th>
                   <th className="px-2 py-4 text-center align-middle">
-                    Matr�cula
+                    Matrícula
                   </th>
                   <th className="px-2 py-4 text-center align-middle">Nome</th>
                   <th className="px-2 py-4 text-center align-middle">
-                    Cargo/Fun��o
+                    Cargo/Função
                   </th>
                   <th className="px-2 py-4 text-center align-middle">CH</th>
                   <th className="px-2 py-4 text-center align-middle">
-                    Exerc�cio
+                    Exercício
                   </th>
                   <th className="px-2 py-4 text-center align-middle">CPF</th>
                   <th className="px-2 py-4 text-center align-middle">PIS</th>
@@ -768,7 +768,7 @@ export default function BaseDadosTabela() {
                 </h3>
 
                 <p className={temaDia ? "mt-1 text-sm text-slate-500" : "mt-1 text-sm text-slate-400"}>
-                  Escolha um campo e marque uma ou mais op��es.
+                  Escolha um campo e marque uma ou mais opções.
                 </p>
               </div>
 
@@ -777,7 +777,7 @@ export default function BaseDadosTabela() {
                 onClick={() => setModalFiltroAberto(false)}
                 className={temaDia ? "rounded-full px-3 py-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700" : "rounded-full px-3 py-1 text-slate-400 hover:bg-white/10 hover:text-white"}
               >
-                �
+                  x
               </button>
             </div>
 
@@ -808,7 +808,7 @@ export default function BaseDadosTabela() {
                     type="text"
                     value={buscaOpcoes}
                     onChange={(e) => setBuscaOpcoes(e.target.value)}
-                    placeholder="Buscar op��o..."
+                    placeholder="Buscar opção..."
                     className={inputModalClass}
                   />
 
@@ -818,7 +818,7 @@ export default function BaseDadosTabela() {
                     disabled={loadingOpcoes || opcoesFiltradas.length === 0}
                     className={temaDia ? "h-11 whitespace-nowrap rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50" : "h-11 whitespace-nowrap rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-50"}
                   >
-                    Selecionar vis�veis
+                    Selecionar visíveis
                   </button>
 
                   <button
@@ -827,7 +827,7 @@ export default function BaseDadosTabela() {
                     disabled={loadingOpcoes || opcoesSelecionadas.length === 0}
                     className={temaDia ? "h-11 whitespace-nowrap rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50" : "h-11 whitespace-nowrap rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-50"}
                   >
-                    Limpar sele��o
+                    Limpar seleção
                   </button>
                 </div>
 
@@ -838,8 +838,8 @@ export default function BaseDadosTabela() {
                   </p>
 
                   <p className="text-xs text-gray-400">
-                    {opcoesFiltradas.length} op��o
-                    {opcoesFiltradas.length === 1 ? "" : "�es"} visível
+                    {opcoesFiltradas.length} opção
+                    {opcoesFiltradas.length === 1 ? "" : "ões"} visível
                     {opcoesFiltradas.length === 1 ? "" : "s"}
                   </p>
                 </div>
@@ -847,7 +847,7 @@ export default function BaseDadosTabela() {
                 <div className={temaDia ? "mt-3 max-h-80 overflow-y-auto rounded-xl border border-slate-200" : "mt-3 max-h-80 overflow-y-auto rounded-xl border border-white/10"}>
                   {loadingOpcoes ? (
                     <div className="p-6 text-center text-sm text-gray-500">
-                      Carregando op��es...
+                      Carregando opções...
                     </div>
                   ) : opcoesFiltradas.length > 0 ? (
                     <div className={temaDia ? "divide-y divide-slate-200" : "divide-y divide-white/10"}>
@@ -869,7 +869,7 @@ export default function BaseDadosTabela() {
                     </div>
                   ) : (
                     <div className="p-6 text-center text-sm text-gray-500">
-                      Nenhuma op��o encontrada.
+                      Nenhuma opção encontrada.
                     </div>
                   )}
                 </div>
@@ -911,6 +911,7 @@ export default function BaseDadosTabela() {
     </section>
   );
 }
+
 
 
 

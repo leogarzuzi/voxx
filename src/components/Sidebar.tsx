@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -31,6 +31,9 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
   const [dashboardOpen, setDashboardOpen] = useState(
     pathname.startsWith("/inicio/dashboard")
   );
+  const [centralMemorandosOpen, setCentralMemorandosOpen] = useState(
+    pathname.startsWith("/inicio/central-memorandos")
+  );
 
   const podeVerSolicitacoes = temPermissao(perfil, PERMISSOES.SOLICITACOES);
   const podeVerAuditoria = temPermissao(perfil, PERMISSOES.AUDITORIA);
@@ -55,6 +58,12 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
   useEffect(() => {
     if (pathname.startsWith("/inicio/base-dados")) {
       setBaseDadosOpen(true);
+    }
+  }, [pathname]);
+
+  useEffect(() => {
+    if (pathname.startsWith("/inicio/central-memorandos")) {
+      setCentralMemorandosOpen(true);
     }
   }, [pathname]);
 
@@ -119,6 +128,9 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
   }
 
   const baseDadosAtivo = pathname.startsWith("/inicio/base-dados");
+  const centralMemorandosAtivo = pathname.startsWith(
+    "/inicio/central-memorandos"
+  );
   const admissaoAtivo = pathname.startsWith("/inicio/admissao");
   const dashboardAtivo = pathname.startsWith("/inicio/dashboard");
   const iconClass = temaDia ? "h-5 w-5 text-slate-400" : "h-5 w-5 text-blue-100";
@@ -460,6 +472,60 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
               Análise FOPAG
             </Link>
           )}
+
+          {podeVerSolicitacoes && (
+            <>
+              <button
+                type="button"
+                onClick={() => setCentralMemorandosOpen(!centralMemorandosOpen)}
+                className={grupoMenuClass(false)}
+              >
+                <span className="flex items-center gap-3">
+                  <svg className={iconClass} viewBox="0 0 24 24" fill="none">
+                    <path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                    <path d="M8.5 8h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    <path d="M8.5 12h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    <path d="M8.5 16h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                  Central de Memorandos
+                </span>
+                <span
+                  className={`${chevronClass} ${
+                    centralMemorandosOpen ? "rotate-90" : ""
+                  }`}
+                >
+                  ›
+                </span>
+              </button>
+
+              {centralMemorandosOpen && (
+                <div className={subMenuClass}>
+                  <Link
+                    prefetch={false}
+                    className={subItemMenuClass(pathname === "/inicio/central-memorandos")}
+                    href="/inicio/central-memorandos"
+                    onClick={() => iniciarNavegacao("/inicio/central-memorandos")}
+                  >
+                    Nova solicitacao
+                  </Link>
+
+                  <Link
+                    prefetch={false}
+                    className={subItemMenuClass(
+                      rotaAtiva("/inicio/central-memorandos/troca-plantao")
+                    )}
+                    href="/inicio/central-memorandos/troca-plantao"
+                    onClick={() =>
+                      iniciarNavegacao("/inicio/central-memorandos/troca-plantao")
+                    }
+                  >
+                    Troca de plantao
+                  </Link>
+                </div>
+              )}
+            </>
+          )}
+
         </nav>
       </div>
 

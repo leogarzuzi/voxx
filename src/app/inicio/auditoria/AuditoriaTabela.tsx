@@ -42,6 +42,10 @@ function formatarAcao(acao: string) {
     PERMUTA_EDITADA: "Permuta editada",
     PERMUTA_STATUS_ALTERADO: "Status da permuta alterado",
 
+    TROCA_PLANTAO_CRIADA: "Troca de plantão criada",
+    TROCA_PLANTAO_EDITADA: "Troca de plantão editada",
+    TROCA_PLANTAO_CANCELADA: "Troca de plantão cancelada",
+
     ADMISSAO_CRIADA: "Nova admissão cadastrada",
     ADMISSAO_EDITADA: "Admissão editada",
   };
@@ -57,6 +61,7 @@ function formatarModulo(modulo: string) {
     desligamento: "Desligamento",
     transferencia: "Transferência",
     permuta: "Permuta",
+    central_memorandos: "Central de memorandos",
   };
 
   return mapa[modulo] || modulo;
@@ -70,6 +75,7 @@ function corModulo(modulo: string, temaDia: boolean) {
     desligamento: "border-red-300/25 bg-red-300/10 text-red-100",
     transferencia: "border-blue-300/25 bg-blue-300/10 text-blue-100",
     permuta: "border-amber-300/25 bg-amber-300/10 text-amber-100",
+    central_memorandos: "border-cyan-300/25 bg-cyan-300/10 text-cyan-100",
   };
 
   const mapaDia: Record<string, string> = {
@@ -79,6 +85,7 @@ function corModulo(modulo: string, temaDia: boolean) {
     desligamento: "border-red-200 bg-red-50 text-red-700",
     transferencia: "border-blue-200 bg-blue-50 text-blue-700",
     permuta: "border-amber-200 bg-amber-50 text-amber-700",
+    central_memorandos: "border-cyan-200 bg-cyan-50 text-cyan-700",
   };
 
   return temaDia
@@ -115,6 +122,12 @@ function formatarDetalhes(detalhes: Record<string, any> | null) {
     desligamentoId: "ID do desligamento",
     transferenciaId: "ID da transferência",
     permutaId: "ID da permuta",
+    trocaPlantaoId: "ID da troca de plantão",
+    protocolo: "Protocolo",
+    dataPlantaoSolicitante: "Plantão solicitante",
+    dataPlantaoSolicitado: "Plantão solicitado",
+    tipoPlantaoSolicitante: "Tipo do plantão solicitante",
+    tipoPlantaoSolicitado: "Tipo do plantão solicitado",
     matriculaSaida: "Matrícula de quem sai",
     nomeSaida: "Nome de quem sai",
     matriculaEntrada: "Matrícula de quem entra",
@@ -195,7 +208,7 @@ function formatarValorVisual(valor: unknown) {
 
   if (texto === "VAZIO") return "Vazio";
   if (texto === "SIM") return "Sim";
-  if (texto === "NAO" || texto === "NÃƒO" || texto === "NÃƒÆ’O") return "Não";
+  if (texto === "NAO" || texto === "NÃO") return "Não";
 
   return texto;
 }
