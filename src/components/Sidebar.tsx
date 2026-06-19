@@ -153,7 +153,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
         <div className="px-4 pb-3 pt-5">
           <Link
             href="/inicio"
-            title="Ir para o inÃ­cio"
+            title="Ir para o início"
             onClick={() => iniciarNavegacao("/inicio")}
             className={
               temaDia
@@ -204,7 +204,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                 <path d="M19 8v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 <path d="M22 11h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
-              SolicitaÃ§Ãµes
+              Solicitações
             </Link>
           )}
 
@@ -234,7 +234,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              UsuÃ¡rios
+              Usuários
             </Link>
           )}
 
@@ -284,7 +284,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                       href="/inicio/base-dados/gestao-rh"
                       onClick={() => iniciarNavegacao("/inicio/base-dados/gestao-rh")}
                     >
-                      GestÃ£o e RH
+                      Gestão e RH
                     </Link>
                   )}
                 </div>
@@ -306,7 +306,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                     <path d="M19 8v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                     <path d="M22 11h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                   </svg>
-                  AdmissÃ£o
+                  Admissão
                 </span>
                 <span className={`${chevronClass} ${admissaoOpen ? "rotate-90" : ""}`}>
                   <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -324,7 +324,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                       href="/inicio/admissao/controle"
                       onClick={() => iniciarNavegacao("/inicio/admissao/controle")}
                     >
-                      Controle de AdmissÃµes
+                      Controle de Admissões
                     </Link>
                   )}
 
@@ -373,7 +373,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                 <path d="M6 17l3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 <circle cx="12" cy="12" r="2.5" stroke="currentColor" strokeWidth="2" />
               </svg>
-              TransferÃªncia
+              Transferência
             </Link>
           )}
 
@@ -425,7 +425,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                       href="/inicio/dashboard/visao-geral"
                       onClick={() => iniciarNavegacao("/inicio/dashboard/visao-geral")}
                     >
-                      VisÃ£o Geral
+                      Visão Geral
                     </Link>
                   )}
 
@@ -435,7 +435,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                       href="/inicio/dashboard/admissoes"
                       onClick={() => iniciarNavegacao("/inicio/dashboard/admissoes")}
                     >
-                      AdmissÃµes
+                      Admissões
                     </Link>
                   )}
 
@@ -475,7 +475,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                 <path d="M8.5 12h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 <path d="M8.5 16h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
-              AnÃ¡lise FOPAG
+              Análise FOPAG
             </Link>
           )}
 
@@ -514,7 +514,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                     href="/inicio/central-memorandos"
                     onClick={() => iniciarNavegacao("/inicio/central-memorandos")}
                   >
-                    Nova solicitacao
+                    Nova solicitação
                   </Link>
 
                   <Link
@@ -527,7 +527,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                       iniciarNavegacao("/inicio/central-memorandos/troca-plantao")
                     }
                   >
-                    Troca de plantao
+                    Troca de plantão
                   </Link>
                   <Link
                     prefetch={false}
@@ -570,12 +570,3 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
     </aside>
   );
 }
-
-
-
-
-
-
-
-
-
