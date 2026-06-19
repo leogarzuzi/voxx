@@ -224,37 +224,51 @@ export default function ConferenciaFolhaPage() {
     }
 
     if (!response.ok) {
-      const erro = await response.json();
+      let mensagemErroApi = "Erro ao gerar relatório.";
+
+      try {
+        const erro = await response.json();
+        mensagemErroApi = erro?.error
+          ? `Erro ao gerar relatório: ${erro.error}`
+          : mensagemErroApi;
+      } catch {
+        const erroTexto = await response.text().catch(() => "");
+        mensagemErroApi = erroTexto
+          ? `Erro ao gerar relatório: ${erroTexto.slice(0, 180)}`
+          : mensagemErroApi;
+      }
 
       setLoading(false);
       setProgresso(0);
-      setMensagem(
-        erro?.error
-          ? `Erro ao gerar relatório: ${erro.error}`
-          : "Erro ao gerar relatório."
-      );
+      setMensagem(mensagemErroApi);
 
       return;
     }
 
-    setProgresso(100);
+    try {
+      setProgresso(100);
 
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
 
-    link.href = url;
-    link.download = `resultado_conferencia_${competencia.replace("/", "-")}.xlsx`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
+      link.href = url;
+      link.download = `resultado_conferencia_${competencia.replace("/", "-")}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
 
-    setTimeout(() => {
+      setTimeout(() => {
+        setLoading(false);
+        setProgresso(0);
+        setMensagem(null);
+      }, 600);
+    } catch (error) {
       setLoading(false);
       setProgresso(0);
-      setMensagem(null);
-    }, 600);
+      setMensagem(`Erro ao baixar relatório: ${String(error)}`);
+    }
   }
 
   const mensagemErro = mensagem?.startsWith("Erro") || mensagem?.startsWith("Envie");

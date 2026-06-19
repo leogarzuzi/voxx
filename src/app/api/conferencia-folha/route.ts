@@ -292,6 +292,12 @@
         previa.map((row) => row.MATRICULA_LIMPA)
       );
 
+      const fopagChavesPorAbaMatricula = new Set(
+        fopagTratada.map(
+          (row) => `${row.ABA_FOPAG}|${row.MATRICULA_LIMPA}`
+        )
+      );
+
       const erros: Record<string, any>[] = [];
 
       for (const linha of fopagTratada) {
@@ -343,10 +349,8 @@
 
         if (!abaEsperada) continue;
 
-        const existeNaFopag = fopagTratada.some(
-          (item) =>
-            item.ABA_FOPAG === abaEsperada &&
-            item.MATRICULA_LIMPA === linha.MATRICULA_LIMPA
+        const existeNaFopag = fopagChavesPorAbaMatricula.has(
+          `${abaEsperada}|${linha.MATRICULA_LIMPA}`
         );
 
         if (existeNaFopag) continue;
