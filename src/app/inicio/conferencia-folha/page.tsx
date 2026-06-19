@@ -1,7 +1,389 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import * as XLSX from "xlsx-js-style";
 import { useTema } from "@/contexts/TemaContext";
+
+const RUBRICAS: Record<string, { "95": string; OUTROS: string }> = {
+  "ADC NOT": { "95": "703", OUTROS: "3037" },
+  ATRASOS: { "95": "1054", OUTROS: "3507" },
+  "GRAT FDS": { "95": "710", OUTROS: "3120" },
+  "GRAT DIF PROV": { "95": "1053", OUTROS: "3195" },
+  EXTRAS: { "95": "715", OUTROS: "3138" },
+  FALTAS: { "95": "1065", OUTROS: "3506" },
+  "GRAT PLT": { "95": "716", OUTROS: "3147" },
+  "GRAT ROT": { "95": "719", OUTROS: "3154" },
+  "GRAT CTI ESP": { "95": "1050", OUTROS: "3185" },
+};
+
+const ABAS_DUPLA = [
+  "ADC NOT",
+  "ATRASOS",
+  "GRAT FDS",
+  "GRAT DIF PROV",
+  "EXTRAS",
+  "FALTAS",
+];
+
+const ABAS_SIMPLES = ["GRAT PLT", "GRAT ROT", "GRAT CTI ESP"];
+
+function limparMatricula(valor: any) {
+  return String(valor ?? "").replace(/\D/g, "");
+}
+
+function formatarMatricula(valor: any) {
+  const limpa = limparMatricula(valor).padStart(8, "0");
+
+  if (limpa.length !== 8) return limpa;
+
+  return `${limpa[0]}.${limpa.slice(1, 4)}.${limpa.slice(4, 7)}-${limpa[7]}`;
+}
+
+function identificarContrato(pref: any) {
+  return String(pref ?? "").trim() === "95" ? "95" : "OUTROS";
+}
+
+function normalizarRubrica(valor: any) {
+  return String(valor ?? "").trim();
+}
+
+function excelDateToJSDate(serial: number) {
+  const utcDays = Math.floor(serial - 25569);
+  const utcValue = utcDays * 86400;
+  return new Date(utcValue * 1000);
+}
+
+function normalizarCompetencia(valor: any) {
+  if (!valor) return "";
+
+  if (valor instanceof Date) {
+    return `${String(valor.getMonth() + 1).padStart(2, "0")}/${valor.getFullYear()}`;
+  }
+
+  if (typeof valor === "number") {
+    const data = excelDateToJSDate(valor);
+    return `${String(data.getMonth() + 1).padStart(2, "0")}/${data.getFullYear()}`;
+  }
+
+  const texto = String(valor).trim();
+  const data = new Date(texto);
+
+  if (!Number.isNaN(data.getTime())) {
+    return `${String(data.getMonth() + 1).padStart(2, "0")}/${data.getFullYear()}`;
+  }
+
+  return "";
+}
+
+function sheetToJson(workbook: XLSX.WorkBook, sheetName: string) {
+  const sheet = workbook.Sheets[sheetName];
+  if (!sheet) return [];
+
+  return XLSX.utils.sheet_to_json<Record<string, any>>(sheet, {
+    defval: "",
+    raw: true,
+  });
+}
+
+function normalizarColunas(rows: Record<string, any>[]) {
+  return rows.map((row) => {
+    const novo: Record<string, any> = {};
+
+    for (const chave of Object.keys(row)) {
+      novo[String(chave).trim().toUpperCase()] = row[chave];
+    }
+
+    return novo;
+  });
+}
+
+function carregarSetMatriculas(workbook: XLSX.WorkBook, aba: string) {
+  const rows = normalizarColunas(sheetToJson(workbook, aba));
+
+  return new Set(
+    rows
+      .filter((row) => row.MATRICULA)
+      .map((row) => limparMatricula(row.MATRICULA))
+  );
+}
+
+function acharAbaPrevia(workbook: XLSX.WorkBook) {
+  if (workbook.SheetNames.includes("PREVIA")) return "PREVIA";
+  if (workbook.SheetNames.includes("HMRG")) return "HMRG";
+
+  return (
+    workbook.SheetNames.find((nome) => nome.toUpperCase() !== "DINAMICA") ||
+    workbook.SheetNames[0]
+  );
+}
+
+function estilizarPlanilha(sheet: XLSX.WorkSheet) {
+  if (!sheet["!ref"]) return;
+
+  const range = XLSX.utils.decode_range(sheet["!ref"]);
+  sheet["!rows"] = [];
+
+  for (let R = range.s.r; R <= range.e.r; R++) {
+    sheet["!rows"][R] = { hpx: 35 };
+
+    for (let C = range.s.c; C <= range.e.c; C++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+      const cell = sheet[cellAddress];
+
+      if (!cell) continue;
+
+      const isHeader = R === 0;
+
+      cell.s = {
+        font: {
+          name: "Calibri",
+          sz: isHeader ? 14 : 11,
+          bold: isHeader,
+          color: { rgb: "000000" },
+        },
+        fill: isHeader ? { fgColor: { rgb: "D9EAF7" } } : undefined,
+        alignment: {
+          horizontal: "center",
+          vertical: "center",
+          wrapText: true,
+        },
+        border: {
+          top: { style: "thin", color: { rgb: "D9D9D9" } },
+          bottom: { style: "thin", color: { rgb: "D9D9D9" } },
+          left: { style: "thin", color: { rgb: "D9D9D9" } },
+          right: { style: "thin", color: { rgb: "D9D9D9" } },
+        },
+      };
+    }
+  }
+}
+
+function criarAbaEstilizada(
+  wb: XLSX.WorkBook,
+  dados: Record<string, any>[],
+  nomeAba: string
+) {
+  const ws = XLSX.utils.json_to_sheet(dados.length ? dados : [{}]);
+
+  estilizarPlanilha(ws);
+
+  ws["!cols"] = Object.keys(dados[0] || {}).map(() => ({
+    wch: 24,
+  }));
+
+  XLSX.utils.book_append_sheet(wb, ws, nomeAba.substring(0, 31));
+}
+
+async function analisarNoNavegador({
+  fopag,
+  previa,
+  competencia,
+}: {
+  fopag: File;
+  previa: File;
+  competencia: string;
+}) {
+  const [fopagBuffer, previaBuffer] = await Promise.all([
+    fopag.arrayBuffer(),
+    previa.arrayBuffer(),
+  ]);
+
+  const fopagWorkbook = XLSX.read(fopagBuffer, {
+    type: "array",
+    cellDates: true,
+  });
+
+  const previaWorkbook = XLSX.read(previaBuffer, {
+    type: "array",
+    cellDates: true,
+  });
+
+  const abaPrevia = acharAbaPrevia(previaWorkbook);
+  const feriasSet = carregarSetMatriculas(fopagWorkbook, "FERIAS");
+  const desligadosSet = carregarSetMatriculas(fopagWorkbook, "DESLIGADOS");
+  const previaOriginal = normalizarColunas(sheetToJson(previaWorkbook, abaPrevia));
+
+  const mapaNomes = new Map(
+    previaOriginal.map((row) => [
+      limparMatricula(row.MATRICULA),
+      row.NOME || "ND",
+    ])
+  );
+
+  const previaTratada = previaOriginal
+    .map(
+      (row) =>
+        ({
+          ...row,
+          MATRICULA_LIMPA: limparMatricula(row.MATRICULA),
+          RUBRICA_LIMPA: normalizarRubrica(row.RUBRICA),
+          COMPETENCIA_LIMPA: normalizarCompetencia(row.COMPETENCIA),
+        } as Record<string, any>)
+    )
+    .filter((row) => row.COMPETENCIA_LIMPA === competencia);
+
+  const abasParaLer = [...ABAS_DUPLA, ...ABAS_SIMPLES];
+  const fopagTratada = abasParaLer.flatMap((aba) => {
+    const rows = normalizarColunas(sheetToJson(fopagWorkbook, aba));
+
+    return rows
+      .filter((row) => row.MATRICULA)
+      .map((row) => {
+        const contrato = identificarContrato(row.PREF);
+
+        return {
+          ...row,
+          ABA_FOPAG: aba,
+          MATRICULA_LIMPA: limparMatricula(row.MATRICULA),
+          CONTRATO: contrato,
+          RUBRICA_ESPERADA: RUBRICAS[aba][contrato],
+        } as Record<string, any>;
+      });
+  });
+
+  const previaChaves = new Set(
+    previaTratada.map((row) => `${row.MATRICULA_LIMPA}|${row.RUBRICA_LIMPA}`)
+  );
+
+  const matriculasNaPrevia = new Set(
+    previaTratada.map((row) => row.MATRICULA_LIMPA)
+  );
+
+  const fopagChavesPorAbaMatricula = new Set(
+    fopagTratada.map((row) => `${row.ABA_FOPAG}|${row.MATRICULA_LIMPA}`)
+  );
+
+  const erros: Record<string, any>[] = [];
+
+  for (const linha of fopagTratada) {
+    const matricula = linha.MATRICULA_LIMPA;
+    const rubrica = linha.RUBRICA_ESPERADA;
+
+    if (ABAS_SIMPLES.includes(linha.ABA_FOPAG) && feriasSet.has(matricula)) {
+      continue;
+    }
+
+    let detalhe = "";
+
+    if (!matriculasNaPrevia.has(matricula)) {
+      detalhe = desligadosSet.has(matricula)
+        ? "Matrícula enviada, mas colaborador consta como desligado."
+        : "Matrícula enviada na FOPAG, mas não existe na prévia da sede.";
+    } else if (!previaChaves.has(`${matricula}|${rubrica}`)) {
+      detalhe =
+        feriasSet.has(matricula) && ABAS_DUPLA.includes(linha.ABA_FOPAG)
+          ? "Rubrica enviada, mas colaborador está de férias na competência."
+          : "Rubrica enviada na FOPAG, mas não foi encontrada na prévia.";
+    } else {
+      continue;
+    }
+
+    erros.push({
+      COMPETENCIA: competencia,
+      ABA_FOPAG: linha.ABA_FOPAG,
+      MATRICULA_FORMATADA: formatarMatricula(matricula),
+      NOME: mapaNomes.get(matricula) || "ND",
+      RUBRICA_ESPERADA: rubrica,
+      DETALHE: detalhe,
+    });
+  }
+
+  const rubricaParaAba: Record<string, string> = {};
+
+  for (const aba of ABAS_DUPLA) {
+    rubricaParaAba[RUBRICAS[aba]["95"]] = aba;
+    rubricaParaAba[RUBRICAS[aba].OUTROS] = aba;
+  }
+
+  for (const linha of previaTratada) {
+    const rubrica = linha.RUBRICA_LIMPA;
+    const abaEsperada = rubricaParaAba[rubrica];
+
+    if (!abaEsperada) continue;
+
+    const existeNaFopag = fopagChavesPorAbaMatricula.has(
+      `${abaEsperada}|${linha.MATRICULA_LIMPA}`
+    );
+
+    if (existeNaFopag) continue;
+
+    erros.push({
+      COMPETENCIA: competencia,
+      ABA_FOPAG: abaEsperada,
+      MATRICULA_FORMATADA: formatarMatricula(linha.MATRICULA_LIMPA),
+      NOME: mapaNomes.get(linha.MATRICULA_LIMPA) || "ND",
+      RUBRICA_ESPERADA: rubrica,
+      DETALHE: "Rubrica paga na prévia, mas não encontrada na FOPAG.",
+    });
+  }
+
+  const resumoDetalhe = Object.entries(
+    erros.reduce<Record<string, number>>((acc, erro) => {
+      acc[erro.DETALHE] = (acc[erro.DETALHE] || 0) + 1;
+      return acc;
+    }, {})
+  ).map(([DETALHE, TOTAL]) => ({ DETALHE, TOTAL }));
+
+  const resumoAba = Object.entries(
+    erros.reduce<Record<string, number>>((acc, erro) => {
+      const aba = erro.ABA_FOPAG || "NÃO INFORMADO";
+      acc[aba] = (acc[aba] || 0) + 1;
+      return acc;
+    }, {})
+  ).map(([ABA_FOPAG, TOTAL]) => ({ ABA_FOPAG, TOTAL }));
+
+  const resumoGeral = [
+    { INDICADOR: "Competência analisada", TOTAL: competencia },
+    { INDICADOR: "Aba da prévia lida", TOTAL: abaPrevia },
+    { INDICADOR: "Linhas na prévia", TOTAL: previaTratada.length },
+    { INDICADOR: "Lançamentos FOPAG", TOTAL: fopagTratada.length },
+    { INDICADOR: "Colaboradores em férias", TOTAL: feriasSet.size },
+    { INDICADOR: "Colaboradores desligados", TOTAL: desligadosSet.size },
+    { INDICADOR: "Total de divergências", TOTAL: erros.length },
+  ];
+
+  const wb = XLSX.utils.book_new();
+
+  criarAbaEstilizada(wb, resumoGeral, "RESUMO_GERAL");
+  criarAbaEstilizada(wb, resumoDetalhe, "RESUMO_DETALHE");
+  criarAbaEstilizada(wb, resumoAba, "RESUMO_POR_ABA");
+  criarAbaEstilizada(wb, erros, "ERROS_DETALHADOS");
+
+  const output = XLSX.write(wb, {
+    type: "array",
+    bookType: "xlsx",
+  });
+
+  return {
+    blob: new Blob([output], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }),
+    auditoria: {
+      competencia,
+      abaPrevia,
+      linhasPrevia: previaTratada.length,
+      lancamentosFopag: fopagTratada.length,
+      colaboradoresFerias: feriasSet.size,
+      colaboradoresDesligados: desligadosSet.size,
+      totalDivergencias: erros.length,
+      arquivoFopag: fopag.name,
+      arquivoPrevia: previa.name,
+      processamento: "navegador",
+    },
+  };
+}
+
+function baixarBlob(blob: Blob, competencia: string) {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = `resultado_conferencia_${competencia.replace("/", "-")}.xlsx`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+}
 
 type UploadCardProps = {
   label: string;
@@ -194,6 +576,36 @@ export default function ConferenciaFolhaPage() {
     return () => clearInterval(interval);
   }, [loading]);
 
+  async function analisarLocalmente() {
+    if (!fopag || !previa) return;
+
+    setMensagem("Arquivo grande detectado. Processando no navegador...");
+
+    const resultado = await analisarNoNavegador({
+      fopag,
+      previa,
+      competencia,
+    });
+
+    baixarBlob(resultado.blob, competencia);
+
+    fetch("/api/conferencia-folha/auditoria", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(resultado.auditoria),
+    }).catch(() => null);
+
+    setProgresso(100);
+
+    setTimeout(() => {
+      setLoading(false);
+      setProgresso(0);
+      setMensagem(null);
+    }, 600);
+  }
+
   async function analisar() {
     if (!fopag || !previa) {
       setMensagem("Envie a FOPAG e a PRÉVIA antes de analisar.");
@@ -238,6 +650,18 @@ export default function ConferenciaFolhaPage() {
         mensagemErroApi = `${mensagemErroApi} Status ${response.status}.`;
       }
 
+      if (response.status === 413) {
+        try {
+          await analisarLocalmente();
+        } catch (error) {
+          setLoading(false);
+          setProgresso(0);
+          setMensagem(`Erro ao gerar relatório no navegador: ${String(error)}`);
+        }
+
+        return;
+      }
+
       setLoading(false);
       setProgresso(0);
       setMensagem(`Erro ao gerar relatório: ${mensagemErroApi}`);
@@ -249,15 +673,7 @@ export default function ConferenciaFolhaPage() {
       setProgresso(100);
 
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-
-      link.href = url;
-      link.download = `resultado_conferencia_${competencia.replace("/", "-")}.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      baixarBlob(blob, competencia);
 
       setTimeout(() => {
         setLoading(false);
