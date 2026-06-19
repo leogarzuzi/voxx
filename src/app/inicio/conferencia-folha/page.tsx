@@ -227,20 +227,20 @@ export default function ConferenciaFolhaPage() {
       let mensagemErroApi = "Erro ao gerar relatório.";
 
       try {
-        const erro = await response.json();
-        mensagemErroApi = erro?.error
-          ? `Erro ao gerar relatório: ${erro.error}`
-          : mensagemErroApi;
+        const erroTexto = await response.text();
+        const erro = erroTexto ? JSON.parse(erroTexto) : null;
+
+        mensagemErroApi =
+          erro?.error ||
+          erro?.message ||
+          (erroTexto ? erroTexto.slice(0, 180) : mensagemErroApi);
       } catch {
-        const erroTexto = await response.text().catch(() => "");
-        mensagemErroApi = erroTexto
-          ? `Erro ao gerar relatório: ${erroTexto.slice(0, 180)}`
-          : mensagemErroApi;
+        mensagemErroApi = `${mensagemErroApi} Status ${response.status}.`;
       }
 
       setLoading(false);
       setProgresso(0);
-      setMensagem(mensagemErroApi);
+      setMensagem(`Erro ao gerar relatório: ${mensagemErroApi}`);
 
       return;
     }

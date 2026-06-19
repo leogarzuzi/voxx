@@ -5,6 +5,7 @@
 
   export const runtime = "nodejs";
   export const dynamic = "force-dynamic";
+  export const maxDuration = 60;
 
   const RUBRICAS: Record<string, { "95": string; OUTROS: string }> = {
     "ADC NOT": { "95": "703", OUTROS: "3037" },
