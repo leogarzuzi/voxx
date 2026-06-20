@@ -149,6 +149,14 @@ export function BuscaRapidaColaborador({ tema = "noite" }: BuscaRapidaColaborado
       )
     : [];
 
+  const painelClass = temaDia
+    ? "border-slate-200 bg-white text-slate-900 shadow-[0_28px_80px_rgba(15,23,42,0.22)]"
+    : "border-white/10 bg-[#171b24] text-white shadow-[0_30px_90px_rgba(0,0,0,0.58)]";
+  const cardClass = temaDia
+    ? "border-slate-200 bg-slate-50/80"
+    : "border-white/10 bg-white/[0.045]";
+  const textoSecundarioClass = temaDia ? "text-slate-500" : "text-slate-400";
+
   return (
     <>
       <form onSubmit={pesquisar} className="px-4 pb-3">
@@ -201,138 +209,169 @@ export function BuscaRapidaColaborador({ tema = "noite" }: BuscaRapidaColaborado
       {modalAberto &&
         createPortal(
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 px-4 backdrop-blur-[1px]"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/65 px-3 py-5 backdrop-blur-sm sm:px-6"
           onMouseDown={fecharModal}
         >
           <div
             onMouseDown={(e) => e.stopPropagation()}
-            className="max-h-[88vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white p-6 text-slate-800 shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="titulo-busca-colaborador"
+            className={`voxx-scrollbar max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[26px] border ${painelClass}`}
           >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h3 className="text-xl font-bold text-blue-700">
-                  Busca de colaborador
-                </h3>
-                <p className="mt-1 text-sm text-slate-500">
-                  Resultado para â€œ{busca.trim()}â€
-                </p>
+            <div
+              className={`sticky top-0 z-10 flex items-start justify-between gap-4 border-b px-5 py-5 backdrop-blur-xl sm:px-7 ${
+                temaDia
+                  ? "border-slate-200 bg-white/95"
+                  : "border-white/10 bg-[#171b24]/95"
+              }`}
+            >
+              <div className="flex min-w-0 items-center gap-3.5">
+                <span
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${
+                    temaDia
+                      ? "border-slate-200 bg-slate-950 text-white shadow-lg shadow-slate-950/10"
+                      : "border-white/10 bg-white text-slate-950 shadow-lg shadow-black/30"
+                  }`}
+                >
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="2" />
+                    <path d="m16 16 4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </span>
+                <div className="min-w-0">
+                  <h3 id="titulo-busca-colaborador" className="text-lg font-bold tracking-normal sm:text-xl">
+                    Busca de colaborador
+                  </h3>
+                  <p className={`mt-0.5 truncate text-sm ${textoSecundarioClass}`}>
+                    Resultado para &quot;{busca.trim()}&quot;
+                  </p>
+                </div>
               </div>
 
               <button
                 type="button"
                 onClick={fecharModal}
-                className="rounded-full px-3 py-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border text-sm transition ${
+                  temaDia
+                    ? "border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-950 hover:text-white"
+                    : "border-white/10 bg-white/[0.05] text-slate-400 hover:bg-white hover:text-slate-950"
+                }`}
                 aria-label="Fechar busca"
               >
-                x
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
               </button>
             </div>
 
-            {loading && (
-              <div className="mt-8 rounded-xl border border-blue-100 bg-blue-50 px-4 py-8 text-center text-sm font-semibold text-blue-700">
-                Consultando histórico do colaborador...
-              </div>
-            )}
-
-            {!loading && erro && (
-              <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                {erro}
-              </div>
-            )}
-
-            {!loading && resultado && !resultado.encontrado && (
-              <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
-                Nenhum colaborador encontrado para essa busca.
-              </div>
-            )}
-
-            {!loading && resultado?.encontrado && (
-              <>
-                <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50 p-4">
-                  <p className="text-xs font-bold uppercase tracking-wide text-blue-700">
-                    Dados principais
-                  </p>
-
-                  <div className="mt-3 grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
-                    <p>
-                      <span className="font-semibold">Nome:</span>{" "}
-                      {texto(resultado.dadosPrincipais?.nome)}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Matrícula:</span>{" "}
-                      {texto(resultado.dadosPrincipais?.Matrícula)}
-                    </p>
-                    <p>
-                      <span className="font-semibold">CPF:</span>{" "}
-                      {texto(resultado.dadosPrincipais?.cpf)}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Cargo:</span>{" "}
-                      {texto(resultado.dadosPrincipais?.cargo)}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Carga horária:</span>{" "}
-                      {texto(resultado.dadosPrincipais?.cargaHoraria)}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Admissão:</span>{" "}
-                      {formatarData(resultado.dadosPrincipais?.Admissão)}
-                    </p>
-                    <p className="md:col-span-2">
-                      <span className="font-semibold">Status atual:</span>{" "}
-                      {texto(resultado.dadosPrincipais?.statusAtual)}
-                    </p>
-                  </div>
+            <div className="p-5 sm:p-7">
+              {loading && (
+                <div className={`flex min-h-44 flex-col items-center justify-center rounded-2xl border px-4 text-center ${cardClass}`}>
+                  <span className={`h-9 w-9 animate-spin rounded-full border-2 border-t-transparent ${temaDia ? "border-slate-900" : "border-white"}`} />
+                  <p className="mt-4 text-sm font-semibold">Consultando histórico do colaborador...</p>
+                  <p className={`mt-1 text-xs ${textoSecundarioClass}`}>Reunindo os registros disponíveis no VOXX.</p>
                 </div>
+              )}
 
-                <div className="mt-5 space-y-4">
-                  {módulos.map(([chave, registros]) => (
-                    <div key={chave} className="rounded-xl border p-4">
-                      <div className="flex items-center justify-between gap-3">
-                        <h4 className="text-sm font-bold text-slate-800">
-                          {formatarNomemódulo(chave)}
-                        </h4>
-                        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500">
-                          {registros.length}
-                        </span>
+              {!loading && erro && (
+                <div className={`rounded-2xl border px-4 py-5 text-sm font-medium ${temaDia ? "border-red-200 bg-red-50 text-red-700" : "border-red-400/20 bg-red-400/10 text-red-200"}`}>
+                  {erro}
+                </div>
+              )}
+
+              {!loading && resultado && !resultado.encontrado && (
+                <div className={`flex min-h-44 flex-col items-center justify-center rounded-2xl border px-4 text-center ${cardClass}`}>
+                  <span className={`flex h-11 w-11 items-center justify-center rounded-2xl ${temaDia ? "bg-slate-200 text-slate-600" : "bg-white/10 text-slate-300"}`}>
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="2" />
+                      <path d="m16 16 4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                  </span>
+                  <p className="mt-4 text-sm font-semibold">Nenhum colaborador encontrado</p>
+                  <p className={`mt-1 text-xs ${textoSecundarioClass}`}>Confira a matrícula, o CPF ou o nome pesquisado.</p>
+                </div>
+              )}
+
+              {!loading && resultado?.encontrado && (
+                <>
+                  <section className={`rounded-2xl border p-5 ${cardClass}`}>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className={`text-[11px] font-bold uppercase tracking-[0.14em] ${textoSecundarioClass}`}>Dados principais</p>
+                        <h4 className="mt-1 text-lg font-bold">{texto(resultado.dadosPrincipais?.nome)}</h4>
                       </div>
+                      {resultado.dadosPrincipais?.statusAtual && (
+                        <span className={`rounded-full border px-3 py-1.5 text-xs font-bold ${temaDia ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-emerald-300/20 bg-emerald-300/10 text-emerald-200"}`}>
+                          {resultado.dadosPrincipais.statusAtual}
+                        </span>
+                      )}
+                    </div>
 
-                      {registros.length === 0 ? (
-                        <p className="mt-3 text-sm text-slate-400">
-                          Nenhum registro encontrado neste módulo.
-                        </p>
-                      ) : (
-                        <div className="mt-3 space-y-2">
+                    <div className={`mt-5 grid grid-cols-2 gap-x-5 gap-y-4 border-t pt-5 text-sm sm:grid-cols-3 ${temaDia ? "border-slate-200" : "border-white/10"}`}>
+                      {[
+                        ["Matrícula", texto(resultado.dadosPrincipais?.Matrícula)],
+                        ["CPF", texto(resultado.dadosPrincipais?.cpf)],
+                        ["Cargo", texto(resultado.dadosPrincipais?.cargo)],
+                        ["Carga horária", texto(resultado.dadosPrincipais?.cargaHoraria)],
+                        ["Admissão", formatarData(resultado.dadosPrincipais?.Admissão)],
+                      ].map(([rotulo, valor]) => (
+                        <div key={rotulo} className={rotulo === "Cargo" ? "col-span-2 sm:col-span-1" : ""}>
+                          <p className={`text-[11px] font-semibold uppercase tracking-wide ${textoSecundarioClass}`}>{rotulo}</p>
+                          <p className="mt-1 font-semibold">{valor}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  <div className="mt-6 flex items-center justify-between gap-3">
+                    <div>
+                      <p className={`text-[11px] font-bold uppercase tracking-[0.14em] ${textoSecundarioClass}`}>Histórico</p>
+                      <h4 className="mt-1 text-base font-bold">Onde este colaborador aparece</h4>
+                    </div>
+                    <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${temaDia ? "border-slate-200 bg-slate-50 text-slate-600" : "border-white/10 bg-white/[0.05] text-slate-300"}`}>
+                      {módulos.length} {módulos.length === 1 ? "módulo" : "módulos"}
+                    </span>
+                  </div>
+
+                  <div className="mt-3 space-y-3">
+                    {módulos.map(([chave, registros]) => (
+                      <section key={chave} className={`overflow-hidden rounded-2xl border ${cardClass}`}>
+                        <div className={`flex items-center justify-between gap-3 border-b px-4 py-3.5 ${temaDia ? "border-slate-200" : "border-white/10"}`}>
+                          <h5 className="text-sm font-bold">{formatarNomemódulo(chave)}</h5>
+                          <span className={`flex h-6 min-w-6 items-center justify-center rounded-full px-2 text-[11px] font-bold ${temaDia ? "bg-slate-200 text-slate-600" : "bg-white/10 text-slate-300"}`}>
+                            {registros.length}
+                          </span>
+                        </div>
+                        <div className={`divide-y px-4 ${temaDia ? "divide-slate-200" : "divide-white/10"}`}>
                           {registros.map((registro) => (
                             <div
                               key={registro.id}
-                              className="rounded-lg bg-slate-50 px-3 py-2 text-sm"
+                              className="py-3.5 text-sm"
                             >
-                              <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
-                                <p className="font-semibold text-slate-700">
-                                  {registro.titulo}
-                                </p>
-                                <p className="text-xs text-slate-500">
-                                  {formatarData(registro.data)}
-                                </p>
+                              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                <div>
+                                  <p className="font-semibold">{registro.titulo}</p>
+                                  <p className={`mt-1 leading-relaxed ${textoSecundarioClass}`}>{registro.descricao}</p>
+                                </div>
+                                <div className="flex shrink-0 items-center gap-2 sm:flex-col sm:items-end">
+                                  <p className={`text-xs ${textoSecundarioClass}`}>{formatarData(registro.data)}</p>
+                                  {registro.status && (
+                                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${temaDia ? "bg-slate-200 text-slate-700" : "bg-white/10 text-slate-200"}`}>
+                                      {registro.status}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
-                              <p className="mt-1 text-slate-500">
-                                {registro.descricao}
-                              </p>
-                              {registro.status && (
-                                <p className="mt-1 text-xs font-semibold text-blue-700">
-                                  {registro.status}
-                                </p>
-                              )}
                             </div>
                           ))}
                         </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
+                      </section>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>,
         document.body
