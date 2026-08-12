@@ -116,8 +116,8 @@ async function handleLogin(e: React.FormEvent) {
     setLoading(true);
     setMensagem("");
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "https://voxx-beryl.vercel.app/definir-senha",
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      redirectTo: `${window.location.origin}/definir-senha`,
     });
 
     setLoading(false);

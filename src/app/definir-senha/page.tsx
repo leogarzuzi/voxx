@@ -147,6 +147,10 @@ export default function DefinirSenhaPage() {
   const [loading, setLoading] = useState(false);
   const [verificando, setVerificando] = useState(true);
   const [mensagem, setMensagem] = useState("");
+  const [tokenPendente, setTokenPendente] = useState<{
+    tokenHash: string;
+    tipo: "recovery" | "invite";
+  } | null>(null);
 
   useEffect(() => {
     async function verificarSessao() {
@@ -175,6 +179,20 @@ export default function DefinirSenhaPage() {
       const tipoLink =
         hashParams.get("type") || searchParams.get("type") || "recovery";
 
+      // Links com token_hash exigem uma acao explicita do usuario. Assim,
+      // leitores de e-mail e verificadores automaticos nao consomem o link.
+      if (
+        tokenHash &&
+        (tipoLink === "recovery" || tipoLink === "invite")
+      ) {
+        setTokenPendente({
+          tokenHash,
+          tipo: tipoLink as "recovery" | "invite",
+        });
+        setVerificando(false);
+        return;
+      }
+
       let sessaoCriada = false;
 
       if (accessToken && refreshToken) {
@@ -188,19 +206,6 @@ export default function DefinirSenhaPage() {
 
       if (!sessaoCriada && code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (!error) sessaoCriada = true;
-      }
-
-      if (
-        !sessaoCriada &&
-        tokenHash &&
-        (tipoLink === "recovery" || tipoLink === "invite")
-      ) {
-        const { error } = await supabase.auth.verifyOtp({
-          token_hash: tokenHash,
-          type: tipoLink as "recovery" | "invite",
-        });
-
         if (!error) sessaoCriada = true;
       }
 
@@ -223,6 +228,30 @@ export default function DefinirSenhaPage() {
 
     verificarSessao();
   }, [router]);
+
+  async function handleConfirmarLink() {
+    if (!tokenPendente) return;
+
+    setLoading(true);
+    setMensagem("");
+
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash: tokenPendente.tokenHash,
+      type: tokenPendente.tipo,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      console.error("Falha ao validar link de redefinicao:", error);
+      setTokenPendente(null);
+      setMensagem("Link invalido ou expirado. Solicite uma nova redefinicao de senha.");
+      return;
+    }
+
+    window.history.replaceState({}, document.title, "/definir-senha");
+    setTokenPendente(null);
+  }
 
   async function handleDefinirSenha(e: React.FormEvent) {
     e.preventDefault();
@@ -314,6 +343,38 @@ export default function DefinirSenhaPage() {
               }
             >
               Voltar para o login
+            </button>
+          </div>
+        </CardSenha>
+      </TelaBase>
+    );
+  }
+
+  if (tokenPendente) {
+    return (
+      <TelaBase>
+        <CardSenha>
+          <div className="flex flex-col items-center text-center">
+            <LogoTopo />
+
+            <h1 className={temaDia ? "mt-5 text-2xl font-semibold tracking-tight text-slate-950" : "mt-5 text-2xl font-semibold tracking-tight text-white"}>
+              Redefinir sua senha
+            </h1>
+            <p className={temaDia ? "mt-3 text-sm leading-6 text-slate-600" : "mt-3 text-sm leading-6 text-slate-300"}>
+              Confirme abaixo para validar o link e criar uma nova senha.
+            </p>
+
+            <button
+              type="button"
+              onClick={handleConfirmarLink}
+              disabled={loading}
+              className={
+                temaDia
+                  ? "mt-6 h-11 w-full rounded-xl bg-slate-950 text-sm font-bold text-white shadow-[0_16px_40px_rgba(15,23,42,0.18)] transition hover:bg-slate-800 active:scale-[0.98] disabled:opacity-60"
+                  : "mt-6 h-11 w-full rounded-xl bg-white text-sm font-bold text-slate-950 shadow-[0_16px_40px_rgba(255,255,255,0.08)] transition hover:bg-slate-200 active:scale-[0.98] disabled:opacity-60"
+              }
+            >
+              {loading ? "Validando..." : "Continuar com a redefinicao"}
             </button>
           </div>
         </CardSenha>
