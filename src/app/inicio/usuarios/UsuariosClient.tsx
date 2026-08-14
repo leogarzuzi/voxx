@@ -20,6 +20,7 @@ type UsuariosClientProps = {
   usuariosAtivos: number;
   usuariosInativos: number;
   administradores: number;
+  perfisDisponiveis: string[];
 };
 
 export default function UsuariosClient({
@@ -30,6 +31,7 @@ export default function UsuariosClient({
   usuariosAtivos,
   usuariosInativos,
   administradores,
+  perfisDisponiveis,
 }: UsuariosClientProps) {
   const { temaDia } = useTema();
 
@@ -124,7 +126,11 @@ export default function UsuariosClient({
         </p>
       )}
 
-      <UsuariosTabela usuariosIniciais={usuariosLista} emailLogado={emailLogado} />
+      <UsuariosTabela
+        usuariosIniciais={usuariosLista}
+        emailLogado={emailLogado}
+        perfisDisponiveis={perfisDisponiveis}
+      />
     </main>
   );
 }

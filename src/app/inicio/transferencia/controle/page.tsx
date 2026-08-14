@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { PERMISSOES, temPermissao } from "@/lib/perfis";
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import ControleTransferenciasClient from "./ControleTransferenciasClient";
 
@@ -27,7 +28,7 @@ export default async function ControleTransferenciasPage() {
     redirect("/login");
   }
 
-  if (!temPermissao(usuario.perfil, PERMISSOES.TRANSFERENCIAS)) {
+  if (!(await temPermissaoNoBanco(supabase, usuario.perfil, PERMISSOES.TRANSFERENCIAS))) {
     redirect("/inicio");
   }
 

@@ -1,5 +1,7 @@
 ﻿import { NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
 
 export const dynamic = "force-dynamic";
 
@@ -54,18 +56,6 @@ type SupabaseServerClient = Awaited<
 >;
 
 type TabelaColaboradores = "colaboradores" | "colaboradores_gestao_rh";
-
-function temAcessoDesligamento(perfil?: string | null) {
-  const perfisPermitidos = [
-    "Admin",
-    "Gerente",
-    "Admissão",
-    "Admissao",
-    "Desligamento",
-  ];
-
-  return !!perfil && perfisPermitidos.includes(perfil);
-}
 
 async function buscarUsuarioLogado() {
   const supabase = await createSupabaseServerClient();
@@ -322,7 +312,7 @@ export async function GET(request: NextRequest) {
 
     if (erro) return erro;
 
-    if (!temAcessoDesligamento(usuarioLogado?.perfil)) {
+    if (!(await temPermissaoNoBanco(supabase, usuarioLogado?.perfil, PERMISSOES.DESLIGAMENTOS))) {
       return Response.json(
         { success: false, error: "Sem permissão." },
         { status: 403 }

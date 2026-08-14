@@ -1,5 +1,8 @@
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import DashboardAdmissoesClient from "./DashboardAdmissoesClient";
+import { redirect } from "next/navigation";
+import { PERMISSOES } from "@/lib/perfis";
+import { usuarioAtualTemPermissao } from "@/lib/perfisServer";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -40,6 +43,7 @@ async function buscarTodosRegistros(
 
 export default async function DashboardAdmissoesPage() {
   const supabase = await createSupabaseServerClient();
+  if (!(await usuarioAtualTemPermissao(supabase, PERMISSOES.ADMISSOES_DASHBOARD))) redirect("/inicio");
   const anoAtual = new Date().getFullYear();
   const mesAtual = new Date().getMonth();
 

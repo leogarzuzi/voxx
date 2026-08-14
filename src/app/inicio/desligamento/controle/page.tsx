@@ -1,21 +1,11 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
 import ControleDesligamentosClient from "./ControleDesligamentosClient";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-
-function temAcessoDesligamento(perfil?: string | null) {
-  const perfisPermitidos = [
-    "Admin",
-    "Gerente",
-    "Admissão",
-    "Admissao",
-    "Desligamento",
-  ];
-
-  return !!perfil && perfisPermitidos.includes(perfil);
-}
 
 export default async function ControleDesligamentosPage() {
   const supabase = await createSupabaseServerClient();
@@ -38,7 +28,7 @@ export default async function ControleDesligamentosPage() {
     redirect("/login");
   }
 
-  if (!temAcessoDesligamento(usuario.perfil)) {
+  if (!(await temPermissaoNoBanco(supabase, usuario.perfil, PERMISSOES.DESLIGAMENTOS))) {
     redirect("/inicio");
   }
 

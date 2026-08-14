@@ -1,5 +1,7 @@
 ﻿import { NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
 
 export const dynamic = "force-dynamic";
 
@@ -29,13 +31,20 @@ export async function GET(request: NextRequest) {
 
     const { data: usuarioLogado } = await supabase
       .from("usuarios")
-      .select("status")
+      .select("perfil, status")
       .eq("email", user.email.toLowerCase())
       .single();
 
     if (!usuarioLogado || usuarioLogado.status !== "ativo") {
       return Response.json(
         { success: false, error: "Usuário sem acesso ativo." },
+        { status: 403 }
+      );
+    }
+
+    if (!(await temPermissaoNoBanco(supabase, usuarioLogado.perfil, PERMISSOES.CENTRAL_MEMORANDOS))) {
+      return Response.json(
+        { success: false, error: "Sem permissão." },
         { status: 403 }
       );
     }

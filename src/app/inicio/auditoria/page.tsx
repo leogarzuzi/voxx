@@ -1,6 +1,8 @@
 ﻿import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import AuditoriaClient from "./AuditoriaClient";
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -22,7 +24,7 @@ export default async function AuditoriaPage() {
     .eq("email", user.email.toLowerCase())
     .single();
 
-  if (usuario?.perfil !== "Admin") {
+  if (!usuario || !(await temPermissaoNoBanco(supabase, usuario.perfil, PERMISSOES.AUDITORIA))) {
     redirect("/inicio");
   }
 

@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
-import { PERMISSOES, temPermissao } from "@/lib/perfis";
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
 import {
     ACOES_AUDITORIA,
     MODULOS_AUDITORIA,
@@ -266,10 +267,11 @@ export async function GET(request: NextRequest) {
     if (erro) return erro;
 
     if (
-      !temPermissao(
+      !(await temPermissaoNoBanco(
+        supabase,
         usuarioLogado?.perfil,
         PERMISSOES.ADMISSOES_VISUALIZAR
-      )
+      ))
     ) {
       return Response.json(
         { success: false, error: "Sem permissão." },
@@ -363,7 +365,7 @@ export async function POST(request: NextRequest) {
     if (erro) return erro;
 
     if (
-      !temPermissao(usuarioLogado?.perfil, PERMISSOES.ADMISSOES_CRIAR)
+      !(await temPermissaoNoBanco(supabase, usuarioLogado?.perfil, PERMISSOES.ADMISSOES_CRIAR))
     ) {
       return Response.json(
         { success: false, error: "Sem permissão." },
@@ -513,7 +515,7 @@ export async function PUT(request: NextRequest) {
     if (erro) return erro;
 
     if (
-      !temPermissao(usuarioLogado?.perfil, PERMISSOES.ADMISSOES_EDITAR)
+      !(await temPermissaoNoBanco(supabase, usuarioLogado?.perfil, PERMISSOES.ADMISSOES_EDITAR))
     ) {
       return Response.json(
         { success: false, error: "Sem permissão." },

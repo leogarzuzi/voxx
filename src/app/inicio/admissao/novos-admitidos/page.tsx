@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
-import { PERMISSOES, temPermissao } from "@/lib/perfis";
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
 import NovosAdmitidosManutencao from "./NovosAdmitidosManutencao";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +25,7 @@ export default async function NovosAdmitidosPage() {
   if (
     !usuarioLogado ||
     usuarioLogado.status !== "ativo" ||
-    !temPermissao(usuarioLogado.perfil, PERMISSOES.NOVOS_ADMITIDOS_VISUALIZAR)
+    !(await temPermissaoNoBanco(supabase, usuarioLogado.perfil, PERMISSOES.NOVOS_ADMITIDOS_VISUALIZAR))
   ) {
     redirect("/inicio");
   }

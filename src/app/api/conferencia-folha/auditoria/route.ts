@@ -1,6 +1,8 @@
 import { NextRequest } from "next/server";
 import { registrarAuditoria } from "@/lib/auditoria";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,7 +28,7 @@ export async function POST(request: NextRequest) {
       .eq("email", user.email.toLowerCase())
       .single();
 
-    if (!usuario || !["Admin", "Gerente"].includes(usuario.perfil)) {
+    if (!usuario || !(await temPermissaoNoBanco(supabase, usuario.perfil, PERMISSOES.CONFERENCIA_FOLHA))) {
       return Response.json(
         { success: false, error: "Sem permissão." },
         { status: 403 }

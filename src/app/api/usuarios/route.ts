@@ -1,10 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { registrarAuditoria } from "@/lib/auditoria";
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
 
 export const dynamic = "force-dynamic";
 
-const PERFIS_PERMITIDOS = ["Admin", "Gerente"];
 const STATUS_PERMITIDOS = ["ativo", "inativo"];
 
 export async function PATCH(request: Request) {
@@ -34,8 +35,8 @@ export async function PATCH(request: Request) {
 
     if (
       !usuarioLogado ||
-      usuarioLogado.perfil !== "Admin" ||
-      usuarioLogado.status !== "ativo"
+      usuarioLogado.status !== "ativo" ||
+      !(await temPermissaoNoBanco(supabase, usuarioLogado.perfil, PERMISSOES.USUARIOS))
     ) {
       return Response.json(
         { success: false, error: "Sem permissão." },
@@ -56,13 +57,6 @@ export async function PATCH(request: Request) {
       );
     }
 
-    if (novoPerfil && !PERFIS_PERMITIDOS.includes(novoPerfil)) {
-      return Response.json(
-        { success: false, error: "Perfil inválido." },
-        { status: 400 }
-      );
-    }
-
     if (novoStatus && !STATUS_PERMITIDOS.includes(novoStatus)) {
       return Response.json(
         { success: false, error: "Status inválido." },
@@ -75,6 +69,23 @@ export async function PATCH(request: Request) {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
+
+    if (novoPerfil) {
+      const { data: perfilValido, error: erroPerfis } = await supabaseAdmin
+        .from("perfis_acesso")
+        .select("nome")
+        .eq("nome", novoPerfil)
+        .eq("ativo", true)
+        .maybeSingle();
+      const fallbackValido = ["Admin", "Gerente"].includes(novoPerfil);
+
+      if ((!perfilValido && !erroPerfis) || (erroPerfis && !fallbackValido)) {
+        return Response.json(
+          { success: false, error: "Perfil inválido ou inativo." },
+          { status: 400 }
+        );
+      }
+    }
 
     // busca o usuário que será alterado
     const { data: usuarioAlvo, error: erroBusca } = await supabaseAdmin

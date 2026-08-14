@@ -15,6 +15,7 @@ type Usuario = {
 type UsuariosTabelaProps = {
   usuariosIniciais: Usuario[];
   emailLogado: string;
+  perfisDisponiveis: string[];
 };
 
 function statusClass(status: string, temaDia: boolean) {
@@ -28,6 +29,7 @@ function statusClass(status: string, temaDia: boolean) {
 export default function UsuariosTabela({
   usuariosIniciais,
   emailLogado,
+  perfisDisponiveis,
 }: UsuariosTabelaProps) {
   const { temaDia } = useTema();
   const [usuarios, setUsuarios] = useState<Usuario[]>(usuariosIniciais);
@@ -202,8 +204,14 @@ export default function UsuariosTabela({
                       }
                       className={temaDia ? "mt-1 h-9 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none transition disabled:cursor-not-allowed disabled:opacity-50 focus:border-slate-400 focus:ring-2 focus:ring-slate-200" : "mt-1 h-9 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 text-sm font-semibold text-slate-100 outline-none transition disabled:cursor-not-allowed disabled:opacity-50 focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 [color-scheme:dark] [&>option]:bg-[#171a23] [&>option]:text-slate-100"}
                     >
-                      <option value="Admin">Admin</option>
-                      <option value="Gerente">Gerente</option>
+                      {!perfisDisponiveis.includes(usuario.perfil) && (
+                        <option value={usuario.perfil}>{usuario.perfil}</option>
+                      )}
+                      {perfisDisponiveis.map((perfilDisponivel) => (
+                        <option key={perfilDisponivel} value={perfilDisponivel}>
+                          {perfilDisponivel}
+                        </option>
+                      ))}
                     </select>
                   </div>
 

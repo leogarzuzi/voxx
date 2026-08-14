@@ -1,6 +1,8 @@
   import { NextRequest } from "next/server";
   import * as XLSX from "xlsx-js-style";
-  import { createSupabaseServerClient } from "@/lib/supabaseServer";
+import { createSupabaseServerClient } from "@/lib/supabaseServer";
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
   import { registrarAuditoria } from "@/lib/auditoria";
 
   export const runtime = "nodejs";
@@ -204,7 +206,7 @@
         .eq("email", user.email.toLowerCase())
         .single();
 
-      if (!usuario || !["Admin", "Gerente"].includes(usuario.perfil)) {
+      if (!usuario || !(await temPermissaoNoBanco(supabase, usuario.perfil, PERMISSOES.CONFERENCIA_FOLHA))) {
         return Response.json(
           { success: false, error: "Sem permissão." },
           { status: 403 }

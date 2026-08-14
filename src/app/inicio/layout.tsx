@@ -4,7 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
-import { PERFIS_CONFIG } from "@/lib/perfis";
+import {
+  PERFIS_CONFIG,
+  PERMISSOES,
+  type PerfilConfig,
+  type Permissao,
+} from "@/lib/perfis";
 import { useTema } from "@/contexts/TemaContext";
 
 type UsuarioSistema = {
@@ -27,6 +32,8 @@ export default function DashboardLayout({
   const [verificando, setVerificando] = useState(true);
   const [nomeUsuario, setNomeUsuario] = useState("");
   const [perfil, setPerfil] = useState("");
+  const [permissoesPerfil, setPermissoesPerfil] =
+    useState<PerfilConfig | null>(null);
   const [avatar, setAvatar] = useState<string | null>(null);
   const [menuAberto, setMenuAberto] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null); // referencia do menu do usuario
@@ -75,21 +82,42 @@ export default function DashboardLayout({
         return;
       }
 
-      // rotas protegidas por perfil
-      const rotaSolicitacoes = pathname.startsWith("/inicio/solicitacoes"); // somente Admin
-      const rotaAuditoria = pathname.startsWith("/inicio/auditoria"); // somente Admin
+      const { data: perfilDinamico } = await supabase
+        .from("perfis_acesso")
+        .select("permissoes, ativo")
+        .eq("nome", usuario.perfil)
+        .maybeSingle<{ permissoes: PerfilConfig; ativo: boolean }>();
 
-      const permissoes =
-        PERFIS_CONFIG[usuario.perfil as keyof typeof PERFIS_CONFIG]; // pega permissoes do perfil
+      const permissoes = perfilDinamico
+        ? perfilDinamico.ativo
+          ? perfilDinamico.permissoes
+          : {}
+        : PERFIS_CONFIG[usuario.perfil as keyof typeof PERFIS_CONFIG] ?? {};
 
-      // bloqueia Solicitacoes para quem nao tem permissao
-      if (rotaSolicitacoes && !permissoes?.solicitacoes) {
-        router.push("/inicio");
-        return;
-      }
+      const rotasProtegidas: Array<[string, Permissao]> = [
+        ["/inicio/base-dados/gestao-rh", PERMISSOES.BASE_DADOS_GESTAO_RH],
+        ["/inicio/base-dados", PERMISSOES.BASE_DADOS_COLABORADORES],
+        ["/inicio/admissao/novos-admitidos", PERMISSOES.NOVOS_ADMITIDOS_VISUALIZAR],
+        ["/inicio/admissao", PERMISSOES.ADMISSOES_VISUALIZAR],
+        ["/inicio/desligamento", PERMISSOES.DESLIGAMENTOS],
+        ["/inicio/transferencia", PERMISSOES.TRANSFERENCIAS],
+        ["/inicio/permuta", PERMISSOES.PERMUTAS],
+        ["/inicio/dashboard/visao-geral", PERMISSOES.DASHBOARD],
+        ["/inicio/dashboard/admissoes", PERMISSOES.ADMISSOES_DASHBOARD],
+        ["/inicio/dashboard/desligamentos", PERMISSOES.DESLIGAMENTOS_DASHBOARD],
+        ["/inicio/dashboard/atestados", PERMISSOES.ATESTADOS],
+        ["/inicio/central-memorandos", PERMISSOES.CENTRAL_MEMORANDOS],
+        ["/inicio/conferencia-folha", PERMISSOES.CONFERENCIA_FOLHA],
+        ["/inicio/solicitacoes", PERMISSOES.SOLICITACOES],
+        ["/inicio/usuarios", PERMISSOES.USUARIOS],
+        ["/inicio/perfis", PERMISSOES.PERFIS],
+        ["/inicio/auditoria", PERMISSOES.AUDITORIA],
+      ];
+      const regraDaRota = rotasProtegidas.find(([rota]) =>
+        pathname.startsWith(rota)
+      );
 
-      // bloqueia Auditoria para quem nao for Admin
-      if (rotaAuditoria && usuario.perfil !== "Admin") {
+      if (regraDaRota && permissoes[regraDaRota[1]] !== true) {
         router.push("/inicio");
         return;
       }
@@ -101,6 +129,7 @@ export default function DashboardLayout({
       );
 
       setPerfil(usuario.perfil);
+      setPermissoesPerfil(permissoes);
       setAvatar(usuario.avatar);
       setVerificando(false);
     }
@@ -274,6 +303,7 @@ async function handleAlterarSenha() {
       <div className="sticky top-0 h-screen shrink-0">
         <Sidebar
           perfil={perfil}
+          permissoes={permissoesPerfil}
           onNavigate={() => setCarregandoRota(true)}
         />
       </div>

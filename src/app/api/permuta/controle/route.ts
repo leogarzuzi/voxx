@@ -4,7 +4,8 @@ import {
   MODULOS_AUDITORIA,
   registrarAuditoria,
 } from "@/lib/auditoria";
-import { PERMISSOES, temPermissao } from "@/lib/perfis";
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 
 export const dynamic = "force-dynamic";
@@ -335,7 +336,7 @@ export async function GET(request: NextRequest) {
 
     if (erro) return erro;
 
-    if (!temPermissao(usuarioLogado?.perfil, PERMISSOES.PERMUTAS)) {
+    if (!(await temPermissaoNoBanco(supabase, usuarioLogado?.perfil, PERMISSOES.PERMUTAS))) {
       return Response.json(
         { success: false, error: "Sem permissao." },
         { status: 403 }
@@ -386,7 +387,7 @@ export async function POST(request: NextRequest) {
 
     if (erro) return erro;
 
-    if (!temPermissao(usuarioLogado?.perfil, PERMISSOES.PERMUTAS)) {
+    if (!(await temPermissaoNoBanco(supabase, usuarioLogado?.perfil, PERMISSOES.PERMUTAS))) {
       return Response.json(
         { success: false, error: "Sem permissao." },
         { status: 403 }
@@ -475,7 +476,7 @@ export async function PUT(request: NextRequest) {
 
     if (erro) return erro;
 
-    if (!temPermissao(usuarioLogado?.perfil, PERMISSOES.PERMUTAS)) {
+    if (!(await temPermissaoNoBanco(supabase, usuarioLogado?.perfil, PERMISSOES.PERMUTAS))) {
       return Response.json(
         { success: false, error: "Sem permissao." },
         { status: 403 }
@@ -604,7 +605,7 @@ export async function PATCH(request: NextRequest) {
 
     if (erro) return erro;
 
-    if (!temPermissao(usuarioLogado?.perfil, PERMISSOES.PERMUTAS)) {
+    if (!(await temPermissaoNoBanco(supabase, usuarioLogado?.perfil, PERMISSOES.PERMUTAS))) {
       return Response.json(
         { success: false, error: "Sem permissao." },
         { status: 403 }

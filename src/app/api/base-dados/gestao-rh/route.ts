@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
-import { PERMISSOES, temPermissao } from "@/lib/perfis";
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
     if (
       !usuarioLogado ||
       usuarioLogado.status !== "ativo" ||
-      !temPermissao(usuarioLogado.perfil, PERMISSOES.BASE_DADOS_GESTAO_RH)
+      !(await temPermissaoNoBanco(supabase, usuarioLogado.perfil, PERMISSOES.BASE_DADOS_GESTAO_RH))
     ) {
       return Response.json(
         { success: false, error: "Sem permissão." },

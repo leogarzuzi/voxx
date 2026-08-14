@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { registrarAuditoria } from "@/lib/auditoria";
-
-const PERFIS_PERMITIDOS = ["Admin", "Gerente"];
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
 
 export async function POST(request: Request) {
   try {
@@ -26,7 +26,11 @@ export async function POST(request: Request) {
       .eq("email", user.email.toLowerCase())
       .single();
 
-    if (erroUsuarioLogado || usuarioLogado?.perfil !== "Admin") {
+    if (
+      erroUsuarioLogado ||
+      !usuarioLogado ||
+      !(await temPermissaoNoBanco(supabase, usuarioLogado.perfil, PERMISSOES.SOLICITACOES))
+    ) {
       return NextResponse.json(
         { sucesso: false, mensagem: "Sem permissão." },
         { status: 403 }
@@ -42,13 +46,6 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!PERFIS_PERMITIDOS.includes(perfil)) {
-      return NextResponse.json(
-        { sucesso: false, mensagem: "Perfil inválido." },
-        { status: 400 }
-      );
-    }
-
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -60,6 +57,20 @@ export async function POST(request: Request) {
     }
 
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
+
+    const { data: perfilValido, error: erroPerfis } = await supabaseAdmin
+      .from("perfis_acesso")
+      .select("nome")
+      .eq("nome", perfil)
+      .eq("ativo", true)
+      .maybeSingle();
+    const fallbackValido = ["Admin", "Gerente"].includes(perfil);
+    if ((!perfilValido && !erroPerfis) || (erroPerfis && !fallbackValido)) {
+      return NextResponse.json(
+        { sucesso: false, mensagem: "Perfil inválido ou inativo." },
+        { status: 400 }
+      );
+    }
 
     const { data: solicitacao, error: erroSolicitacao } = await supabaseAdmin
       .from("solicitacoes_acesso")

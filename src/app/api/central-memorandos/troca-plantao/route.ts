@@ -1,5 +1,7 @@
 ﻿import { NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
 import {
   ACOES_AUDITORIA,
   MODULOS_AUDITORIA,
@@ -116,6 +118,13 @@ async function obterUsuarioAtivo(supabase: any) {
         { success: false, error: "Usuário sem acesso ativo." },
         { status: 403 }
       ),
+    };
+  }
+
+  if (!(await temPermissaoNoBanco(supabase, usuarioLogado.perfil, PERMISSOES.CENTRAL_MEMORANDOS))) {
+    return {
+      usuario: null,
+      erro: Response.json({ success: false, error: "Sem permissão." }, { status: 403 }),
     };
   }
 

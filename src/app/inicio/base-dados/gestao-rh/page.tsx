@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
-import { PERMISSOES, temPermissao } from "@/lib/perfis";
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
 import BaseGestaoRhClient from "./BaseGestaoRhClient";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +27,7 @@ export default async function BaseDadosGestaoRhPage() {
   if (
     !usuarioLogado ||
     usuarioLogado.status !== "ativo" ||
-    !temPermissao(usuarioLogado.perfil, PERMISSOES.BASE_DADOS_GESTAO_RH)
+    !(await temPermissaoNoBanco(supabase, usuarioLogado.perfil, PERMISSOES.BASE_DADOS_GESTAO_RH))
   ) {
     redirect("/inicio");
   }

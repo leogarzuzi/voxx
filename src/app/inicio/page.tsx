@@ -1,7 +1,12 @@
-export default function InicioPage() {
-  return (
-    <main className="min-h-screen bg-slate-50 p-8">
-      <h1 className="text-3xl font-bold text-blue-700">Início</h1>
-    </main>
-  );
+import InicioClient from "./InicioClient";
+
+export const dynamic = "force-dynamic";
+
+export default async function InicioPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ busca?: string }>;
+}) {
+  const parametros = await searchParams;
+  return <InicioClient buscaInicial={parametros.busca?.trim() || ""} />;
 }

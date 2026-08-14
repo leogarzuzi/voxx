@@ -3,6 +3,9 @@ import DashboardAtestadosClient, {
 } from "./DashboardAtestadosClient";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { classificarDivisao } from "@/lib/classificarDivisao";
+import { redirect } from "next/navigation";
+import { PERMISSOES } from "@/lib/perfis";
+import { usuarioAtualTemPermissao } from "@/lib/perfisServer";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -164,6 +167,7 @@ async function buscarResumoAtestados(
 
 export default async function DashboardAtestadosPage() {
   const supabase = await createSupabaseServerClient();
+  if (!(await usuarioAtualTemPermissao(supabase, PERMISSOES.ATESTADOS))) redirect("/inicio");
   const { resumo, totais, error } = await buscarResumoAtestados(supabase);
 
   return (

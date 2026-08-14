@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
 import {
   ACOES_AUDITORIA,
   MODULOS_AUDITORIA,
@@ -174,18 +176,6 @@ function normalizarBaseOrigem(valor: unknown) {
   return "colaboradores";
 }
 
-function temAcessoDesligamento(perfil?: string | null) {
-  const perfisPermitidos = [
-    "Admin",
-    "Gerente",
-    "Admissão",
-    "Admissao",
-    "Desligamento",
-  ];
-
-  return !!perfil && perfisPermitidos.includes(perfil);
-}
-
 function montarCamposAlterados(
   antes: Record<string, any> | null,
   depois: Record<string, any> | null
@@ -325,7 +315,7 @@ export async function GET(request: NextRequest) {
 
     if (erro) return erro;
 
-    if (!temAcessoDesligamento(usuarioLogado?.perfil)) {
+    if (!(await temPermissaoNoBanco(supabase, usuarioLogado?.perfil, PERMISSOES.DESLIGAMENTOS))) {
       return Response.json(
         { success: false, error: "Sem permissão." },
         { status: 403 }
@@ -410,7 +400,7 @@ export async function POST(request: NextRequest) {
 
     if (erro) return erro;
 
-    if (!temAcessoDesligamento(usuarioLogado?.perfil)) {
+    if (!(await temPermissaoNoBanco(supabase, usuarioLogado?.perfil, PERMISSOES.DESLIGAMENTOS))) {
       return Response.json(
         { success: false, error: "Sem permissão." },
         { status: 403 }
@@ -551,7 +541,7 @@ export async function PUT(request: NextRequest) {
 
     if (erro) return erro;
 
-    if (!temAcessoDesligamento(usuarioLogado?.perfil)) {
+    if (!(await temPermissaoNoBanco(supabase, usuarioLogado?.perfil, PERMISSOES.DESLIGAMENTOS))) {
       return Response.json(
         { success: false, error: "Sem permissão." },
         { status: 403 }

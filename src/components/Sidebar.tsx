@@ -11,14 +11,16 @@ import {
   podeVerMenuAdmissao,
   podeVerMenuBaseDados,
   temPermissao,
+  type PerfilConfig,
 } from "@/lib/perfis";
 
 type SidebarProps = {
   perfil: string;
+  permissoes?: PerfilConfig | null;
   onNavigate?: () => void;
 };
 
-export function Sidebar({ perfil, onNavigate }: SidebarProps) {
+export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
   const pathname = usePathname();
   const { tema, temaDia, alternarTema } = useTema();
 
@@ -35,23 +37,24 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
     pathname.startsWith("/inicio/central-memorandos")
   );
 
-  const podeVerSolicitacoes = temPermissao(perfil, PERMISSOES.SOLICITACOES);
-  const podeVerAuditoria = temPermissao(perfil, PERMISSOES.AUDITORIA);
-  const podeVerUsuarios = temPermissao(perfil, PERMISSOES.USUARIOS);
-  const podeVerBaseDados = podeVerMenuBaseDados(perfil);
-  const podeVerAdmissao = podeVerMenuAdmissao(perfil);
-  const podeVerDesligamento = temPermissao(perfil, PERMISSOES.DESLIGAMENTOS);
-  const podeVerTransferencia = temPermissao(perfil, PERMISSOES.TRANSFERENCIAS);
-  const podeVerPermuta = temPermissao(perfil, PERMISSOES.PERMUTAS);
+  const pode = (permissao: (typeof PERMISSOES)[keyof typeof PERMISSOES]) =>
+    temPermissao(perfil, permissao, permissoes);
+  const podeVerSolicitacoes = pode(PERMISSOES.SOLICITACOES);
+  const podeVerAuditoria = pode(PERMISSOES.AUDITORIA);
+  const podeVerUsuarios = pode(PERMISSOES.USUARIOS);
+  const podeVerPerfis = pode(PERMISSOES.PERFIS);
+  const podeVerBaseDados = podeVerMenuBaseDados(perfil, permissoes);
+  const podeVerAdmissao = podeVerMenuAdmissao(perfil, permissoes);
+  const podeVerDesligamento = pode(PERMISSOES.DESLIGAMENTOS);
+  const podeVerTransferencia = pode(PERMISSOES.TRANSFERENCIAS);
+  const podeVerPermuta = pode(PERMISSOES.PERMUTAS);
   const podeVerDashboard =
-    temPermissao(perfil, PERMISSOES.DASHBOARD) ||
-    temPermissao(perfil, PERMISSOES.ADMISSOES_DASHBOARD) ||
-    temPermissao(perfil, PERMISSOES.DESLIGAMENTOS) ||
-    temPermissao(perfil, PERMISSOES.ATESTADOS);
-  const podeVerAnaliseFopag = temPermissao(
-    perfil,
-    PERMISSOES.CONFERENCIA_FOLHA
-  );
+    pode(PERMISSOES.DASHBOARD) ||
+    pode(PERMISSOES.ADMISSOES_DASHBOARD) ||
+    pode(PERMISSOES.DESLIGAMENTOS_DASHBOARD) ||
+    pode(PERMISSOES.ATESTADOS);
+  const podeVerAnaliseFopag = pode(PERMISSOES.CONFERENCIA_FOLHA);
+  const podeVerCentralMemorandos = pode(PERMISSOES.CENTRAL_MEMORANDOS);
 
 
 
@@ -192,52 +195,6 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
         <BuscaRapidaColaborador tema={tema} />
 
         <nav className="voxx-scrollbar mt-1 min-h-0 flex-1 space-y-1.5 overflow-y-auto px-4 pb-4">
-          {podeVerSolicitacoes && (
-            <Link
-              className={itemMenuClass(rotaAtiva("/inicio/solicitacoes"))}
-              href="/inicio/solicitacoes"
-              onClick={() => iniciarNavegacao("/inicio/solicitacoes")}
-            >
-              <svg className={iconClass} viewBox="0 0 24 24" fill="none">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2" />
-                <path d="M19 8v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <path d="M22 11h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-              Solicitações
-            </Link>
-          )}
-
-          {podeVerAuditoria && (
-            <Link
-              className={itemMenuClass(rotaAtiva("/inicio/auditoria"))}
-              href="/inicio/auditoria"
-              onClick={() => iniciarNavegacao("/inicio/auditoria")}
-            >
-              <svg className={iconClass} viewBox="0 0 24 24" fill="none">
-                <path d="M9 11l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-              </svg>
-              Auditoria
-            </Link>
-          )}
-
-          {podeVerUsuarios && (
-            <Link
-              className={itemMenuClass(rotaAtiva("/inicio/usuarios"))}
-              href="/inicio/usuarios"
-              onClick={() => iniciarNavegacao("/inicio/usuarios")}
-            >
-              <svg className={iconClass} viewBox="0 0 24 24" fill="none">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Usuários
-            </Link>
-          )}
-
           {podeVerBaseDados && (
             <>
               <button
@@ -262,7 +219,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
 
               {baseDadosOpen && (
                 <div className={subMenuClass}>
-                  {temPermissao(perfil, PERMISSOES.BASE_DADOS_COLABORADORES) && (
+                  {pode(PERMISSOES.BASE_DADOS_COLABORADORES) && (
                     <Link
                       prefetch={false}
                       className={subItemMenuClass(
@@ -275,7 +232,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                     </Link>
                   )}
 
-                  {temPermissao(perfil, PERMISSOES.BASE_DADOS_GESTAO_RH) && (
+                  {pode(PERMISSOES.BASE_DADOS_GESTAO_RH) && (
                     <Link
                       prefetch={false}
                       className={subItemMenuClass(
@@ -317,7 +274,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
 
               {admissaoOpen && (
                 <div className={subMenuClass}>
-                  {temPermissao(perfil, PERMISSOES.ADMISSOES_VISUALIZAR) && (
+                  {pode(PERMISSOES.ADMISSOES_VISUALIZAR) && (
                     <Link
                       prefetch={false}
                       className={subItemMenuClass(rotaAtiva("/inicio/admissao/controle"))}
@@ -328,7 +285,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                     </Link>
                   )}
 
-                  {temPermissao(perfil, PERMISSOES.NOVOS_ADMITIDOS_VISUALIZAR) && (
+                  {pode(PERMISSOES.NOVOS_ADMITIDOS_VISUALIZAR) && (
                     <Link
                       prefetch={false}
                       className={subItemMenuClass(
@@ -419,7 +376,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
 
               {dashboardOpen && (
                 <div className={subMenuClass}>
-                  {temPermissao(perfil, PERMISSOES.DASHBOARD) && (
+                  {pode(PERMISSOES.DASHBOARD) && (
                     <Link
                       className={subItemMenuClass(rotaAtiva("/inicio/dashboard/visao-geral"))}
                       href="/inicio/dashboard/visao-geral"
@@ -429,7 +386,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                     </Link>
                   )}
 
-                  {temPermissao(perfil, PERMISSOES.ADMISSOES_DASHBOARD) && (
+                  {pode(PERMISSOES.ADMISSOES_DASHBOARD) && (
                     <Link
                       className={subItemMenuClass(rotaAtiva("/inicio/dashboard/admissoes"))}
                       href="/inicio/dashboard/admissoes"
@@ -439,7 +396,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                     </Link>
                   )}
 
-                  {temPermissao(perfil, PERMISSOES.DESLIGAMENTOS) && (
+                  {pode(PERMISSOES.DESLIGAMENTOS_DASHBOARD) && (
                     <Link
                       className={subItemMenuClass(rotaAtiva("/inicio/dashboard/desligamentos"))}
                       href="/inicio/dashboard/desligamentos"
@@ -449,7 +406,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                     </Link>
                   )}
 
-                  {temPermissao(perfil, PERMISSOES.ATESTADOS) && (
+                  {pode(PERMISSOES.ATESTADOS) && (
                     <Link
                       className={subItemMenuClass(rotaAtiva("/inicio/dashboard/atestados"))}
                       href="/inicio/dashboard/atestados"
@@ -463,28 +420,12 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
             </>
           )}
 
-          {podeVerAnaliseFopag && (
-            <Link
-              className={itemMenuClass(rotaAtiva("/inicio/conferencia-folha"))}
-              href="/inicio/conferencia-folha"
-              onClick={() => iniciarNavegacao("/inicio/conferencia-folha")}
-            >
-              <svg className={iconClass} viewBox="0 0 24 24" fill="none">
-                <path d="M6 3h9l3 3v15H6V3Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-                <path d="M15 3v4h4" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-                <path d="M8.5 12h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <path d="M8.5 16h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-              Análise FOPAG
-            </Link>
-          )}
-
-          {podeVerSolicitacoes && (
+          {podeVerCentralMemorandos && (
             <>
               <button
                 type="button"
                 onClick={() => setCentralMemorandosOpen(!centralMemorandosOpen)}
-                className={grupoMenuClass(false)}
+                className={grupoMenuClass(centralMemorandosAtivo)}
               >
                 <span className="flex items-center gap-3">
                   <svg className={iconClass} viewBox="0 0 24 24" fill="none">
@@ -493,7 +434,7 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                     <path d="M8.5 12h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                     <path d="M8.5 16h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                   </svg>
-                  Central de Memorandos
+                  Memorandos
                 </span>
                 <span
                   className={`${chevronClass} ${
@@ -544,6 +485,86 @@ export function Sidebar({ perfil, onNavigate }: SidebarProps) {
                 </div>
               )}
             </>
+          )}
+
+          {podeVerAnaliseFopag && (
+            <Link
+              className={itemMenuClass(rotaAtiva("/inicio/conferencia-folha"))}
+              href="/inicio/conferencia-folha"
+              onClick={() => iniciarNavegacao("/inicio/conferencia-folha")}
+            >
+              <svg className={iconClass} viewBox="0 0 24 24" fill="none">
+                <path d="M6 3h9l3 3v15H6V3Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                <path d="M15 3v4h4" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                <path d="M8.5 12h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M8.5 16h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              Análise FOPAG
+            </Link>
+          )}
+
+          {podeVerSolicitacoes && (
+            <Link
+              className={itemMenuClass(rotaAtiva("/inicio/solicitacoes"))}
+              href="/inicio/solicitacoes"
+              onClick={() => iniciarNavegacao("/inicio/solicitacoes")}
+            >
+              <svg className={iconClass} viewBox="0 0 24 24" fill="none">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2" />
+                <path d="M19 8v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M22 11h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              Solicitações
+            </Link>
+          )}
+
+          {podeVerUsuarios && (
+            <Link
+              className={itemMenuClass(rotaAtiva("/inicio/usuarios"))}
+              href="/inicio/usuarios"
+              onClick={() => iniciarNavegacao("/inicio/usuarios")}
+            >
+              <svg className={iconClass} viewBox="0 0 24 24" fill="none">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Usuários
+            </Link>
+          )}
+
+          {podeVerPerfis && (
+            <Link
+              className={itemMenuClass(rotaAtiva("/inicio/perfis"))}
+              href="/inicio/perfis"
+              onClick={() => iniciarNavegacao("/inicio/perfis")}
+            >
+              <svg className={iconClass} viewBox="0 0 24 24" fill="none">
+                <path d="M4 6h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M4 12h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <circle cx="9" cy="6" r="2" fill="currentColor" />
+                <circle cx="15" cy="12" r="2" fill="currentColor" />
+                <circle cx="11" cy="18" r="2" fill="currentColor" />
+              </svg>
+              Perfis
+            </Link>
+          )}
+
+          {podeVerAuditoria && (
+            <Link
+              className={itemMenuClass(rotaAtiva("/inicio/auditoria"))}
+              href="/inicio/auditoria"
+              onClick={() => iniciarNavegacao("/inicio/auditoria")}
+            >
+              <svg className={iconClass} viewBox="0 0 24 24" fill="none">
+                <path d="M9 11l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+              </svg>
+              Auditoria
+            </Link>
           )}
 
         </nav>

@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
 
 export async function GET(request: NextRequest) {
   const supabase = await createSupabaseServerClient();
@@ -21,7 +23,7 @@ export async function GET(request: NextRequest) {
     .eq("email", user.email.toLowerCase())
     .single();
 
-  if (usuario?.perfil !== "Admin") {
+  if (!usuario || !(await temPermissaoNoBanco(supabase, usuario.perfil, PERMISSOES.AUDITORIA))) {
     return Response.json(
       { success: false, error: "Sem permissão." },
       { status: 403 }

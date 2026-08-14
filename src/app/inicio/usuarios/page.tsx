@@ -1,6 +1,8 @@
 ﻿import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import UsuariosClient from "./UsuariosClient";
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -35,8 +37,8 @@ export default async function UsuariosPage() {
 
   if (
     !usuarioLogado ||
-    usuarioLogado.perfil !== "Admin" ||
-    usuarioLogado.status !== "ativo"
+    usuarioLogado.status !== "ativo" ||
+    !(await temPermissaoNoBanco(supabase, usuarioLogado.perfil, PERMISSOES.USUARIOS))
   ) {
     redirect("/inicio");
   }
@@ -45,6 +47,16 @@ export default async function UsuariosPage() {
     .from("usuarios")
     .select("id, nome, email, perfil, status, criado_em")
     .order("criado_em", { ascending: false });
+
+  const { data: perfisAtivos } = await supabase
+    .from("perfis_acesso")
+    .select("nome")
+    .eq("ativo", true)
+    .order("protegido", { ascending: false })
+    .order("nome");
+  const perfisDisponiveis = perfisAtivos?.length
+    ? perfisAtivos.map((perfil) => perfil.nome as string)
+    : ["Admin", "Gerente"];
 
   const usuariosLista = (usuarios ?? []) as Usuario[];
   const totalUsuarios = usuariosLista.length;
@@ -67,6 +79,7 @@ export default async function UsuariosPage() {
       usuariosAtivos={usuariosAtivos}
       usuariosInativos={usuariosInativos}
       administradores={administradores}
+      perfisDisponiveis={perfisDisponiveis}
     />
   );
 }

@@ -20,6 +20,7 @@ export const PERMISSOES = {
 
   // dashboards antigos
   ADMISSOES_DASHBOARD: "admissoesDashboard",
+  DESLIGAMENTOS_DASHBOARD: "desligamentosDashboard",
   DESLIGAMENTOS: "desligamentos",
   ATESTADOS: "atestados",
   TRANSFERENCIAS: "transferencias",
@@ -28,6 +29,8 @@ export const PERMISSOES = {
   // áreas administrativas
   AUDITORIA: "auditoria",
   USUARIOS: "usuarios",
+  PERFIS: "perfis",
+  CENTRAL_MEMORANDOS: "centralMemorandos",
 
   // base de dados
   BASE_DADOS_COLABORADORES: "baseDadosColaboradores",
@@ -47,7 +50,7 @@ export const PERMISSOES = {
 
 export type Permissao = (typeof PERMISSOES)[keyof typeof PERMISSOES];
 
-type PerfilConfig = Record<Permissao, boolean>;
+export type PerfilConfig = Partial<Record<Permissao, boolean>>;
 
 // permissões de cada perfil
 export const PERFIS_CONFIG: Record<Perfil, PerfilConfig> = {
@@ -64,6 +67,9 @@ export const PERFIS_CONFIG: Record<Perfil, PerfilConfig> = {
 
     auditoria: true,
     usuarios: true,
+    perfis: true,
+    centralMemorandos: true,
+    desligamentosDashboard: true,
 
     baseDadosColaboradores: true,
     baseDadosGestaoRh: true,
@@ -91,6 +97,7 @@ export const PERFIS_CONFIG: Record<Perfil, PerfilConfig> = {
 
     auditoria: false,
     usuarios: false,
+    desligamentosDashboard: true,
 
     baseDadosColaboradores: true,
     baseDadosGestaoRh: true,
@@ -276,23 +283,31 @@ export function perfilExiste(perfil: string | null | undefined): perfil is Perfi
 
 export function temPermissao(
   perfil: string | null | undefined,
-  permissao: Permissao
+  permissao: Permissao,
+  permissoesDinamicas?: PerfilConfig | null
 ) {
+  if (permissoesDinamicas) return permissoesDinamicas[permissao] === true;
   if (!perfilExiste(perfil)) return false;
 
   return PERFIS_CONFIG[perfil][permissao] === true;
 }
 
-export function podeVerMenuBaseDados(perfil: string | null | undefined) {
+export function podeVerMenuBaseDados(
+  perfil: string | null | undefined,
+  permissoesDinamicas?: PerfilConfig | null
+) {
   return (
-    temPermissao(perfil, PERMISSOES.BASE_DADOS_COLABORADORES) ||
-    temPermissao(perfil, PERMISSOES.BASE_DADOS_GESTAO_RH)
+    temPermissao(perfil, PERMISSOES.BASE_DADOS_COLABORADORES, permissoesDinamicas) ||
+    temPermissao(perfil, PERMISSOES.BASE_DADOS_GESTAO_RH, permissoesDinamicas)
   );
 }
 
-export function podeVerMenuAdmissao(perfil: string | null | undefined) {
+export function podeVerMenuAdmissao(
+  perfil: string | null | undefined,
+  permissoesDinamicas?: PerfilConfig | null
+) {
   return (
-    temPermissao(perfil, PERMISSOES.ADMISSOES_VISUALIZAR) ||
-    temPermissao(perfil, PERMISSOES.NOVOS_ADMITIDOS_VISUALIZAR)
+    temPermissao(perfil, PERMISSOES.ADMISSOES_VISUALIZAR, permissoesDinamicas) ||
+    temPermissao(perfil, PERMISSOES.NOVOS_ADMITIDOS_VISUALIZAR, permissoesDinamicas)
   );
 }

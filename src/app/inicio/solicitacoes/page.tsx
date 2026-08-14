@@ -38,6 +38,18 @@ export default function SolicitacoesPage() {
   const [solicitacaoSelecionada, setSolicitacaoSelecionada] =
     useState<number | null>(null);
   const [perfilSelecionado, setPerfilSelecionado] = useState("");
+  const [perfisDisponiveis, setPerfisDisponiveis] = useState(["Admin", "Gerente"]);
+
+  async function carregarPerfis() {
+    const { data } = await supabase
+      .from("perfis_acesso")
+      .select("nome")
+      .eq("ativo", true)
+      .order("protegido", { ascending: false })
+      .order("nome");
+
+    if (data?.length) setPerfisDisponiveis(data.map((perfil) => perfil.nome));
+  }
 
   async function carregarSolicitacoes() {
     try {
@@ -103,6 +115,7 @@ export default function SolicitacoesPage() {
 
   useEffect(() => {
     carregarSolicitacoes();
+    carregarPerfis();
   }, []);
 
   const totalSolicitacoes = solicitacoes.length;
@@ -479,8 +492,9 @@ export default function SolicitacoesPage() {
                 }
               >
                 <option value="">Selecione...</option>
-                <option value="Admin">Admin</option>
-                <option value="Gerente">Gerente</option>
+                {perfisDisponiveis.map((perfil) => (
+                  <option key={perfil} value={perfil}>{perfil}</option>
+                ))}
               </select>
             </div>
 

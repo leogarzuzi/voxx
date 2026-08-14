@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
-import { PERMISSOES, temPermissao } from "@/lib/perfis";
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 
 export const dynamic = "force-dynamic";
@@ -76,7 +77,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (!temPermissao(usuarioLogado.perfil, PERMISSOES.TRANSFERENCIAS)) {
+    if (!(await temPermissaoNoBanco(supabase, usuarioLogado.perfil, PERMISSOES.TRANSFERENCIAS))) {
       return Response.json(
         { success: false, error: "Sem permissao." },
         { status: 403 }

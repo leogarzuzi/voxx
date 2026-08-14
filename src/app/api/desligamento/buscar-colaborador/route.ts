@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
+import { PERMISSOES } from "@/lib/perfis";
+import { temPermissaoNoBanco } from "@/lib/perfisServer";
 
 export const dynamic = "force-dynamic";
 
@@ -19,18 +21,6 @@ function validarMatricula(matricula: string) {
   }
 
   return null;
-}
-
-function temAcessoDesligamento(perfil?: string | null) {
-  const perfisPermitidos = [
-    "Admin",
-    "Gerente",
-    "Admissão",
-    "Admissao",
-    "Desligamento",
-  ];
-
-  return !!perfil && perfisPermitidos.includes(perfil);
 }
 
 function normalizarColaboradorDaBase(colaborador: any, baseOrigem: string) {
@@ -84,7 +74,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (!temAcessoDesligamento(usuarioLogado.perfil)) {
+    if (!(await temPermissaoNoBanco(supabase, usuarioLogado.perfil, PERMISSOES.DESLIGAMENTOS))) {
       return Response.json(
         { success: false, error: "Sem permissão." },
         { status: 403 }
