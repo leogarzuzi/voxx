@@ -20,12 +20,12 @@ interface TipoDesligamentoChartProps {
 }
 
 const COLORS = [
-  "#60a5fa",
-  "#f87171",
-  "#34d399",
-  "#a78bfa",
-  "#fb923c",
-  "#22d3ee",
+  "#9f2533",
+  "#bd3945",
+  "#d95b62",
+  "#e8787e",
+  "#f09a9e",
+  "#a94a55",
 ];
 
 export function TipoDesligamentoChart({
@@ -45,7 +45,7 @@ export function TipoDesligamentoChart({
             innerRadius={76}
             outerRadius={126}
             paddingAngle={3}
-            stroke={temaDia ? "#ffffff" : "#171a23"}
+            stroke={temaDia ? "#ffffff" : "#163b5c"}
             strokeWidth={3}
             cursor={onSelectTipo ? "pointer" : "default"}
             onClick={(item) => {
@@ -65,8 +65,8 @@ export function TipoDesligamentoChart({
           <Tooltip
             formatter={(value) => [`${value}`, "Desligamentos"]}
             contentStyle={{
-              background: temaDia ? "#ffffff" : "#171a23",
-              border: temaDia ? "1px solid rgba(15,23,42,0.12)" : "1px solid rgba(255,255,255,0.1)",
+              background: temaDia ? "#ffffff" : "#163b5c",
+              border: temaDia ? "1px solid #b9dbe8" : "1px solid #4381a7",
               borderRadius: 16,
               color: temaDia ? "#0f172a" : "#e2e8f0",
             }}

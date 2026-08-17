@@ -22,6 +22,7 @@ interface TurnoverChartProps {
 export function TurnoverChart({ data, temaDia = false }: TurnoverChartProps) {
   // ALTERE AQUI A META DO TURNOVER
   const metaTurnover = 5;
+  const limiteEixo = Math.max(6, Math.ceil(Math.max(...data.map((item) => item.turnover), 0) + 1));
 
   return (
     <div className="h-[350px] w-full">
@@ -41,8 +42,7 @@ export function TurnoverChart({ data, temaDia = false }: TurnoverChartProps) {
 
           <YAxis
             type="number"
-            domain={[0, 6]}
-            ticks={[0, 1, 2, 3, 4, 5, 6]}
+            domain={[0, limiteEixo]}
             tickFormatter={(value) => `${value}%`}
             axisLine={false}
             tickLine={false}
@@ -52,10 +52,10 @@ export function TurnoverChart({ data, temaDia = false }: TurnoverChartProps) {
           <Tooltip
             formatter={(value) => [`${value}%`, "Turnover"]}
             contentStyle={{
-              background: "#171a23",
-              border: "1px solid rgba(255,255,255,0.1)",
+              background: temaDia ? "#ffffff" : "#163b5c",
+              border: `1px solid ${temaDia ? "#b9dbe8" : "#4381a7"}`,
               borderRadius: 16,
-              color: "#e2e8f0",
+              color: temaDia ? "#102a43" : "#f4f8fb",
             }}
             itemStyle={{ color: temaDia ? "#0f172a" : "#e2e8f0" }}
             labelStyle={{ color: temaDia ? "#334155" : "#cbd5e1", fontWeight: 700 }}
@@ -78,10 +78,10 @@ export function TurnoverChart({ data, temaDia = false }: TurnoverChartProps) {
           <Line
             type="monotone"
             dataKey="turnover"
-            stroke={temaDia ? "#0f172a" : "#60a5fa"}
+            stroke="#35b5e5"
             strokeWidth={3}
-            dot={{ r: 4, fill: temaDia ? "#0f172a" : "#60a5fa", stroke: temaDia ? "#ffffff" : "#172033", strokeWidth: 2 }}
-            activeDot={{ r: 6, fill: temaDia ? "#334155" : "#93c5fd", stroke: temaDia ? "#ffffff" : "#172033", strokeWidth: 2 }}
+            dot={{ r: 4, fill: "#35b5e5", stroke: temaDia ? "#ffffff" : "#163b5c", strokeWidth: 2 }}
+            activeDot={{ r: 6, fill: "#6dd0f3", stroke: temaDia ? "#ffffff" : "#163b5c", strokeWidth: 2 }}
           />
         </LineChart>
       </ResponsiveContainer>

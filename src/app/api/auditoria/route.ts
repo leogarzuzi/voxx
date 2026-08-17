@@ -19,11 +19,11 @@ export async function GET(request: NextRequest) {
 
   const { data: usuario } = await supabase
     .from("usuarios")
-    .select("perfil")
+    .select("perfil, status")
     .eq("email", user.email.toLowerCase())
     .single();
 
-  if (!usuario || !(await temPermissaoNoBanco(supabase, usuario.perfil, PERMISSOES.AUDITORIA))) {
+  if (!usuario || usuario.status !== "ativo" || !(await temPermissaoNoBanco(supabase, usuario.perfil, PERMISSOES.AUDITORIA))) {
     return Response.json(
       { success: false, error: "Sem permissão." },
       { status: 403 }

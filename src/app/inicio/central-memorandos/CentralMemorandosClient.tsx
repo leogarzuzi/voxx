@@ -1,71 +1,30 @@
 ﻿"use client";
 
 import { useState } from "react";
-import { useTema } from "@/contexts/TemaContext";
 import { BancoHorasModal } from "./BancoHorasModal";
 import { TrocaPlantaoModal } from "./TrocaPlantaoModal";
 
 export default function CentralMemorandosClient() {
-  const { temaDia } = useTema();
   const [modalTrocaAberto, setModalTrocaAberto] = useState(false);
   const [modalBancoHorasAberto, setModalBancoHorasAberto] = useState(false);
 
-  const cardClass = temaDia
-    ? "group rounded-[26px] border border-slate-200 bg-white p-6 text-left shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_24px_60px_rgba(15,23,42,0.12)]"
-    : "group rounded-[26px] border border-white/10 bg-[#171a23] p-6 text-left shadow-[0_22px_70px_rgba(0,0,0,0.28)] transition hover:-translate-y-0.5 hover:border-white/20 hover:bg-[#1d2230]";
-  const iconClass = temaDia
-    ? "flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-800 ring-1 ring-slate-200"
-    : "flex h-11 w-11 items-center justify-center rounded-2xl bg-white/[0.06] text-slate-100 ring-1 ring-white/10";
-  const titleClass = temaDia
-    ? "mt-5 text-lg font-semibold text-slate-950"
-    : "mt-5 text-lg font-semibold text-white";
-  const descriptionClass = temaDia
-    ? "mt-2 text-sm leading-6 text-slate-500"
-    : "mt-2 text-sm leading-6 text-slate-400";
-  const linkClass = temaDia
-    ? "mt-5 inline-flex text-sm font-bold text-slate-950 transition group-hover:translate-x-1"
-    : "mt-5 inline-flex text-sm font-bold text-slate-100 transition group-hover:translate-x-1";
+  const cardClass = "voxx-surface group rounded-[26px] p-6 text-left transition hover:-translate-y-0.5 hover:border-[var(--rs-cyan-500)]";
+  const iconClass = "flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--voxx-border)] bg-[var(--voxx-surface-soft)] text-[var(--voxx-primary)]";
+  const titleClass = "voxx-text-primary mt-5 text-lg font-semibold";
+  const descriptionClass = "voxx-text-muted mt-2 text-sm leading-6";
+  const linkClass = "mt-5 inline-flex text-sm font-bold text-[var(--voxx-primary)] transition group-hover:translate-x-1";
 
   return (
-    <main
-      className={
-        temaDia
-          ? "min-h-screen bg-[#f4f6fb] px-8 py-8 text-slate-950"
-          : "min-h-screen bg-[#11141b] px-8 py-8 text-slate-100"
-      }
-    >
-      <section
-        className={
-          temaDia
-            ? "overflow-hidden rounded-[30px] border border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#eef3fb_58%,#e8edf6_100%)] p-7 shadow-[0_24px_70px_rgba(15,23,42,0.1)]"
-            : "overflow-hidden rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_14%_0%,rgba(59,130,246,0.18),transparent_32%),linear-gradient(135deg,#242833_0%,#171a23_58%,#10131a_100%)] p-7 shadow-[0_24px_80px_rgba(0,0,0,0.32)]"
-        }
-      >
-        <p
-          className={
-            temaDia
-              ? "text-xs font-semibold uppercase tracking-[0.32em] text-slate-500"
-              : "text-xs font-semibold uppercase tracking-[0.32em] text-slate-400"
-          }
-        >
+    <main className="voxx-page min-h-screen px-8 py-8">
+      <section className="voxx-surface-raised relative overflow-hidden rounded-[30px] p-7">
+        <span className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[var(--voxx-focus)]" />
+        <p className="relative text-xs font-semibold uppercase tracking-[0.32em] text-[var(--voxx-primary)]">
           Memorandos
         </p>
-        <h1
-          className={
-            temaDia
-              ? "mt-3 text-4xl font-semibold tracking-tight text-slate-950"
-              : "mt-3 text-4xl font-semibold tracking-tight text-white"
-          }
-        >
+        <h1 className="voxx-text-primary relative mt-3 text-4xl font-semibold tracking-tight">
           Central de Memorandos
         </h1>
-        <p
-          className={
-            temaDia
-              ? "mt-2 max-w-2xl text-sm leading-6 text-slate-600"
-              : "mt-2 max-w-2xl text-sm leading-6 text-slate-300"
-          }
-        >
+        <p className="voxx-text-muted relative mt-2 max-w-2xl text-sm leading-6">
           Área para solicitações eletrônicas entre coordenação e RH.
         </p>
       </section>

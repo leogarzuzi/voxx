@@ -1,13 +1,12 @@
 import { google } from "googleapis";
 import { createClient } from "@supabase/supabase-js";
+import { cronAutorizado } from "@/lib/cronAuth";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   try {
-    const authHeader = request.headers.get("authorization");
-
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (!cronAutorizado(request)) {
       return Response.json(
         { success: false, error: "Não autorizado." },
         { status: 401 }

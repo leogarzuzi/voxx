@@ -1,31 +1,108 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+
+  /* Identidade RioSaúde */
+  --rs-navy-950: #071522;
+  --rs-navy-900: #0a1e31;
+  --rs-navy-850: #0d253b;
+  --rs-navy-800: #12314d;
+  --rs-navy-700: #173b63;
+  --rs-navy-600: #214f7a;
+  --rs-cyan-600: #159dce;
+  --rs-cyan-500: #35b5e5;
+  --rs-cyan-400: #45c2ef;
+  --rs-cyan-300: #6dd0f3;
+
+  /* Tema noturno (padrão, evitando clarão antes da hidratação) */
+  --background: #0d2742;
+  --foreground: #f4f8fb;
+  --voxx-bg: #0d2742;
+  --voxx-bg-subtle: #123553;
+  --voxx-surface: #163b5c;
+  --voxx-surface-raised: #1b486d;
+  --voxx-surface-soft: #102f4b;
+  --voxx-border: #2f6285;
+  --voxx-border-strong: #4381a7;
+  --voxx-text: #f4f8fb;
+  --voxx-text-muted: #bfd0dc;
+  --voxx-text-subtle: #a5bdcd;
+  --voxx-primary: #45c2ef;
+  --voxx-primary-hover: #6dd0f3;
+  --voxx-primary-contrast: #071522;
+  --voxx-focus: rgba(69, 194, 239, 0.28);
+  --voxx-overlay: rgba(5, 22, 38, 0.68);
+  --voxx-shadow: 0 24px 70px rgba(3, 18, 32, 0.30);
+  --voxx-shadow-soft: 0 14px 34px rgba(3, 18, 32, 0.20);
+  --voxx-scroll-track: #102f4b;
+  --voxx-scroll-thumb: #4381a7;
+}
+
+html.tema-dia {
+  color-scheme: light;
+  --background: #eef8fc;
+  --foreground: #102a43;
+  --voxx-bg: #eef8fc;
+  --voxx-bg-subtle: #dff2f9;
+  --voxx-surface: #ffffff;
+  --voxx-surface-raised: #ffffff;
+  --voxx-surface-soft: #f4fbfe;
+  --voxx-border: #b9dbe8;
+  --voxx-border-strong: #7fc4dc;
+  --voxx-text: #102a43;
+  --voxx-text-muted: #60758a;
+  --voxx-text-subtle: #8294a5;
+  --voxx-primary: #159dce;
+  --voxx-primary-hover: #0d84b0;
+  --voxx-primary-contrast: #ffffff;
+  --voxx-focus: rgba(53, 181, 229, 0.30);
+  --voxx-overlay: rgba(16, 42, 67, 0.38);
+  --voxx-shadow: 0 24px 70px rgba(21, 120, 164, 0.14);
+  --voxx-shadow-soft: 0 14px 34px rgba(21, 120, 164, 0.10);
+  --voxx-scroll-track: #dff2f9;
+  --voxx-scroll-thumb: #65b8d5;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-voxx-bg: var(--voxx-bg);
+  --color-voxx-bg-subtle: var(--voxx-bg-subtle);
+  --color-voxx-surface: var(--voxx-surface);
+  --color-voxx-surface-raised: var(--voxx-surface-raised);
+  --color-voxx-border: var(--voxx-border);
+  --color-voxx-text: var(--voxx-text);
+  --color-voxx-muted: var(--voxx-text-muted);
+  --color-voxx-primary: var(--voxx-primary);
+  --font-sans: "Segoe UI", Arial, Helvetica, sans-serif;
+  --font-mono: "Cascadia Code", Consolas, monospace;
 }
 
-/* ajuste global de escala do VOXX */
+/* ajuste global de escala da aplicação */
 /* 100% = tamanho padrão | 87.5% = mais compacto | 80% = bem menor */
 html {
   font-size: 75.5%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--voxx-bg);
+  color: var(--voxx-text);
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+}
+
+::selection {
+  background: rgba(53, 181, 229, 0.34);
+  color: var(--voxx-text);
+}
+
+:focus-visible {
+  outline: 2px solid var(--rs-cyan-500);
+  outline-offset: 2px;
 }
 
 * {
-  scrollbar-color: rgba(148, 163, 184, 0.52) rgba(255, 255, 255, 0.06);
+  scrollbar-color: var(--voxx-scroll-thumb) var(--voxx-scroll-track);
   scrollbar-width: thin;
 }
 
@@ -35,18 +112,18 @@ body {
 }
 
 *::-webkit-scrollbar-track {
-  background: rgba(15, 18, 26, 0.85);
+  background: var(--voxx-scroll-track);
   border-radius: 999px;
 }
 
 *::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, rgba(96, 165, 250, 0.95), rgba(148, 163, 184, 0.78));
-  border: 3px solid rgba(15, 18, 26, 0.95);
+  background: linear-gradient(135deg, var(--rs-cyan-500), var(--voxx-scroll-thumb));
+  border: 3px solid var(--voxx-scroll-track);
   border-radius: 999px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, rgba(147, 197, 253, 1), rgba(203, 213, 225, 0.92));
+  background: linear-gradient(135deg, var(--rs-cyan-300), var(--rs-cyan-500));
 }
 
 *::-webkit-scrollbar-corner {
@@ -54,8 +131,712 @@ body {
 }
 
 .voxx-scrollbar {
-  scrollbar-color: rgba(148, 163, 184, 0.52) rgba(15, 18, 26, 0.85);
+  scrollbar-color: var(--voxx-scroll-thumb) var(--voxx-scroll-track);
   scrollbar-width: thin;
+}
+
+/* Primitivos visuais compartilhados */
+.voxx-page {
+  min-height: 100vh;
+  background: var(--voxx-bg);
+  color: var(--voxx-text);
+}
+
+.voxx-page-soft {
+  background: var(--voxx-bg-subtle);
+  color: var(--voxx-text);
+}
+
+.voxx-surface {
+  border: 1px solid var(--voxx-border);
+  background: var(--voxx-surface);
+  color: var(--voxx-text);
+  box-shadow: var(--voxx-shadow-soft);
+}
+
+.voxx-surface-raised {
+  border: 1px solid var(--voxx-border);
+  background: var(--voxx-surface-raised);
+  color: var(--voxx-text);
+  box-shadow: var(--voxx-shadow);
+}
+
+.voxx-text-primary { color: var(--voxx-text); }
+.voxx-text-muted { color: var(--voxx-text-muted); }
+.voxx-text-subtle { color: var(--voxx-text-subtle); }
+
+/* Base de Dados: mantém tabelas e filtros alinhados à paleta institucional. */
+.voxx-base-module > div + div,
+.voxx-base-module table {
+  color: var(--voxx-text);
+}
+
+.voxx-base-module table {
+  background: var(--voxx-surface-raised);
+}
+
+.voxx-base-module thead {
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-base-module thead tr,
+.voxx-base-module tbody tr {
+  border-color: var(--voxx-border) !important;
+}
+
+.voxx-base-module thead tr,
+.voxx-base-module tbody td {
+  color: var(--voxx-text-muted) !important;
+}
+
+.voxx-base-module tbody td:nth-child(3),
+.voxx-base-module tbody td:nth-child(4) {
+  color: var(--voxx-text) !important;
+}
+
+.voxx-base-module tbody tr:hover {
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-base-module input[type="checkbox"] {
+  accent-color: var(--voxx-primary);
+}
+
+.voxx-base-modal h3,
+.voxx-base-modal label,
+.voxx-base-modal select {
+  color: var(--voxx-text) !important;
+}
+
+.voxx-base-modal p {
+  color: var(--voxx-text-muted);
+}
+
+.voxx-base-modal select {
+  border-color: var(--voxx-border) !important;
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-base-modal option {
+  color: var(--voxx-text);
+  background: var(--voxx-surface);
+}
+
+.voxx-base-modal input[type="checkbox"] {
+  accent-color: var(--voxx-primary);
+}
+
+/* Admissão: tabela operacional e formulário seguem os mesmos tokens do tema. */
+.voxx-admissao-module table {
+  color: var(--voxx-text);
+  background: var(--voxx-surface-raised);
+}
+
+.voxx-admissao-module thead {
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-admissao-module table th,
+.voxx-admissao-module table td,
+.voxx-admissao-module table tr {
+  border-color: var(--voxx-border) !important;
+}
+
+.voxx-admissao-module thead tr,
+.voxx-admissao-module tbody td {
+  color: var(--voxx-text-muted) !important;
+}
+
+.voxx-admissao-module tbody tr:hover {
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-admissao-module input[type="checkbox"],
+.voxx-admissao-modal input[type="checkbox"] {
+  accent-color: var(--voxx-primary);
+}
+
+.voxx-admissao-modal h3,
+.voxx-admissao-modal label,
+.voxx-admissao-modal select,
+.voxx-admissao-modal textarea {
+  color: var(--voxx-text) !important;
+}
+
+.voxx-admissao-modal p {
+  color: var(--voxx-text-muted);
+}
+
+.voxx-admissao-modal select,
+.voxx-admissao-modal textarea {
+  border-color: var(--voxx-border) !important;
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-admissao-modal option {
+  color: var(--voxx-text);
+  background: var(--voxx-surface);
+}
+
+/* Desligamento: tabelas principal e de términos, filtros e formulários. */
+.voxx-desligamento-module table,
+.voxx-desligamento-modal table {
+  color: var(--voxx-text);
+  background: var(--voxx-surface-raised);
+}
+
+.voxx-desligamento-module thead,
+.voxx-desligamento-modal thead {
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-desligamento-module table th,
+.voxx-desligamento-module table td,
+.voxx-desligamento-module table tr,
+.voxx-desligamento-modal table th,
+.voxx-desligamento-modal table td,
+.voxx-desligamento-modal table tr {
+  border-color: var(--voxx-border) !important;
+}
+
+.voxx-desligamento-module thead tr,
+.voxx-desligamento-module tbody td,
+.voxx-desligamento-modal thead tr,
+.voxx-desligamento-modal tbody td {
+  color: var(--voxx-text-muted) !important;
+}
+
+.voxx-desligamento-module tbody tr:hover,
+.voxx-desligamento-modal tbody tr:hover {
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-desligamento-module input[type="checkbox"],
+.voxx-desligamento-modal input[type="checkbox"] {
+  accent-color: var(--voxx-primary);
+}
+
+.voxx-desligamento-modal h3,
+.voxx-desligamento-modal label,
+.voxx-desligamento-modal select,
+.voxx-desligamento-modal textarea {
+  color: var(--voxx-text) !important;
+}
+
+.voxx-desligamento-modal p {
+  color: var(--voxx-text-muted);
+}
+
+.voxx-desligamento-modal select,
+.voxx-desligamento-modal textarea {
+  border-color: var(--voxx-border) !important;
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-desligamento-modal option {
+  color: var(--voxx-text);
+  background: var(--voxx-surface);
+}
+
+/* Transferência: tabela, filtros, confirmação e formulário operacional. */
+.voxx-transferencia-module table {
+  color: var(--voxx-text);
+  background: var(--voxx-surface-raised);
+}
+
+.voxx-transferencia-module thead {
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-transferencia-module table th,
+.voxx-transferencia-module table td,
+.voxx-transferencia-module table tr {
+  border-color: var(--voxx-border) !important;
+}
+
+.voxx-transferencia-module thead tr,
+.voxx-transferencia-module tbody td {
+  color: var(--voxx-text-muted) !important;
+}
+
+.voxx-transferencia-module tbody tr:hover {
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-transferencia-modal h3,
+.voxx-transferencia-modal label,
+.voxx-transferencia-modal select,
+.voxx-transferencia-modal textarea {
+  color: var(--voxx-text) !important;
+}
+
+.voxx-transferencia-modal p {
+  color: var(--voxx-text-muted);
+}
+
+.voxx-transferencia-modal select,
+.voxx-transferencia-modal textarea {
+  border-color: var(--voxx-border) !important;
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-transferencia-modal option {
+  color: var(--voxx-text);
+  background: var(--voxx-surface);
+}
+
+/* Permuta: tabela, filtros, ações, confirmação e formulário. */
+.voxx-permuta-module table {
+  color: var(--voxx-text);
+  background: var(--voxx-surface-raised);
+}
+
+.voxx-permuta-module thead {
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-permuta-module table th,
+.voxx-permuta-module table td,
+.voxx-permuta-module table tr {
+  border-color: var(--voxx-border) !important;
+}
+
+.voxx-permuta-module thead tr,
+.voxx-permuta-module tbody td {
+  color: var(--voxx-text-muted) !important;
+}
+
+.voxx-permuta-module tbody tr:hover {
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-permuta-modal h3,
+.voxx-permuta-modal label,
+.voxx-permuta-modal select,
+.voxx-permuta-modal textarea {
+  color: var(--voxx-text) !important;
+}
+
+.voxx-permuta-modal p {
+  color: var(--voxx-text-muted);
+}
+
+.voxx-permuta-modal select,
+.voxx-permuta-modal textarea {
+  border-color: var(--voxx-border) !important;
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-permuta-modal option {
+  color: var(--voxx-text);
+  background: var(--voxx-surface);
+}
+
+/* Análise FOPAG: importação de arquivos, progresso e orientação. */
+.voxx-fopag-file {
+  border-color: var(--voxx-border) !important;
+  background: var(--voxx-surface-soft) !important;
+  color: var(--voxx-text);
+}
+
+.voxx-fopag-file:hover {
+  border-color: var(--voxx-border-strong) !important;
+  background: var(--voxx-surface-raised) !important;
+}
+
+.voxx-fopag-file p,
+.voxx-fopag aside p,
+.voxx-fopag li {
+  color: var(--voxx-text-muted) !important;
+}
+
+.voxx-fopag-file p:first-of-type,
+.voxx-fopag aside h2,
+.voxx-fopag aside p:first-child {
+  color: var(--voxx-text) !important;
+}
+
+.voxx-fopag-file button {
+  border-color: var(--voxx-border) !important;
+  background: var(--voxx-surface-raised) !important;
+  color: var(--voxx-text) !important;
+}
+
+.voxx-fopag-file button:hover {
+  border-color: var(--voxx-border-strong) !important;
+}
+
+.voxx-fopag aside > div > div {
+  border-color: var(--voxx-border) !important;
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-fopag select option {
+  color: var(--voxx-text);
+  background: var(--voxx-surface);
+}
+
+/* Auditoria: filtros, eventos e detalhamento das alterações. */
+.voxx-auditoria label,
+.voxx-auditoria h2 {
+  color: var(--voxx-text) !important;
+}
+
+.voxx-auditoria article {
+  border-color: var(--voxx-border) !important;
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-auditoria article:hover {
+  border-color: var(--voxx-border-strong) !important;
+  background: var(--voxx-surface-raised) !important;
+}
+
+.voxx-auditoria article > div + div {
+  border-color: var(--voxx-border) !important;
+  background: color-mix(in srgb, var(--voxx-surface-soft) 82%, transparent) !important;
+}
+
+.voxx-auditoria article p {
+  color: var(--voxx-text-muted) !important;
+}
+
+.voxx-auditoria article p.font-semibold,
+.voxx-auditoria article p.font-medium {
+  color: var(--voxx-text) !important;
+}
+
+.voxx-auditoria article [class*="border-l"],
+.voxx-auditoria article [class*="border-t"] {
+  border-color: var(--voxx-border) !important;
+}
+
+.voxx-auditoria select option {
+  color: var(--voxx-text);
+  background: var(--voxx-surface);
+}
+
+/* Dashboard — Visão Geral: linguagem executiva em azul RioSaúde. */
+.voxx-dashboard-metric {
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.voxx-dashboard-metric:hover {
+  transform: translateY(-2px);
+  border-color: var(--voxx-border-strong);
+}
+
+.voxx-dashboard-turnover table {
+  color: var(--voxx-text-muted);
+  background: var(--voxx-surface-raised);
+}
+
+.voxx-dashboard-turnover thead {
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-dashboard-turnover th,
+.voxx-dashboard-turnover td,
+.voxx-dashboard-turnover tr {
+  border-color: var(--voxx-border) !important;
+}
+
+.voxx-dashboard-turnover thead tr,
+.voxx-dashboard-turnover tbody tr {
+  color: var(--voxx-text-muted) !important;
+}
+
+.voxx-dashboard-turnover tbody tr:hover {
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-dashboard-turnover tbody td:first-child,
+.voxx-dashboard-turnover tbody td:last-child {
+  color: var(--voxx-text) !important;
+}
+
+/* Dashboard — Admissões: gráficos em verde, estrutura institucional neutra. */
+.voxx-dashboard-admissoes-table table {
+  color: var(--voxx-text-muted);
+  background: var(--voxx-surface-raised);
+}
+
+.voxx-dashboard-admissoes-table thead {
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-dashboard-admissoes-table th,
+.voxx-dashboard-admissoes-table td,
+.voxx-dashboard-admissoes-table tr {
+  border-color: var(--voxx-border) !important;
+}
+
+.voxx-dashboard-admissoes-table tbody tr:hover {
+  background: var(--voxx-surface-soft) !important;
+}
+
+.voxx-dashboard-admissoes-table tbody td:first-child {
+  color: var(--voxx-text) !important;
+}
+
+.voxx-field {
+  border: 1px solid var(--voxx-border);
+  background: var(--voxx-surface-soft);
+  color: var(--voxx-text);
+  box-shadow: 0 8px 20px rgba(7, 21, 34, 0.06);
+}
+
+.voxx-field::placeholder { color: var(--voxx-text-subtle); }
+.voxx-field:hover { border-color: var(--voxx-border-strong); }
+.voxx-field:focus {
+  border-color: var(--rs-cyan-500);
+  box-shadow: 0 0 0 3px var(--voxx-focus);
+  outline: none;
+}
+
+.voxx-button-primary {
+  border: 1px solid transparent;
+  background: var(--voxx-primary);
+  color: var(--voxx-primary-contrast);
+  box-shadow: var(--voxx-shadow-soft);
+}
+
+.voxx-button-primary:hover { background: var(--voxx-primary-hover); }
+
+.voxx-button-secondary {
+  border: 1px solid var(--voxx-border);
+  background: var(--voxx-surface-soft);
+  color: var(--voxx-text);
+}
+
+.voxx-button-secondary:hover {
+  border-color: var(--voxx-border-strong);
+  background: var(--voxx-surface-raised);
+}
+
+.voxx-button-primary:disabled,
+.voxx-button-secondary:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+/* Área externa: login, solicitação e recuperação de acesso */
+.voxx-auth-page {
+  position: relative;
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--voxx-bg);
+  color: var(--voxx-text);
+}
+
+.voxx-auth-backdrop {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(53, 181, 229, 0.18), transparent 35%),
+    radial-gradient(circle at 8% 75%, rgba(23, 59, 99, 0.18), transparent 31%),
+    linear-gradient(155deg, var(--voxx-bg-subtle) 0%, var(--voxx-bg) 58%, var(--voxx-bg-subtle) 100%);
+}
+
+html.tema-dia .voxx-auth-backdrop {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(53, 181, 229, 0.30), transparent 36%),
+    radial-gradient(circle at 8% 75%, rgba(23, 59, 99, 0.11), transparent 30%),
+    linear-gradient(155deg, #ffffff 0%, var(--voxx-bg) 56%, var(--voxx-bg-subtle) 100%);
+}
+
+.voxx-auth-glow-left,
+.voxx-auth-glow-right {
+  pointer-events: none;
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(72px);
+}
+
+.voxx-auth-glow-left {
+  left: -7rem;
+  top: 4rem;
+  height: 19rem;
+  width: 19rem;
+  background: rgba(53, 181, 229, 0.14);
+}
+
+.voxx-auth-glow-right {
+  right: -6rem;
+  bottom: 3rem;
+  height: 21rem;
+  width: 21rem;
+  background: rgba(23, 59, 99, 0.20);
+}
+
+.voxx-auth-card {
+  border: 1px solid var(--voxx-border);
+  background: color-mix(in srgb, var(--voxx-surface) 94%, transparent);
+  color: var(--voxx-text);
+  box-shadow: var(--voxx-shadow);
+  backdrop-filter: blur(18px);
+}
+
+.voxx-auth-logo {
+  display: flex;
+  min-height: 5rem;
+  width: min(100%, 22rem);
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.5rem;
+}
+
+.voxx-brand-image {
+  filter: none;
+  transition: filter 180ms ease, opacity 180ms ease;
+}
+
+html.tema-noite .voxx-brand-image {
+  filter: brightness(0) invert(1);
+}
+
+/* Navegação institucional */
+.voxx-sidebar-rail {
+  border-right: 1px solid rgba(109, 208, 243, 0.20);
+  background: #0d2742;
+}
+
+.voxx-app-shell {
+  background:
+    linear-gradient(
+      to right,
+      #0d2742 0,
+      #0d2742 255px,
+      rgba(109, 208, 243, 0.20) 255px,
+      rgba(109, 208, 243, 0.20) 256px,
+      var(--voxx-bg) 256px,
+      var(--voxx-bg) 100%
+    );
+}
+
+.voxx-sidebar {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(69, 194, 239, 0.24), transparent 34%),
+    linear-gradient(180deg, #173b63 0%, #123553 50%, #0d2742 100%);
+  color: #f4f8fb;
+  box-shadow: 18px 0 48px rgba(7, 35, 60, 0.20);
+}
+
+html.tema-noite .voxx-sidebar {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(69, 194, 239, 0.20), transparent 34%),
+    linear-gradient(180deg, #163b5c 0%, #123553 52%, #0d2742 100%);
+}
+
+.voxx-sidebar .voxx-brand-image { filter: brightness(0) invert(1); }
+
+.voxx-sidebar .voxx-field {
+  border-color: rgba(168, 219, 237, 0.24);
+  background: rgba(7, 32, 54, 0.34);
+  color: #f4f8fb;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.voxx-sidebar .voxx-field::placeholder { color: #a8bbcb; }
+.voxx-sidebar .voxx-field:hover { border-color: rgba(109, 208, 243, 0.48); }
+.voxx-sidebar .voxx-field:focus {
+  border-color: var(--rs-cyan-400);
+  box-shadow: 0 0 0 3px rgba(69, 194, 239, 0.16);
+}
+
+.voxx-sidebar .voxx-surface {
+  border-color: rgba(168, 219, 237, 0.22);
+  background: rgba(7, 32, 54, 0.38);
+  color: #dceaf3;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+/* Menu do usuário */
+.voxx-user-trigger,
+.voxx-user-menu {
+  border: 1px solid var(--voxx-border);
+  background: color-mix(in srgb, var(--voxx-surface) 94%, transparent);
+  color: var(--voxx-text);
+  box-shadow: var(--voxx-shadow-soft);
+  backdrop-filter: blur(18px);
+}
+
+.voxx-user-trigger:hover {
+  border-color: var(--rs-cyan-500);
+  background: var(--voxx-surface-raised);
+}
+
+.voxx-user-menu-header {
+  border-color: var(--voxx-border);
+  background: var(--voxx-surface-soft);
+}
+
+.voxx-user-menu-item {
+  color: var(--voxx-text-muted);
+}
+
+.voxx-user-menu-item:hover {
+  background: color-mix(in srgb, var(--rs-cyan-500) 10%, var(--voxx-surface));
+  color: var(--voxx-text);
+}
+
+.voxx-user-menu-icon {
+  border: 1px solid color-mix(in srgb, var(--rs-cyan-500) 28%, var(--voxx-border));
+  background: color-mix(in srgb, var(--rs-cyan-500) 11%, var(--voxx-surface));
+  color: var(--voxx-primary);
+}
+
+/* Carregamentos */
+.voxx-loading-overlay {
+  background: var(--voxx-overlay);
+  backdrop-filter: blur(3px);
+}
+
+.voxx-loading-card {
+  display: flex;
+  min-width: 18rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid var(--voxx-border);
+  border-radius: 1.75rem;
+  background: color-mix(in srgb, var(--voxx-surface) 94%, transparent);
+  padding: 1.75rem 2rem;
+  color: var(--voxx-text);
+  box-shadow: var(--voxx-shadow);
+}
+
+.voxx-spinner {
+  display: inline-block;
+  height: 2.5rem;
+  width: 2.5rem;
+  animation: spin 800ms linear infinite;
+  border: 3px solid color-mix(in srgb, var(--rs-cyan-500) 24%, transparent);
+  border-top-color: var(--rs-cyan-500);
+  border-radius: 999px;
+}
+
+.voxx-loading-message {
+  color: var(--voxx-text-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.voxx-auth-title { color: var(--voxx-text); }
+.voxx-auth-description { color: var(--voxx-text-muted); }
+.voxx-auth-label { color: var(--voxx-text); }
+
+.voxx-auth-loading {
+  background: var(--voxx-overlay);
+  backdrop-filter: blur(2px);
 }
 
 /* transicao suave de tema */
@@ -79,14 +860,15 @@ html.tema-noite * {
   align-items: center;
   justify-content: center;
   border-radius: 1rem;
-  border: 1px solid rgba(52, 211, 153, 0.25);
-  background: rgba(52, 211, 153, 0.10);
-  color: rgb(209, 250, 229);
+  border: 1px solid var(--voxx-border);
+  background: var(--voxx-surface-soft);
+  color: var(--voxx-primary);
   box-shadow: none;
 }
 
 .voxx-export-button:hover {
-  background: rgba(52, 211, 153, 0.20);
+  border-color: var(--rs-cyan-500);
+  background: var(--voxx-surface-raised);
 }
 
 .voxx-export-button:disabled {
@@ -95,25 +877,26 @@ html.tema-noite * {
 }
 
 html.tema-dia .voxx-export-button {
-  border-color: rgba(15, 118, 110, 0.42);
-  background: rgba(204, 251, 241, 0.92);
-  color: rgb(17, 94, 89);
-  box-shadow: 0 10px 24px rgba(15, 118, 110, 0.12);
+  border-color: var(--voxx-border);
+  background: var(--voxx-surface-soft);
+  color: var(--voxx-primary);
+  box-shadow: var(--voxx-shadow-soft);
 }
 
 html.tema-dia .voxx-export-button:hover {
-  border-color: rgba(15, 118, 110, 0.62);
-  background: rgba(153, 246, 228, 0.98);
+  border-color: var(--rs-cyan-500);
+  background: var(--voxx-surface-raised);
 }
 
 html.tema-noite .voxx-export-button {
-  border-color: rgba(52, 211, 153, 0.25);
-  background: rgba(52, 211, 153, 0.10);
-  color: rgb(209, 250, 229);
+  border-color: var(--voxx-border);
+  background: var(--voxx-surface-soft);
+  color: var(--voxx-primary);
   box-shadow: none;
 }
 
 html.tema-noite .voxx-export-button:hover {
-  background: rgba(52, 211, 153, 0.20);
+  border-color: var(--rs-cyan-500);
+  background: var(--voxx-surface-raised);
 }
 

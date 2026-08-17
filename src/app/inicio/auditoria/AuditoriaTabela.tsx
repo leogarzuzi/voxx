@@ -336,24 +336,22 @@ export default function AuditoriaTabela() {
     buscarLogs();
   }
 
-  const camposFormulario = temaDia
-    ? "mt-1 h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 [color-scheme:light] [&>option]:bg-white [&>option]:text-slate-900"
-    : "mt-1 h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/30 focus:bg-white/[0.08] focus:ring-2 focus:ring-blue-300/10 [color-scheme:dark] [&>option]:bg-[#171a23] [&>option]:text-slate-100";
+  const camposFormulario = "voxx-field mt-1 h-11 w-full rounded-2xl px-3 text-sm";
 
   return (
     <>
-      <section className={temaDia ? "mt-6 rounded-[26px] border border-slate-200 bg-white p-5 shadow-[0_22px_60px_rgba(15,23,42,0.08)]" : "mt-6 rounded-[26px] border border-white/10 bg-[#171a23] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]"}>
+      <section className="voxx-auditoria voxx-surface mt-6 rounded-[26px] p-5">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--voxx-primary)]">
               Filtros
             </p>
-            <h2 className={temaDia ? "mt-1 text-xl font-bold text-slate-950" : "mt-1 text-xl font-bold text-white"}>
+            <h2 className="voxx-text-primary mt-1 text-xl font-bold">
               Refinar registros
             </h2>
           </div>
 
-          <p className={temaDia ? "text-sm text-slate-500" : "text-sm text-slate-400"}>
+          <p className="voxx-text-muted text-sm">
             Exibindo até 50 registros encontrados no banco.
           </p>
         </div>
@@ -389,7 +387,7 @@ export default function AuditoriaTabela() {
             </label>
             <input
               type="text"
-              placeholder="email@exemplo.com"
+              placeholder="Buscar usuário"
               value={usuario}
               onChange={(e) => setUsuario(e.target.value)}
               className={camposFormulario}
@@ -457,7 +455,7 @@ export default function AuditoriaTabela() {
           <button
             type="button"
             onClick={limparFiltros}
-            className={temaDia ? "rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100" : "rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08]"}
+            className="voxx-button-secondary rounded-2xl px-4 py-2.5 text-sm font-semibold"
           >
             Limpar filtros
           </button>
@@ -465,28 +463,28 @@ export default function AuditoriaTabela() {
           <button
             type="button"
             onClick={aplicarFiltros}
-            className={temaDia ? "rounded-2xl bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_14px_35px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:bg-slate-800" : "rounded-2xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_14px_35px_rgba(0,0,0,0.24)] transition hover:-translate-y-0.5 hover:bg-slate-200"}
+            className="voxx-button-primary rounded-2xl px-5 py-2.5 text-sm font-semibold"
           >
             Buscar
           </button>
         </div>
       </section>
 
-      <section className={temaDia ? "mt-6 overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-[0_22px_60px_rgba(15,23,42,0.08)]" : "mt-6 overflow-hidden rounded-[26px] border border-white/10 bg-[#171a23] shadow-[0_22px_70px_rgba(0,0,0,0.28)]"}>
-        <div className={temaDia ? "flex flex-col gap-2 border-b border-slate-200 px-6 py-5 md:flex-row md:items-end md:justify-between" : "flex flex-col gap-2 border-b border-white/10 px-6 py-5 md:flex-row md:items-end md:justify-between"}>
+      <section className="voxx-auditoria voxx-surface mt-6 overflow-hidden rounded-[26px]">
+        <div className="flex flex-col gap-2 border-b border-[var(--voxx-border)] px-6 py-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--voxx-primary)]">
               Histórico
             </p>
-            <h2 className={temaDia ? "mt-1 text-xl font-bold text-slate-950" : "mt-1 text-xl font-bold text-white"}>
+            <h2 className="voxx-text-primary mt-1 text-xl font-bold">
               Registros de auditoria
             </h2>
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="voxx-text-muted mt-1 text-sm">
               Últimos 50 eventos, ou últimos 50 resultados dos filtros aplicados.
             </p>
           </div>
 
-          <div className={temaDia ? "rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700" : "rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-semibold text-slate-200"}>
+          <div className="voxx-text-primary rounded-full border border-[var(--voxx-border)] bg-[var(--voxx-surface-soft)] px-4 py-2 text-sm font-semibold">
             {logs.length} registro{logs.length === 1 ? "" : "s"}
           </div>
         </div>

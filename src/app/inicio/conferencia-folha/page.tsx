@@ -1,8 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import * as XLSX from "xlsx-js-style";
 import { useTema } from "@/contexts/TemaContext";
+import {
+  carregarWorkbook,
+  criarAbaEstilizada,
+  criarWorkbook,
+  escreverWorkbook,
+  nomesAbas,
+  sheetToJson,
+  type WorkbookSeguro,
+} from "@/lib/excelSeguro";
 
 const RUBRICAS: Record<string, { "95": string; OUTROS: string }> = {
   "ADC NOT": { "95": "703", OUTROS: "3037" },
@@ -75,16 +83,6 @@ function normalizarCompetencia(valor: any) {
   return "";
 }
 
-function sheetToJson(workbook: XLSX.WorkBook, sheetName: string) {
-  const sheet = workbook.Sheets[sheetName];
-  if (!sheet) return [];
-
-  return XLSX.utils.sheet_to_json<Record<string, any>>(sheet, {
-    defval: "",
-    raw: true,
-  });
-}
-
 function normalizarColunas(rows: Record<string, any>[]) {
   return rows.map((row) => {
     const novo: Record<string, any> = {};
@@ -97,7 +95,7 @@ function normalizarColunas(rows: Record<string, any>[]) {
   });
 }
 
-function carregarSetMatriculas(workbook: XLSX.WorkBook, aba: string) {
+function carregarSetMatriculas(workbook: WorkbookSeguro, aba: string) {
   const rows = normalizarColunas(sheetToJson(workbook, aba));
 
   return new Set(
@@ -107,71 +105,14 @@ function carregarSetMatriculas(workbook: XLSX.WorkBook, aba: string) {
   );
 }
 
-function acharAbaPrevia(workbook: XLSX.WorkBook) {
-  if (workbook.SheetNames.includes("PREVIA")) return "PREVIA";
-  if (workbook.SheetNames.includes("HMRG")) return "HMRG";
+function acharAbaPrevia(workbook: WorkbookSeguro) {
+  const abas = nomesAbas(workbook);
+  if (abas.includes("PREVIA")) return "PREVIA";
+  if (abas.includes("HMRG")) return "HMRG";
 
   return (
-    workbook.SheetNames.find((nome) => nome.toUpperCase() !== "DINAMICA") ||
-    workbook.SheetNames[0]
+    abas.find((nome) => nome.toUpperCase() !== "DINAMICA") || abas[0]
   );
-}
-
-function estilizarPlanilha(sheet: XLSX.WorkSheet) {
-  if (!sheet["!ref"]) return;
-
-  const range = XLSX.utils.decode_range(sheet["!ref"]);
-  sheet["!rows"] = [];
-
-  for (let R = range.s.r; R <= range.e.r; R++) {
-    sheet["!rows"][R] = { hpx: 35 };
-
-    for (let C = range.s.c; C <= range.e.c; C++) {
-      const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
-      const cell = sheet[cellAddress];
-
-      if (!cell) continue;
-
-      const isHeader = R === 0;
-
-      cell.s = {
-        font: {
-          name: "Calibri",
-          sz: isHeader ? 14 : 11,
-          bold: isHeader,
-          color: { rgb: "000000" },
-        },
-        fill: isHeader ? { fgColor: { rgb: "D9EAF7" } } : undefined,
-        alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: true,
-        },
-        border: {
-          top: { style: "thin", color: { rgb: "D9D9D9" } },
-          bottom: { style: "thin", color: { rgb: "D9D9D9" } },
-          left: { style: "thin", color: { rgb: "D9D9D9" } },
-          right: { style: "thin", color: { rgb: "D9D9D9" } },
-        },
-      };
-    }
-  }
-}
-
-function criarAbaEstilizada(
-  wb: XLSX.WorkBook,
-  dados: Record<string, any>[],
-  nomeAba: string
-) {
-  const ws = XLSX.utils.json_to_sheet(dados.length ? dados : [{}]);
-
-  estilizarPlanilha(ws);
-
-  ws["!cols"] = Object.keys(dados[0] || {}).map(() => ({
-    wch: 24,
-  }));
-
-  XLSX.utils.book_append_sheet(wb, ws, nomeAba.substring(0, 31));
 }
 
 async function analisarNoNavegador({
@@ -188,15 +129,10 @@ async function analisarNoNavegador({
     previa.arrayBuffer(),
   ]);
 
-  const fopagWorkbook = XLSX.read(fopagBuffer, {
-    type: "array",
-    cellDates: true,
-  });
-
-  const previaWorkbook = XLSX.read(previaBuffer, {
-    type: "array",
-    cellDates: true,
-  });
+  const [fopagWorkbook, previaWorkbook] = await Promise.all([
+    carregarWorkbook(fopagBuffer),
+    carregarWorkbook(previaBuffer),
+  ]);
 
   const abaPrevia = acharAbaPrevia(previaWorkbook);
   const feriasSet = carregarSetMatriculas(fopagWorkbook, "FERIAS");
@@ -342,20 +278,17 @@ async function analisarNoNavegador({
     { INDICADOR: "Total de divergências", TOTAL: erros.length },
   ];
 
-  const wb = XLSX.utils.book_new();
+  const wb = criarWorkbook();
 
   criarAbaEstilizada(wb, resumoGeral, "RESUMO_GERAL");
   criarAbaEstilizada(wb, resumoDetalhe, "RESUMO_DETALHE");
   criarAbaEstilizada(wb, resumoAba, "RESUMO_POR_ABA");
   criarAbaEstilizada(wb, erros, "ERROS_DETALHADOS");
 
-  const output = XLSX.write(wb, {
-    type: "array",
-    bookType: "xlsx",
-  });
+  const output = await escreverWorkbook(wb);
 
   return {
-    blob: new Blob([output], {
+    blob: new Blob([output as BlobPart], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     }),
     auditoria: {
@@ -410,7 +343,7 @@ function UploadCard({
 
   return (
     <div
-      className={`overflow-hidden rounded-[24px] border transition-all duration-300 ${
+      className={`voxx-fopag-file overflow-hidden rounded-[24px] border transition-all duration-300 ${
         file
           ? "border-emerald-300/25 bg-emerald-300/10 shadow-[0_0_0_2px_rgba(52,211,153,0.08)]"
           : isDrag
@@ -521,7 +454,7 @@ function UploadCard({
         <input
           ref={inputRef}
           type="file"
-          accept=".xlsx,.xls"
+          accept=".xlsx"
           className="hidden"
           onChange={(event) => onFile(event.target.files?.[0] || null)}
         />
@@ -690,22 +623,22 @@ export default function ConferenciaFolhaPage() {
   const mensagemErro = mensagem?.startsWith("Erro") || mensagem?.startsWith("Envie");
 
   return (
-    <main className={temaDia ? "min-h-screen min-w-0 bg-[#f4f6fb] p-8 text-slate-950" : "min-h-screen min-w-0 bg-[#11141b] p-8 text-slate-100"}>
-      <section className={temaDia ? "overflow-hidden rounded-[30px] border border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#eef3fb_58%,#e8edf6_100%)] p-7 shadow-[0_24px_70px_rgba(15,23,42,0.08)]" : "overflow-hidden rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_14%_0%,rgba(59,130,246,0.24),transparent_32%),linear-gradient(135deg,#242833_0%,#171a23_58%,#10131a_100%)] p-7 shadow-[0_24px_80px_rgba(0,0,0,0.32)]"}>
-        <p className={temaDia ? "text-xs font-semibold uppercase tracking-[0.32em] text-slate-500" : "text-xs font-semibold uppercase tracking-[0.32em] text-slate-400"}>
-          Módulo VOXX
+    <main className="voxx-fopag voxx-page min-h-screen min-w-0 p-8">
+      <section className="voxx-surface-raised overflow-hidden rounded-[30px] p-7">
+        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[var(--voxx-primary)]">
+          Gestão de RH
         </p>
-        <h1 className={temaDia ? "mt-3 text-4xl font-semibold tracking-tight text-slate-950" : "mt-3 text-4xl font-semibold tracking-tight text-white"}>
+        <h1 className="voxx-text-primary mt-3 text-4xl font-semibold tracking-tight">
           Análise FOPAG
         </h1>
-        <p className={temaDia ? "mt-2 max-w-2xl text-sm leading-6 text-slate-600" : "mt-2 max-w-2xl text-sm leading-6 text-slate-300"}>
+        <p className="voxx-text-muted mt-2 max-w-2xl text-sm leading-6">
           Compare a FOPAG com a prévia da folha e baixe o relatório de
           conferência em Excel.
         </p>
       </section>
 
       {mostrarInfo && (
-        <section className={temaDia ? "mt-6 rounded-[24px] border border-slate-200 bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.08)]" : "mt-6 rounded-[24px] border border-blue-300/20 bg-blue-300/[0.07] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.22)]"}>
+        <section className="mt-6 rounded-[24px] border border-[var(--voxx-border)] bg-[var(--voxx-surface-soft)] p-5 shadow-[var(--voxx-shadow-soft)]">
           <p className={temaDia ? "mb-3 text-xs font-bold uppercase tracking-widest text-slate-700" : "mb-3 text-xs font-bold uppercase tracking-widest text-blue-100"}>
             Requisitos da prévia
           </p>
@@ -727,7 +660,7 @@ export default function ConferenciaFolhaPage() {
       )}
 
       <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(360px,520px)_1fr]">
-        <div className={temaDia ? "rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_22px_60px_rgba(15,23,42,0.08)]" : "rounded-[28px] border border-white/10 bg-[#171a23] p-6 shadow-[0_22px_70px_rgba(0,0,0,0.28)]"}>
+        <div className="voxx-surface rounded-[28px] p-6">
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.24em] text-slate-500">
@@ -741,7 +674,7 @@ export default function ConferenciaFolhaPage() {
             <select
               value={competencia}
               onChange={(event) => setCompetencia(event.target.value)}
-              className={temaDia ? "h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-bold text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 [&>option]:bg-white [&>option]:text-slate-900" : "h-11 rounded-2xl border border-white/10 bg-white/[0.06] px-4 text-sm font-bold text-slate-100 outline-none transition [color-scheme:dark] focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 [&>option]:bg-[#171a23] [&>option]:text-slate-100"}
+              className="voxx-field h-11 rounded-2xl px-4 text-sm font-bold"
             >
               {competencias.map((item) => (
                 <option key={item} value={item}>
@@ -755,7 +688,7 @@ export default function ConferenciaFolhaPage() {
             <a
               href="/modelos/modelo_fopag.xlsx"
               download
-              className={temaDia ? "flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-100" : "flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-center text-sm font-semibold text-slate-200 transition hover:bg-white/[0.1]"}
+              className="voxx-button-secondary flex items-center justify-center rounded-2xl px-4 py-3 text-center text-sm font-semibold"
             >
               Modelo FOPAG
             </a>
@@ -763,7 +696,7 @@ export default function ConferenciaFolhaPage() {
             <button
               type="button"
               onClick={() => setMostrarInfo((valorAtual) => !valorAtual)}
-              className={temaDia ? "rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100" : "rounded-2xl border border-blue-300/25 bg-blue-300/10 px-4 py-3 text-sm font-semibold text-blue-100 transition hover:bg-blue-300/20"}
+              className="voxx-button-secondary rounded-2xl px-4 py-3 text-sm font-semibold"
             >
               Requisitos
             </button>
@@ -816,7 +749,7 @@ export default function ConferenciaFolhaPage() {
             type="button"
             onClick={analisar}
             disabled={loading}
-            className={temaDia ? "mt-6 w-full rounded-2xl bg-slate-950 py-4 text-sm font-bold text-white shadow-[0_12px_34px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50" : "mt-6 w-full rounded-2xl bg-white py-4 text-sm font-bold text-slate-950 shadow-[0_12px_34px_rgba(0,0,0,0.24)] transition hover:-translate-y-0.5 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"}
+            className="voxx-button-primary mt-6 w-full rounded-2xl py-4 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Analisando..." : "Analisar e baixar relatório"}
           </button>
@@ -866,7 +799,7 @@ export default function ConferenciaFolhaPage() {
           )}
         </div>
 
-        <aside className={temaDia ? "rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_22px_60px_rgba(15,23,42,0.08)]" : "rounded-[28px] border border-white/10 bg-[#171a23] p-6 shadow-[0_22px_70px_rgba(0,0,0,0.22)]"}>
+        <aside className="voxx-surface rounded-[28px] p-6">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-slate-500">
             Fluxo da análise
           </p>
@@ -878,7 +811,7 @@ export default function ConferenciaFolhaPage() {
             {[
               ["1", "Baixe o modelo", "Use o arquivo modelo da FOPAG quando precisar padronizar a origem."],
               ["2", "Envie os arquivos", "Carregue a FOPAG e a prévia no formato Excel."],
-              ["3", "Baixe o resultado", "O VOXX compara os arquivos e entrega o relatório pronto."],
+              ["3", "Baixe o resultado", "O sistema compara os arquivos e entrega o relatório pronto."],
             ].map(([numero, titulo, descricao]) => (
               <div
                 key={numero}

@@ -24,11 +24,11 @@ export async function POST(request: NextRequest) {
 
     const { data: usuario } = await supabase
       .from("usuarios")
-      .select("perfil")
+      .select("perfil, status")
       .eq("email", user.email.toLowerCase())
       .single();
 
-    if (!usuario || !(await temPermissaoNoBanco(supabase, usuario.perfil, PERMISSOES.CONFERENCIA_FOLHA))) {
+    if (!usuario || usuario.status !== "ativo" || !(await temPermissaoNoBanco(supabase, usuario.perfil, PERMISSOES.CONFERENCIA_FOLHA))) {
       return Response.json(
         { success: false, error: "Sem permissão." },
         { status: 403 }

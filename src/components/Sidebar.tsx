@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { BuscaRapidaColaborador } from "@/components/BuscaRapidaColaborador";
 import { TemaToggle } from "@/components/TemaToggle";
@@ -95,37 +96,25 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
 
 
   function itemMenuClass(ativo: boolean) {
-    const estado = temaDia
-      ? ativo
-        ? "bg-slate-950 text-white shadow-[0_14px_32px_rgba(15,23,42,0.18)] ring-1 ring-slate-950/5 [&_svg]:!text-white"
-        : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 [&_svg]:!text-slate-400 hover:[&_svg]:!text-slate-700"
-      : ativo
-        ? "bg-white text-slate-950 shadow-[0_14px_35px_rgba(0,0,0,0.28)] ring-1 ring-white/70 [&_svg]:!text-slate-950"
-        : "text-slate-300 hover:bg-white/10 hover:text-white [&_svg]:!text-slate-400 hover:[&_svg]:!text-white";
+    const estado = ativo
+      ? "bg-[var(--rs-cyan-500)] text-[#071522] shadow-[0_14px_34px_rgba(4,30,50,0.24)] ring-1 ring-cyan-200/40 [&_svg]:!text-[#071522]"
+      : "text-[#dceaf3] hover:bg-white/10 hover:text-white [&_svg]:!text-[#9fc2d7] hover:[&_svg]:!text-[var(--rs-cyan-300)]";
 
     return `group flex w-full items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-medium transition duration-200 ${estado}`;
   }
 
   function grupoMenuClass(ativo: boolean) {
-    const estado = temaDia
-      ? ativo
-        ? "bg-slate-950 text-white shadow-[0_14px_32px_rgba(15,23,42,0.18)] ring-1 ring-slate-950/5 [&_svg]:!text-white"
-        : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 [&_svg]:!text-slate-400 hover:[&_svg]:!text-slate-700"
-      : ativo
-        ? "bg-white text-slate-950 shadow-[0_14px_35px_rgba(0,0,0,0.28)] ring-1 ring-white/70 [&_svg]:!text-slate-950"
-        : "text-slate-300 hover:bg-white/10 hover:text-white [&_svg]:!text-slate-400 hover:[&_svg]:!text-white";
+    const estado = ativo
+      ? "bg-[var(--rs-cyan-500)] text-[#071522] shadow-[0_14px_34px_rgba(4,30,50,0.24)] ring-1 ring-cyan-200/40 [&_svg]:!text-[#071522]"
+      : "text-[#dceaf3] hover:bg-white/10 hover:text-white [&_svg]:!text-[#9fc2d7] hover:[&_svg]:!text-[var(--rs-cyan-300)]";
 
     return `group flex w-full items-center justify-between rounded-2xl px-3.5 py-2.5 text-sm font-medium transition duration-200 ${estado}`;
   }
 
   function subItemMenuClass(ativo: boolean) {
-    const estado = temaDia
-      ? ativo
-        ? "bg-slate-950/90 font-semibold text-white shadow-sm"
-        : "text-slate-500 hover:bg-slate-100 hover:text-slate-950"
-      : ativo
-        ? "bg-white/15 font-semibold text-white ring-1 ring-white/10"
-        : "text-slate-400 hover:bg-white/10 hover:text-white";
+    const estado = ativo
+      ? "bg-cyan-300/15 font-semibold text-[var(--rs-cyan-300)] ring-1 ring-cyan-200/15"
+      : "text-[#a8bbcb] hover:bg-white/10 hover:text-white";
 
     return `block rounded-xl px-3 py-2 text-sm transition ${estado}`;
   }
@@ -136,21 +125,13 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
   );
   const admissaoAtivo = pathname.startsWith("/inicio/admissao");
   const dashboardAtivo = pathname.startsWith("/inicio/dashboard");
-  const iconClass = temaDia ? "h-5 w-5 text-slate-400" : "h-5 w-5 text-blue-100";
-  const chevronClass = temaDia
-    ? "inline-flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition group-hover:border-slate-300 group-hover:text-slate-700"
-    : "inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-blue-100 transition group-hover:border-white/20 group-hover:text-white";
-  const subMenuClass = temaDia
-    ? "ml-8 mt-1 space-y-1 border-l border-slate-200 pl-3"
-    : "ml-8 mt-1 space-y-1 border-l border-blue-600 pl-3";
+  const iconClass = "h-5 w-5 text-[#9fc2d7]";
+  const chevronClass = "inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-[#b9dbea] transition group-hover:border-cyan-200/30 group-hover:text-[var(--rs-cyan-300)]";
+  const subMenuClass = "ml-8 mt-1 space-y-1 border-l border-cyan-300/30 pl-3";
 
   return (
     <aside
-      className={
-        temaDia
-          ? "sticky top-0 flex h-screen w-64 shrink-0 flex-col self-start overflow-hidden rounded-tr-[30px] rounded-br-[30px] border-r border-slate-200 bg-[radial-gradient(circle_at_18%_0%,rgba(59,130,246,0.12),transparent_34%),linear-gradient(180deg,#ffffff_0%,#f8fafc_52%,#eef2f7_100%)] text-slate-950 shadow-[18px_0_45px_rgba(15,23,42,0.10)]"
-          : "sticky top-0 flex h-screen w-64 shrink-0 flex-col self-start overflow-hidden rounded-tr-[30px] rounded-br-[30px] border-r border-white/10 bg-[radial-gradient(circle_at_20%_0%,rgba(59,130,246,0.24),transparent_34%),linear-gradient(180deg,#20242d_0%,#151821_52%,#11141b_100%)] text-white shadow-[18px_0_45px_rgba(15,23,42,0.22)]"
-      }
+      className="voxx-sidebar flex h-full w-64 shrink-0 flex-col overflow-hidden"
     >
       <div className="flex min-h-0 flex-1 flex-col">
         <div className="px-4 pb-3 pt-5">
@@ -158,37 +139,16 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
             href="/inicio"
             title="Ir para o início"
             onClick={() => iniciarNavegacao("/inicio")}
-            className={
-              temaDia
-                ? "flex items-center gap-3 rounded-3xl border border-slate-200 bg-white p-3 shadow-[0_14px_28px_rgba(15,23,42,0.08)] transition hover:border-slate-300 hover:bg-slate-50"
-                : "flex items-center gap-3 rounded-3xl border border-white/10 bg-white/[0.06] p-3 shadow-inner shadow-white/5 transition hover:bg-white/[0.09]"
-            }
+            className="flex items-center rounded-3xl border border-white/10 bg-white/[0.06] p-3 shadow-inner shadow-white/5 transition hover:border-cyan-200/20 hover:bg-white/[0.09]"
           >
-            <span
-              className={
-                temaDia
-                  ? "flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 shadow-[0_12px_24px_rgba(15,23,42,0.22)]"
-                  : "flex h-11 w-11 items-center justify-center rounded-2xl bg-white shadow-[0_10px_30px_rgba(0,0,0,0.24)]"
-              }
-            >
-              <img
-                src="/logo-simbolo.png"
-                alt="VOXX"
-                className="h-9 w-9 object-contain"
-              />
-            </span>
-
-            <span className="min-w-0">
-              <span
-                className={
-                  temaDia
-                    ? "block text-base font-bold leading-tight tracking-wide text-slate-950"
-                    : "block text-base font-bold leading-tight tracking-wide text-white"
-                }
-              >
-                VOXX
-              </span>
-            </span>
+            <Image
+              src="/logo-ronaldo-gazolla.png"
+              alt="Hospital Municipal Ronaldo Gazolla"
+              width={711}
+              height={230}
+              priority
+              className="voxx-brand-image h-auto w-full object-contain"
+            />
           </Link>
         </div>
 
@@ -571,19 +531,11 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
       </div>
 
       <div
-        className={
-          temaDia
-            ? "border-t border-slate-200 px-4 pb-4 pt-3"
-            : "border-t border-white/10 px-4 pb-4 pt-3"
-        }
+        className="border-t border-white/10 px-4 pb-4 pt-3"
       >
         <TemaToggle tema={tema} onToggle={alternarTema} />
         <p
-          className={
-            temaDia
-              ? "mt-2 text-center text-[11px] font-semibold text-slate-500"
-              : "mt-2 text-center text-[11px] font-semibold text-slate-400"
-          }
+          className="mt-2 text-center text-[11px] font-semibold text-[#a8bbcb]"
         >
           {temaDia ? "Modo dia ativo" : "Modo noite ativo"}
         </p>

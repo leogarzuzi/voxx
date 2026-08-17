@@ -22,13 +22,14 @@ export async function POST(request: Request) {
 
     const { data: usuarioLogado, error: erroUsuarioLogado } = await supabase
       .from("usuarios")
-      .select("perfil")
+      .select("perfil, status")
       .eq("email", user.email.toLowerCase())
       .single();
 
     if (
       erroUsuarioLogado ||
       !usuarioLogado ||
+      usuarioLogado.status !== "ativo" ||
       !(await temPermissaoNoBanco(supabase, usuarioLogado.perfil, PERMISSOES.SOLICITACOES))
     ) {
       return NextResponse.json(
@@ -43,6 +44,13 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { sucesso: false, mensagem: "Dados incompletos." },
         { status: 400 }
+      );
+    }
+
+    if (perfil === "Admin" && usuarioLogado.perfil !== "Admin") {
+      return NextResponse.json(
+        { sucesso: false, mensagem: "Somente um Admin pode conceder o perfil Admin." },
+        { status: 403 }
       );
     }
 

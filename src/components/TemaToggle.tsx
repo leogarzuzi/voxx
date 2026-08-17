@@ -23,33 +23,21 @@ export function TemaToggle({ tema, onToggle, variant = "sidebar" }: TemaTogglePr
       <button
         type="button"
         onClick={onToggle}
-        className={
-          temaDia
-            ? `relative flex h-12 w-full items-center justify-between rounded-full border border-slate-200 bg-white p-1 text-xs font-bold text-slate-500 transition ${
-                noLogin
-                  ? "shadow-[0_18px_44px_rgba(15,23,42,0.14)]"
-                  : "shadow-[0_12px_28px_rgba(15,23,42,0.10)]"
-              }`
-            : `relative flex h-12 w-full items-center justify-between rounded-full border border-white/10 p-1 text-xs font-bold text-slate-400 transition ${
-                noLogin
-                  ? "bg-slate-950/55 shadow-[0_18px_44px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl"
-                  : "bg-slate-950/35 shadow-[0_12px_32px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.05)]"
-              }`
-        }
+        className={`voxx-surface relative flex h-12 w-full items-center justify-between rounded-full p-1 text-xs font-bold transition ${noLogin ? "backdrop-blur-xl" : ""}`}
         aria-label={temaDia ? "Ativar modo noite" : "Ativar modo dia"}
         title={temaDia ? "Ativar modo noite" : "Ativar modo dia"}
       >
         <span
           className={`absolute top-1 h-10 w-[calc(50%-4px)] rounded-full transition-all duration-300 ${
             temaDia
-              ? "left-1 bg-white shadow-[0_10px_24px_rgba(245,158,11,0.22),inset_0_0_0_1px_rgba(245,158,11,0.20)]"
-              : "left-[calc(50%+0px)] bg-slate-800 shadow-[0_0_24px_rgba(96,165,250,0.45),inset_0_0_0_1px_rgba(96,165,250,0.35)]"
+              ? "left-1 bg-[var(--voxx-surface-raised)] shadow-[0_8px_22px_rgba(23,59,99,0.16),inset_0_0_0_1px_var(--voxx-border)]"
+              : "left-[calc(50%+0px)] bg-[var(--rs-navy-700)] shadow-[0_0_24px_rgba(53,181,229,0.30),inset_0_0_0_1px_rgba(69,194,239,0.38)]"
           }`}
         />
 
         <span
           className={`relative z-10 flex flex-1 items-center justify-center gap-1.5 transition ${
-            temaDia ? "text-amber-500" : "text-slate-500"
+            temaDia ? "text-[var(--rs-navy-700)]" : "text-[var(--voxx-text-subtle)]"
           }`}
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -61,7 +49,7 @@ export function TemaToggle({ tema, onToggle, variant = "sidebar" }: TemaTogglePr
 
         <span
           className={`relative z-10 flex flex-1 items-center justify-center gap-1.5 transition ${
-            temaDia ? "text-slate-400" : "text-blue-200"
+            temaDia ? "text-[var(--voxx-text-subtle)]" : "text-[var(--rs-cyan-300)]"
           }`}
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">

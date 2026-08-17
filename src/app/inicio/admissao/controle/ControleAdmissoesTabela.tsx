@@ -295,7 +295,7 @@ function gerarNomeArquivoExcel() {
   const hora = String(agora.getHours()).padStart(2, "0");
   const minuto = String(agora.getMinutes()).padStart(2, "0");
 
-  return `admissoes-voxx-${ano}-${mes}-${dia}-${hora}${minuto}.csv`;
+  return `admissoes-${ano}-${mes}-${dia}-${hora}${minuto}.csv`;
 }
 
 type InputTextoProps = {
@@ -318,18 +318,15 @@ function InputTexto({
   onChange,
   required = false,
   type = "text",
-  placeholder,
   inputMode,
   pattern,
   maxLength,
   className = "",
   disabled = false,
 }: InputTextoProps) {
-  const { temaDia } = useTema();
-
   return (
     <label className={`block ${className}`}>
-      <span className={temaDia ? "text-sm font-semibold text-slate-700" : "text-sm font-semibold text-slate-300"}>
+      <span className="voxx-text-primary text-sm font-semibold">
         {label}
         {required && <span className="text-red-500"> *</span>}
       </span>
@@ -339,15 +336,14 @@ function InputTexto({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        placeholder={placeholder}
         inputMode={inputMode}
         pattern={pattern}
         maxLength={maxLength}
         disabled={disabled}
-        className={`mt-1 h-11 w-full rounded-2xl border px-3 text-sm outline-none transition [color-scheme:dark] focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 ${
+        className={`voxx-field mt-1 h-11 w-full rounded-2xl px-3 text-sm ${
           disabled
-            ? "cursor-not-allowed border-white/10 bg-white/[0.035] text-slate-500"
-            : "border-white/10 bg-white/[0.06] text-slate-100 placeholder:text-slate-500"
+            ? "cursor-not-allowed opacity-55"
+            : ""
         }`}
       />
     </label>
@@ -371,16 +367,14 @@ function SelectCampo({
   placeholder = "Selecione",
   className = "",
 }: SelectCampoProps) {
-  const { temaDia } = useTema();
-
   return (
     <label className={`block ${className}`}>
-      <span className={temaDia ? "text-sm font-semibold text-slate-700" : "text-sm font-semibold text-slate-300"}>{label}</span>
+      <span className="voxx-text-primary text-sm font-semibold">{label}</span>
 
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={temaDia ? "mt-1 h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 [color-scheme:light] [&>option]:bg-white [&>option]:text-slate-900" : "mt-1 h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 text-sm text-slate-100 outline-none transition focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 [color-scheme:dark] [&>option]:bg-[#171a23] [&>option]:text-slate-100"}
+        className="voxx-field mt-1 h-11 w-full rounded-2xl px-3 text-sm"
       >
         <option value="">{placeholder}</option>
 
@@ -407,10 +401,8 @@ function CheckboxCampo({
   onChange,
   description,
 }: CheckboxCampoProps) {
-  const { temaDia } = useTema();
-
   return (
-    <label className={temaDia ? "flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-white p-3 transition hover:bg-slate-50" : "flex cursor-pointer items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3 transition hover:bg-white/[0.07]"}>
+    <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[var(--voxx-border)] bg-[var(--voxx-surface-soft)] p-3 transition hover:border-[var(--voxx-border-strong)]">
       <input
         type="checkbox"
         checked={checked}
@@ -419,12 +411,12 @@ function CheckboxCampo({
       />
 
       <span>
-        <span className={temaDia ? "block text-sm font-semibold text-slate-800" : "block text-sm font-semibold text-slate-200"}>
+        <span className="voxx-text-primary block text-sm font-semibold">
           {label}
         </span>
 
         {description && (
-          <span className={temaDia ? "mt-0.5 block text-xs text-slate-500" : "mt-0.5 block text-xs text-slate-400"}>
+          <span className="voxx-text-muted mt-0.5 block text-xs">
             {description}
           </span>
         )}
@@ -775,21 +767,19 @@ export default function ControleAdmissoesTabela() {
     buscarAdmissoes("");
   }
 
-  const campoBuscaClass = temaDia
-    ? "h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-center text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 xl:w-96"
-    : "h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 text-center text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/30 focus:bg-white/[0.08] focus:ring-2 focus:ring-blue-300/10 xl:w-96";
+  const campoBuscaClass = "voxx-field h-11 w-full rounded-2xl px-4 text-center text-sm xl:w-96";
 
   const textoSecundarioTabela = temaDia ? "text-slate-600" : "text-slate-300";
   const textoDestaqueTabela = temaDia ? "text-slate-950" : "text-slate-100";
   return (
-    <section className={temaDia ? "mt-6 min-w-0 overflow-hidden rounded-[26px] border border-slate-200 bg-white p-5 shadow-[0_22px_60px_rgba(15,23,42,0.08)]" : "mt-6 min-w-0 overflow-hidden rounded-[26px] border border-white/10 bg-[#171a23] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]"}>
+    <section className="voxx-admissao-module voxx-surface mt-6 min-w-0 overflow-hidden rounded-[26px] p-5">
       <div className="mb-5 flex flex-col gap-4">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={abrirModalNovaAdmissao}
-              className={temaDia ? "rounded-2xl bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_14px_35px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:bg-slate-800" : "rounded-2xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_14px_35px_rgba(0,0,0,0.24)] transition hover:-translate-y-0.5 hover:bg-slate-200"}
+              className="voxx-button-primary rounded-2xl px-5 py-2.5 text-sm font-semibold"
             >
               Nova admissão
             </button>
@@ -818,14 +808,13 @@ export default function ControleAdmissoesTabela() {
               type="text"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
-              placeholder="Buscar por nome, matrícula, CPF, cargo ou e-mail"
               className={campoBuscaClass}
             />
 
             <button
               type="submit"
               disabled={loading}
-              className={temaDia ? "h-11 rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60" : "h-11 rounded-2xl bg-white px-5 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60"}
+              className="voxx-button-primary h-11 rounded-2xl px-5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
             >
               Buscar
             </button>
@@ -834,7 +823,7 @@ export default function ControleAdmissoesTabela() {
               type="button"
               onClick={limparBusca}
               disabled={loading}
-              className={temaDia ? "h-11 rounded-2xl border border-slate-200 bg-slate-50 px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60" : "h-11 rounded-2xl border border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"}
+              className="voxx-button-secondary h-11 rounded-2xl px-5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
             >
               Limpar
             </button>
@@ -908,7 +897,7 @@ export default function ControleAdmissoesTabela() {
           Carregando admissões...
         </div>
       ) : (
-        <div className={temaDia ? "voxx-scrollbar w-full max-w-full overflow-x-auto rounded-[22px] border border-slate-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.08)]" : "voxx-scrollbar w-full max-w-full overflow-x-auto rounded-[22px] border border-white/10 bg-[#202532] shadow-[0_18px_45px_rgba(0,0,0,0.2)]"}>
+        <div className="voxx-scrollbar voxx-surface-raised w-full max-w-full overflow-x-auto rounded-[22px]">
           <table className={temaDia ? "min-w-[2210px] text-center text-xs [&_td]:border-r [&_td]:border-slate-200 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-slate-200 [&_th:last-child]:border-r-0" : "min-w-[2210px] text-center text-xs [&_td]:border-r [&_td]:border-white/10 [&_td:last-child]:border-r-0 [&_th]:border-r [&_th]:border-white/10 [&_th:last-child]:border-r-0"}>
             <thead className={temaDia ? "sticky top-0 z-10 bg-slate-100" : "sticky top-0 z-10 bg-[#2a3040]"}>
               <tr className={temaDia ? "border-b border-slate-200 text-slate-600" : "border-b border-white/10 text-slate-300"}>
@@ -1109,13 +1098,13 @@ export default function ControleAdmissoesTabela() {
 
       {modalAberto && (
         <div
-          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/55 px-4 backdrop-blur-[2px]"
+          className="voxx-admissao-modal fixed inset-0 z-[90] flex items-center justify-center bg-[var(--voxx-overlay)] px-4 backdrop-blur-[2px]"
           onMouseDown={fecharModal}
         >
           <form
             onSubmit={salvarAdmissao}
             onMouseDown={(e) => e.stopPropagation()}
-            className={temaDia ? "max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-3xl border border-slate-200 bg-white p-6 text-slate-900 shadow-2xl" : "max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-3xl border border-white/10 bg-[#171a23] p-6 text-slate-100 shadow-2xl"}
+            className="voxx-surface-raised max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-3xl p-6"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -1328,7 +1317,7 @@ export default function ControleAdmissoesTabela() {
                 type="button"
                 onClick={fecharModal}
                 disabled={salvando}
-                className={temaDia ? "rounded-2xl border border-slate-200 bg-slate-50 px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60" : "rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"}
+                className="voxx-button-secondary rounded-2xl px-5 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Cancelar
               </button>
@@ -1336,7 +1325,7 @@ export default function ControleAdmissoesTabela() {
               <button
                 type="submit"
                 disabled={salvando}
-                className={temaDia ? "rounded-2xl bg-slate-950 px-5 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60" : "rounded-2xl bg-white px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60"}
+                className="voxx-button-primary rounded-2xl px-5 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {salvando
                   ? "Salvando..."

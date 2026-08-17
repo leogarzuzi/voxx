@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { TemaToggle } from "@/components/TemaToggle";
@@ -31,7 +32,6 @@ function CampoTexto({
   label,
   required,
   type = "text",
-  placeholder,
   value,
   onChange,
   tema,
@@ -44,30 +44,19 @@ function CampoTexto({
   onChange: (value: string) => void;
   tema: TemaInterface;
 }) {
-  const temaDia = tema === "dia";
-
   return (
     <div>
-      <label
-        className={
-          temaDia
-            ? "mb-1 block text-sm font-semibold text-slate-700"
-            : "mb-1 block text-sm font-medium text-slate-300"
-        }
-      >
-        {label} {required && <span className={temaDia ? "text-red-500" : "text-red-300"}>*</span>}
+      <label className="voxx-auth-label mb-1 block text-sm font-semibold">
+        {label} {required && <span className="text-red-500">*</span>}
       </label>
       <input
         required={required}
         type={type}
-        placeholder={placeholder}
-        className={
-          temaDia
-            ? "h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.06)] outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-            : "h-11 w-full rounded-xl border border-white/10 bg-[#202532] px-4 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-blue-300/40 focus:ring-2 focus:ring-blue-300/15"
-        }
+        placeholder=""
+        className="voxx-field h-11 w-full rounded-xl px-4 transition"
         value={value}
         onChange={(event) => onChange(event.target.value)}
+        data-tema={tema}
       />
     </div>
   );
@@ -148,22 +137,17 @@ async function handleLogin(e: React.FormEvent) {
       return;
     }
 
-    const { error } = await supabase.from("solicitacoes_acesso").insert({
-      nome,
-      email: email.trim().toLowerCase(),
-      status: "Pendente",
+    const response = await fetch("/api/solicitacoes-acesso", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome, email: email.trim().toLowerCase() }),
     });
+    const resultado = await response.json();
 
     setLoading(false);
 
-    if (error) {
-      if (error.code === "23505") {
-        setMensagem("Já existe uma solicitação para este e-mail.");
-        return;
-      }
-
-      setMensagem(`Erro: ${error.message}`);
-      console.log(error);
+    if (!response.ok) {
+      setMensagem(resultado.error || "Não foi possível enviar a solicitação.");
       return;
     }
 
@@ -180,73 +164,33 @@ async function handleLogin(e: React.FormEvent) {
 
   return (
     <div
-      className={
-        temaDia
-          ? "relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f5f7fb] px-4 py-10 pb-24 text-slate-900"
-          : "relative flex min-h-screen items-center justify-center overflow-hidden bg-[#11141b] px-4 py-10 pb-24 text-slate-100"
-      }
+      className="voxx-auth-page px-4 py-10 pb-24"
     >
-      <div
-        className={
-          temaDia
-            ? "pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.15),transparent_34%),linear-gradient(180deg,#ffffff_0%,#f5f7fb_52%,#e9eef6_100%)]"
-            : "pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.14),transparent_34%),linear-gradient(180deg,#151923_0%,#11141b_52%,#0d1016_100%)]"
-        }
-      />
-      <div
-        className={
-          temaDia
-            ? "pointer-events-none absolute -left-24 top-16 h-72 w-72 rounded-full bg-blue-100/70 blur-3xl"
-            : "pointer-events-none absolute -left-24 top-16 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl"
-        }
-      />
-      <div
-        className={
-          temaDia
-            ? "pointer-events-none absolute -right-20 bottom-16 h-80 w-80 rounded-full bg-slate-200/80 blur-3xl"
-            : "pointer-events-none absolute -right-20 bottom-16 h-80 w-80 rounded-full bg-slate-700/20 blur-3xl"
-        }
-      />
+      <div className="voxx-auth-backdrop" />
+      <div className="voxx-auth-glow-left" />
+      <div className="voxx-auth-glow-right" />
 
       <div className="relative z-10 w-full max-w-[430px]">
         <div
-          className={
-            temaDia
-              ? "rounded-[30px] border border-white bg-white/92 p-8 text-slate-900 shadow-[0_28px_80px_rgba(15,23,42,0.14)] backdrop-blur-xl"
-              : "rounded-[30px] border border-white/10 bg-[#171a23]/95 p-8 text-slate-100 shadow-[0_28px_90px_rgba(0,0,0,0.46)] backdrop-blur-xl"
-          }
+          className="voxx-auth-card rounded-[30px] p-8"
         >
           <div className="mb-7 flex flex-col items-center">
             <div
-              className={
-                temaDia
-                  ? "flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-slate-950 shadow-[0_18px_38px_rgba(15,23,42,0.22)]"
-                  : "flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] shadow-inner shadow-white/5"
-              }
+              className="voxx-auth-logo"
             >
-              <img src="/logo-simbolo.png" alt="VOXX" className="h-12 w-12 object-contain" />
+              <Image src="/logo-ronaldo-gazolla.png" alt="Hospital Municipal Ronaldo Gazolla" width={711} height={230} priority className="voxx-brand-image h-auto w-full object-contain" />
             </div>
 
-            <h1
-              className={
-                temaDia
-                  ? "mt-5 text-2xl font-semibold tracking-tight text-slate-950"
-                  : "mt-5 text-2xl font-semibold tracking-tight text-white"
-              }
-            >
-              {modoTela === "login" ? "Entrar no sistema" : "Solicitar acesso"}
-            </h1>
-            <p
-              className={
-                temaDia
-                  ? "mt-2 text-center text-sm font-medium text-slate-500"
-                  : "mt-2 text-center text-sm font-medium text-slate-400"
-              }
-            >
-              {modoTela === "login"
-                ? "Acesse sua conta para continuar."
-                : "Informe seus dados para solicitar liberação."}
-            </p>
+            {modoTela === "primeiro-acesso" && (
+              <>
+                <h1 className="voxx-auth-title mt-5 text-2xl font-semibold tracking-tight">
+                  Solicitar acesso
+                </h1>
+                <p className="voxx-auth-description mt-2 text-center text-sm font-medium">
+                  Informe seus dados para solicitar liberação.
+                </p>
+              </>
+            )}
           </div>
 
           {modoTela === "login" ? (
@@ -262,36 +206,22 @@ async function handleLogin(e: React.FormEvent) {
               />
 
               <div>
-                <label
-                  className={
-                    temaDia
-                      ? "mb-1 block text-sm font-semibold text-slate-700"
-                      : "mb-1 block text-sm font-medium text-slate-300"
-                  }
-                >
-                  Senha <span className={temaDia ? "text-red-500" : "text-red-300"}>*</span>
+                <label className="voxx-auth-label mb-1 block text-sm font-semibold">
+                  Senha <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input
                     required
                     type={mostrarSenha ? "text" : "password"}
-                    placeholder="Digite sua senha"
-                    className={
-                      temaDia
-                        ? "h-11 w-full rounded-xl border border-slate-200 bg-white px-4 pr-12 text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.06)] outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-                        : "h-11 w-full rounded-xl border border-white/10 bg-[#202532] px-4 pr-12 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-blue-300/40 focus:ring-2 focus:ring-blue-300/15"
-                    }
+                    placeholder=""
+                    className="voxx-field h-11 w-full rounded-xl px-4 pr-12 transition"
                     value={senha}
                     onChange={(event) => setSenha(event.target.value)}
                   />
                   <button
                     type="button"
                     onClick={() => setMostrarSenha(!mostrarSenha)}
-                    className={
-                      temaDia
-                        ? "absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
-                        : "absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-white"
-                    }
+                    className="voxx-text-muted absolute right-3 top-1/2 -translate-y-1/2 transition hover:text-[var(--voxx-primary)]"
                   >
                     <IconeOlho aberto={mostrarSenha} />
                   </button>
@@ -301,11 +231,7 @@ async function handleLogin(e: React.FormEvent) {
               <button
                 type="submit"
                 disabled={loading}
-                className={
-                  temaDia
-                    ? "h-11 w-full rounded-xl bg-slate-950 text-sm font-bold text-white shadow-[0_16px_40px_rgba(15,23,42,0.18)] transition hover:bg-slate-800 active:scale-[0.98] disabled:opacity-60"
-                    : "h-11 w-full rounded-xl bg-white text-sm font-bold text-slate-950 shadow-[0_16px_40px_rgba(255,255,255,0.08)] transition hover:bg-slate-200 active:scale-[0.98] disabled:opacity-60"
-                }
+                className="voxx-button-primary h-11 w-full rounded-xl text-sm font-bold transition active:scale-[0.98]"
               >
                 {loading ? "Entrando..." : "Entrar"}
               </button>
@@ -319,11 +245,7 @@ async function handleLogin(e: React.FormEvent) {
               <button
                 type="submit"
                 disabled={loading}
-                className={
-                  temaDia
-                    ? "h-11 w-full rounded-xl bg-slate-950 text-sm font-bold text-white shadow-[0_16px_40px_rgba(15,23,42,0.18)] transition hover:bg-slate-800 active:scale-[0.98] disabled:opacity-60"
-                    : "h-11 w-full rounded-xl bg-white text-sm font-bold text-slate-950 shadow-[0_16px_40px_rgba(255,255,255,0.08)] transition hover:bg-slate-200 active:scale-[0.98] disabled:opacity-60"
-                }
+                className="voxx-button-primary h-11 w-full rounded-xl text-sm font-bold transition active:scale-[0.98]"
               >
                 {loading ? "Enviando..." : "Solicitar acesso"}
               </button>
@@ -335,11 +257,7 @@ async function handleLogin(e: React.FormEvent) {
               type="button"
               onClick={handleResetSenha}
               disabled={loading}
-              className={
-                temaDia
-                  ? "h-10 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 active:scale-[0.97]"
-                  : "h-10 rounded-xl border border-white/10 bg-white/[0.04] text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] hover:text-white active:scale-[0.97]"
-              }
+              className="voxx-button-secondary h-10 rounded-xl text-sm font-semibold transition active:scale-[0.97]"
             >
               {loading ? "Enviando..." : "Esqueci a senha"}
             </button>
@@ -350,11 +268,7 @@ async function handleLogin(e: React.FormEvent) {
                 setMensagem("");
                 setModoTela(modoTela === "login" ? "primeiro-acesso" : "login");
               }}
-              className={
-                temaDia
-                  ? "h-10 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 active:scale-[0.97]"
-                  : "h-10 rounded-xl border border-white/10 bg-white/[0.04] text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] hover:text-white active:scale-[0.97]"
-              }
+              className="voxx-button-secondary h-10 rounded-xl text-sm font-semibold transition active:scale-[0.97]"
             >
               {modoTela === "login" ? "Solicitar acesso" : "Voltar"}
             </button>
@@ -376,17 +290,14 @@ async function handleLogin(e: React.FormEvent) {
             </div>
           )}
 
-          <p className={temaDia ? "mt-6 text-center text-xs text-slate-400" : "mt-6 text-center text-xs text-slate-500"}>
-            VOXX • v1.0
-          </p>
         </div>
       </div>
 
       <TemaToggle tema={tema} onToggle={alternarTema} variant="login" />
 
       {loading && (
-        <div className={temaDia ? "fixed inset-0 z-50 flex items-center justify-center bg-white/45 backdrop-blur-[1.5px]" : "fixed inset-0 z-50 flex items-center justify-center bg-black/35 backdrop-blur-[1.5px]"}>
-          <img src="/logo-simbolo.png" alt="Carregando" className="h-20 w-20 animate-pulse object-contain drop-shadow-2xl" />
+        <div className="voxx-auth-loading fixed inset-0 z-50 flex items-center justify-center">
+          <Image src="/logo-ronaldo-gazolla.png" alt="Carregando" width={711} height={230} className="voxx-brand-image h-auto w-64 animate-pulse object-contain drop-shadow-2xl" />
         </div>
       )}
     </div>

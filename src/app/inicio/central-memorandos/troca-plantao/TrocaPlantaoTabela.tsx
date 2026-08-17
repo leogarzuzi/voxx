@@ -248,34 +248,23 @@ export default function TrocaPlantaoTabela() {
     }`;
   }
 
-  const pageClass = temaDia
-    ? "min-h-screen bg-[#f4f6fb] px-8 py-8 text-slate-950"
-    : "min-h-screen bg-[#11141b] px-8 py-8 text-slate-100";
-  const cardClass = temaDia
-    ? "rounded-[28px] border border-slate-200 bg-white shadow-[0_22px_60px_rgba(15,23,42,0.08)]"
-    : "rounded-[28px] border border-white/10 bg-[#171a23] shadow-[0_22px_70px_rgba(0,0,0,0.28)]";
-  const inputClass = temaDia
-    ? "h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-    : "h-10 rounded-xl border border-white/10 bg-[#202532] px-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-blue-300/40 focus:ring-2 focus:ring-blue-300/15";
-  const mutedText = temaDia ? "text-slate-500" : "text-slate-400";
-  const strongText = temaDia ? "text-slate-950" : "text-white";
+  const pageClass = "voxx-page min-h-screen px-8 py-8";
+  const cardClass = "voxx-surface rounded-[28px]";
+  const inputClass = "voxx-field h-10 rounded-xl px-3 text-sm";
+  const mutedText = "voxx-text-muted";
+  const strongText = "voxx-text-primary";
 
   return (
     <main className={pageClass}>
-      <section
-        className={
-          temaDia
-            ? "overflow-hidden rounded-[30px] border border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#eef3fb_58%,#e8edf6_100%)] p-7 shadow-[0_24px_70px_rgba(15,23,42,0.1)]"
-            : "overflow-hidden rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_14%_0%,rgba(59,130,246,0.18),transparent_32%),linear-gradient(135deg,#242833_0%,#171a23_58%,#10131a_100%)] p-7 shadow-[0_24px_80px_rgba(0,0,0,0.32)]"
-        }
-      >
-        <p className={temaDia ? "text-xs font-semibold uppercase tracking-[0.32em] text-slate-500" : "text-xs font-semibold uppercase tracking-[0.32em] text-slate-400"}>
+      <section className="voxx-surface-raised relative overflow-hidden rounded-[30px] p-7">
+        <span className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[var(--voxx-focus)]" />
+        <p className="relative text-xs font-semibold uppercase tracking-[0.32em] text-[var(--voxx-primary)]">
           Memorandos
         </p>
-        <h1 className={temaDia ? "mt-3 text-4xl font-semibold tracking-tight text-slate-950" : "mt-3 text-4xl font-semibold tracking-tight text-white"}>
+        <h1 className="voxx-text-primary relative mt-3 text-4xl font-semibold tracking-tight">
           Troca de plantao
         </h1>
-        <p className={temaDia ? "mt-2 max-w-2xl text-sm leading-6 text-slate-600" : "mt-2 max-w-2xl text-sm leading-6 text-slate-300"}>
+        <p className="voxx-text-muted relative mt-2 max-w-2xl text-sm leading-6">
           Controle dos memorandos eletronicos de troca de plantao recebidos.
         </p>
       </section>
@@ -287,8 +276,9 @@ export default function TrocaPlantaoTabela() {
           ["Alterados", resumo.alterados],
           ["Cancelados", resumo.cancelados],
         ].map(([titulo, valor]) => (
-          <div key={String(titulo)} className={`${cardClass} p-5`}>
-            <p className={`text-sm font-medium ${mutedText}`}>{titulo}</p>
+          <div key={String(titulo)} className={`${cardClass} voxx-dashboard-metric relative overflow-hidden p-5`}>
+            <span className="absolute inset-y-0 left-0 w-1.5 bg-[var(--voxx-primary)]" />
+            <p className={`text-xs font-bold uppercase tracking-[0.16em] ${mutedText}`}>{titulo}</p>
             <p className={`mt-3 text-3xl font-bold tracking-tight ${strongText}`}>
               {valor}
             </p>
@@ -297,7 +287,7 @@ export default function TrocaPlantaoTabela() {
       </section>
 
       <section className={`mt-6 ${cardClass}`}>
-        <div className={temaDia ? "border-b border-slate-200 p-5" : "border-b border-white/10 p-5"}>
+        <div className="border-b border-[var(--voxx-border)] p-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <h2 className={`text-lg font-semibold ${strongText}`}>
@@ -318,22 +308,14 @@ export default function TrocaPlantaoTabela() {
                 />
                 <button
                   type="submit"
-                  className={
-                    temaDia
-                      ? "h-10 rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
-                      : "h-10 rounded-xl bg-white px-4 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"
-                  }
+                  className="voxx-button-primary h-10 rounded-xl px-4 text-sm font-semibold"
                 >
                   Buscar
                 </button>
                 <button
                   type="button"
                   onClick={limparFiltros}
-                  className={
-                    temaDia
-                      ? "h-10 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                      : "h-10 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08]"
-                  }
+                  className="voxx-button-secondary h-10 rounded-xl px-4 text-sm font-semibold"
                 >
                   Limpar
                 </button>
@@ -394,7 +376,7 @@ export default function TrocaPlantaoTabela() {
         {!carregando && !erro && registros.length > 0 && (
           <div className="voxx-scrollbar overflow-x-auto">
             <table className="w-full min-w-[1450px] text-center text-sm">
-              <thead className={temaDia ? "bg-slate-100 text-xs uppercase text-slate-600" : "bg-[#202532] text-xs uppercase text-slate-300"}>
+              <thead className="voxx-text-muted bg-[var(--voxx-surface-soft)] text-xs uppercase">
                 <tr>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Acoes</th>
@@ -409,13 +391,13 @@ export default function TrocaPlantaoTabela() {
                 </tr>
               </thead>
 
-              <tbody className={temaDia ? "divide-y divide-slate-200" : "divide-y divide-white/10"}>
+              <tbody className="divide-y divide-[var(--voxx-border)]">
                 {registros.map((item) => {
                   const statusAtual = item.status?.toLowerCase();
                   const podeAlterar = statusAtual === "recebido";
 
                   return (
-                    <tr key={item.id} className={temaDia ? "text-slate-700 transition hover:bg-slate-50" : "text-slate-300 transition hover:bg-white/[0.04]"}>
+                    <tr key={item.id} className="voxx-text-muted transition hover:bg-[var(--voxx-surface-soft)]">
                       <td className="whitespace-nowrap px-4 py-3">
                         <span className={badgeStatus(item.status)}>
                           {labelStatus(item.status)}

@@ -1,7 +1,6 @@
 ﻿"use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
 import { useTema } from "@/contexts/TemaContext";
 
 type Solicitacao = {
@@ -40,33 +39,19 @@ export default function SolicitacoesPage() {
   const [perfilSelecionado, setPerfilSelecionado] = useState("");
   const [perfisDisponiveis, setPerfisDisponiveis] = useState(["Admin", "Gerente"]);
 
-  async function carregarPerfis() {
-    const { data } = await supabase
-      .from("perfis_acesso")
-      .select("nome")
-      .eq("ativo", true)
-      .order("protegido", { ascending: false })
-      .order("nome");
-
-    if (data?.length) setPerfisDisponiveis(data.map((perfil) => perfil.nome));
-  }
-
   async function carregarSolicitacoes() {
     try {
       setLoading(true);
 
-      const { data, error } = await supabase
-        .from("solicitacoes_acesso")
-        .select("*")
-        .order("criado_em", { ascending: false });
+      const response = await fetch("/api/solicitacoes-acesso", { cache: "no-store" });
+      const resultado = await response.json();
 
-      if (error) {
-        console.error("Erro ao carregar solicitações:", error);
+      if (!response.ok) {
         alert("Erro ao carregar solicitações.");
         return;
       }
-
-      setSolicitacoes(data || []);
+      setSolicitacoes(resultado.solicitacoes || []);
+      if (resultado.perfis?.length) setPerfisDisponiveis(resultado.perfis);
     } catch (erro) {
       console.error("Erro inesperado:", erro);
       alert("Erro inesperado ao carregar solicitações.");
@@ -76,14 +61,14 @@ export default function SolicitacoesPage() {
   }
 
   async function recusarSolicitacao(id: number) {
-    const { error } = await supabase
-      .from("solicitacoes_acesso")
-      .update({ status: "Recusada" })
-      .eq("id", id);
+    const response = await fetch("/api/solicitacoes-acesso", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
 
-    if (error) {
+    if (!response.ok) {
       alert("Erro ao recusar solicitação.");
-      console.error(error);
       return;
     }
 
@@ -115,7 +100,6 @@ export default function SolicitacoesPage() {
 
   useEffect(() => {
     carregarSolicitacoes();
-    carregarPerfis();
   }, []);
 
   const totalSolicitacoes = solicitacoes.length;
@@ -136,9 +120,7 @@ export default function SolicitacoesPage() {
     {
       label: "Total",
       value: totalSolicitacoes,
-      tone: temaDia
-        ? "border-slate-200 bg-slate-950 text-white"
-        : "border-white/20 bg-white text-slate-950",
+      tone: "border-[var(--voxx-primary)] bg-[var(--voxx-primary)] text-[var(--voxx-primary-contrast)]",
     },
     {
       label: "Pendentes",
@@ -164,47 +146,17 @@ export default function SolicitacoesPage() {
   ];
 
   return (
-    <main
-      className={
-        temaDia
-          ? "min-h-screen bg-[#f4f7fb] p-8 text-slate-900 transition-colors"
-          : "min-h-screen bg-[#11141b] p-8 text-slate-100 transition-colors"
-      }
-    >
-      <section
-        className={
-          temaDia
-            ? "overflow-hidden rounded-[30px] border border-slate-200 bg-[radial-gradient(circle_at_14%_0%,rgba(59,130,246,0.14),transparent_32%),linear-gradient(135deg,#ffffff_0%,#f8fafc_58%,#edf2f7_100%)] p-7 shadow-[0_24px_70px_rgba(15,23,42,0.10)]"
-            : "overflow-hidden rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_14%_0%,rgba(59,130,246,0.26),transparent_32%),linear-gradient(135deg,#242833_0%,#171a23_58%,#10131a_100%)] p-7 shadow-[0_24px_80px_rgba(0,0,0,0.32)]"
-        }
-      >
+    <main className="voxx-solicitacoes voxx-page min-h-screen p-8 transition-colors">
+      <section className="voxx-surface-raised overflow-hidden rounded-[30px] p-7">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p
-              className={
-                temaDia
-                  ? "text-xs font-semibold uppercase tracking-[0.32em] text-slate-500"
-                  : "text-xs font-semibold uppercase tracking-[0.32em] text-slate-400"
-              }
-            >
+            <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[var(--voxx-primary)]">
               Acessos do sistema
             </p>
-            <h1
-              className={
-                temaDia
-                  ? "mt-3 text-4xl font-semibold tracking-tight text-slate-950"
-                  : "mt-3 text-4xl font-semibold tracking-tight text-white"
-              }
-            >
+            <h1 className="voxx-text-primary mt-3 text-4xl font-semibold tracking-tight">
               Solicitações de acesso
             </h1>
-            <p
-              className={
-                temaDia
-                  ? "mt-2 max-w-2xl text-sm text-slate-600"
-                  : "mt-2 max-w-2xl text-sm text-slate-300"
-              }
-            >
+            <p className="voxx-text-muted mt-2 max-w-2xl text-sm">
               Analise novos pedidos, defina perfis e mantenha o acesso ao
               sistema sob controle.
             </p>
@@ -214,11 +166,7 @@ export default function SolicitacoesPage() {
             type="button"
             onClick={carregarSolicitacoes}
             disabled={loading}
-            className={
-              temaDia
-                ? "w-fit rounded-2xl bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_14px_35px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                : "w-fit rounded-2xl border border-white/10 bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_14px_35px_rgba(0,0,0,0.25)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
-            }
+            className="voxx-button-primary w-fit rounded-2xl px-5 py-2.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "Atualizando..." : "Atualizar"}
           </button>
@@ -228,29 +176,13 @@ export default function SolicitacoesPage() {
           {metricas.map((card) => (
             <div
               key={card.label}
-              className={
-                temaDia
-                  ? "rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-[0_16px_34px_rgba(15,23,42,0.07)]"
-                  : "rounded-3xl border border-white/10 bg-white/[0.06] p-4 shadow-inner shadow-white/5"
-              }
+              className="rounded-3xl border border-[var(--voxx-border)] bg-[var(--voxx-surface-soft)] p-4 shadow-[var(--voxx-shadow-soft)]"
             >
-              <p
-                className={
-                  temaDia
-                    ? "text-xs font-medium uppercase tracking-[0.2em] text-slate-500"
-                    : "text-xs font-medium uppercase tracking-[0.2em] text-slate-500"
-                }
-              >
+              <p className="voxx-text-muted text-xs font-medium uppercase tracking-[0.2em]">
                 {card.label}
               </p>
               <div className="mt-3 flex items-center justify-between gap-3">
-                <span
-                  className={
-                    temaDia
-                      ? "text-3xl font-semibold text-slate-950"
-                      : "text-3xl font-semibold text-white"
-                  }
-                >
+                <span className="voxx-text-primary text-3xl font-semibold">
                   {card.value}
                 </span>
                 <span
@@ -264,33 +196,15 @@ export default function SolicitacoesPage() {
         </div>
       </section>
 
-      <section
-        className={
-          temaDia
-            ? "mt-6 overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-[0_22px_60px_rgba(15,23,42,0.08)]"
-            : "mt-6 overflow-hidden rounded-[26px] border border-white/10 bg-[#171a23] shadow-[0_22px_70px_rgba(0,0,0,0.28)]"
-        }
-      >
+      <section className="voxx-surface mt-6 overflow-hidden rounded-[26px]">
         <div
-          className={
-            temaDia
-              ? "flex items-center justify-between border-b border-slate-200 px-6 py-5"
-              : "flex items-center justify-between border-b border-white/10 px-6 py-5"
-          }
+          className="flex items-center justify-between border-b border-[var(--voxx-border)] px-6 py-5"
         >
           <div>
-            <h2
-              className={
-                temaDia ? "text-lg font-bold text-slate-950" : "text-lg font-bold text-white"
-              }
-            >
+            <h2 className="voxx-text-primary text-lg font-bold">
               Fila de solicitações
             </h2>
-            <p
-              className={
-                temaDia ? "mt-1 text-sm text-slate-500" : "mt-1 text-sm text-slate-400"
-              }
-            >
+            <p className="voxx-text-muted mt-1 text-sm">
               Registros mais recentes aparecem primeiro.
             </p>
           </div>
@@ -298,58 +212,30 @@ export default function SolicitacoesPage() {
 
         <div className="space-y-3 p-4">
           {loading ? (
-            <div
-              className={
-                temaDia
-                  ? "rounded-2xl border border-slate-200 bg-slate-50 px-5 py-10 text-center text-sm text-slate-500"
-                  : "rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-10 text-center text-sm text-slate-400"
-              }
-            >
+            <div className="voxx-text-muted rounded-2xl border border-[var(--voxx-border)] bg-[var(--voxx-surface-soft)] px-5 py-10 text-center text-sm">
               Carregando solicitações...
             </div>
           ) : solicitacoes.length === 0 ? (
-            <div
-              className={
-                temaDia
-                  ? "rounded-2xl border border-slate-200 bg-slate-50 px-5 py-10 text-center text-sm text-slate-500"
-                  : "rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-10 text-center text-sm text-slate-400"
-              }
-            >
+            <div className="voxx-text-muted rounded-2xl border border-[var(--voxx-border)] bg-[var(--voxx-surface-soft)] px-5 py-10 text-center text-sm">
               Nenhuma solicitação encontrada.
             </div>
           ) : (
             solicitacoes.map((item) => (
               <article
                 key={item.id}
-                className={
-                  temaDia
-                    ? "grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_10px_26px_rgba(15,23,42,0.04)] transition hover:border-slate-300 hover:bg-slate-50 lg:grid-cols-[minmax(220px,1.4fr)_140px_130px_110px_170px]"
-                    : "grid gap-4 rounded-2xl border border-white/10 bg-white/[0.045] p-4 transition hover:border-white/20 hover:bg-white/[0.07] lg:grid-cols-[minmax(220px,1.4fr)_140px_130px_110px_170px]"
-                }
+                className="grid gap-4 rounded-2xl border border-[var(--voxx-border)] bg-[var(--voxx-surface-soft)] p-4 transition hover:border-[var(--voxx-border-strong)] hover:bg-[var(--voxx-surface-raised)] lg:grid-cols-[minmax(220px,1.4fr)_140px_130px_110px_170px]"
               >
                 <div className="min-w-0">
-                  <p
-                    className={
-                      temaDia
-                        ? "truncate text-sm font-semibold text-slate-950"
-                        : "truncate text-sm font-semibold text-white"
-                    }
-                  >
+                  <p className="voxx-text-primary truncate text-sm font-semibold">
                     {item.nome}
                   </p>
-                  <p
-                    className={
-                      temaDia
-                        ? "mt-1 break-all text-xs text-slate-500"
-                        : "mt-1 break-all text-xs text-slate-400"
-                    }
-                  >
+                  <p className="voxx-text-muted mt-1 break-all text-xs">
                     {item.email}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                  <p className="voxx-text-muted text-[10px] font-bold uppercase tracking-[0.18em]">
                     Status
                   </p>
                   <span
@@ -363,29 +249,19 @@ export default function SolicitacoesPage() {
                 </div>
 
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                  <p className="voxx-text-muted text-[10px] font-bold uppercase tracking-[0.18em]">
                     Perfil
                   </p>
-                  <p
-                    className={
-                      temaDia
-                        ? "mt-2 text-sm font-medium text-slate-700"
-                        : "mt-2 text-sm font-medium text-slate-200"
-                    }
-                  >
+                  <p className="voxx-text-primary mt-2 text-sm font-medium">
                     {item.perfil ? item.perfil : "-"}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                  <p className="voxx-text-muted text-[10px] font-bold uppercase tracking-[0.18em]">
                     Data
                   </p>
-                  <p
-                    className={
-                      temaDia ? "mt-2 text-sm text-slate-600" : "mt-2 text-sm text-slate-300"
-                    }
-                  >
+                  <p className="voxx-text-muted mt-2 text-sm">
                     {new Date(item.criado_em).toLocaleDateString("pt-BR")}
                   </p>
                 </div>
@@ -398,33 +274,21 @@ export default function SolicitacoesPage() {
                           setSolicitacaoSelecionada(item.id);
                           setPerfilSelecionado("");
                         }}
-                        className={
-                          temaDia
-                            ? "rounded-xl bg-slate-950 px-3 py-2 text-xs font-semibold text-white transition hover:-translate-y-0.5 hover:bg-slate-800"
-                            : "rounded-xl bg-white px-3 py-2 text-xs font-semibold text-slate-950 transition hover:-translate-y-0.5 hover:bg-slate-200"
-                        }
+                        className="voxx-button-primary rounded-xl px-3 py-2 text-xs font-semibold"
                       >
                         Aprovar
                       </button>
 
                       <button
                         onClick={() => recusarSolicitacao(item.id)}
-                        className={
-                          temaDia
-                            ? "rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100"
-                            : "rounded-xl border border-red-300/30 bg-red-400/10 px-3 py-2 text-xs font-semibold text-red-200 transition hover:bg-red-400/20"
-                        }
+                        className="rounded-xl border border-red-500/60 bg-red-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-500"
                       >
                         Recusar
                       </button>
                     </>
                   ) : (
                     <span
-                      className={
-                        temaDia
-                          ? "rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500"
-                          : "rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-slate-400"
-                      }
+                      className="voxx-text-muted rounded-full border border-[var(--voxx-border)] bg-[var(--voxx-surface-soft)] px-3 py-1 text-xs font-medium"
                     >
                       Finalizada
                     </span>
@@ -437,59 +301,29 @@ export default function SolicitacoesPage() {
       </section>
 
       {solicitacaoSelecionada && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4 backdrop-blur-[2px]">
-          <div
-            className={
-              temaDia
-                ? "w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 text-slate-900 shadow-2xl"
-                : "w-full max-w-md rounded-3xl border border-white/10 bg-[#171a23] p-6 text-slate-100 shadow-2xl"
-            }
-          >
-            <div
-              className={
-                temaDia
-                  ? "mb-5 rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                  : "mb-5 rounded-2xl border border-white/10 bg-white/[0.05] p-4"
-              }
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--voxx-overlay)] px-4 backdrop-blur-[2px]">
+          <div className="voxx-surface-raised w-full max-w-md rounded-3xl p-6">
+            <div className="mb-5 rounded-2xl border border-[var(--voxx-border)] bg-[var(--voxx-surface-soft)] p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--voxx-primary)]">
                 Aprovação
               </p>
-              <h2
-                className={
-                  temaDia ? "mt-2 text-xl font-bold text-slate-950" : "mt-2 text-xl font-bold text-white"
-                }
-              >
+              <h2 className="voxx-text-primary mt-2 text-xl font-bold">
                 Aprovar solicitação
               </h2>
-              <p
-                className={
-                  temaDia ? "mt-1 text-sm text-slate-600" : "mt-1 text-sm text-slate-300"
-                }
-              >
+              <p className="voxx-text-muted mt-1 text-sm">
                 {solicitacaoEmAprovacao?.nome || "Escolha o perfil do usuário."}
               </p>
             </div>
 
             <div>
-              <label
-                className={
-                  temaDia
-                    ? "mb-1 block text-sm font-semibold text-slate-700"
-                    : "mb-1 block text-sm font-semibold text-slate-300"
-                }
-              >
+              <label className="voxx-text-primary mb-1 block text-sm font-semibold">
                 Perfil
               </label>
 
               <select
                 value={perfilSelecionado}
                 onChange={(e) => setPerfilSelecionado(e.target.value)}
-                className={
-                  temaDia
-                    ? "h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-                    : "h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 text-slate-100 outline-none transition focus:border-white/30 focus:ring-2 focus:ring-blue-300/10"
-                }
+                className="voxx-field h-11 w-full rounded-2xl px-3"
               >
                 <option value="">Selecione...</option>
                 {perfisDisponiveis.map((perfil) => (
@@ -505,11 +339,7 @@ export default function SolicitacoesPage() {
                   setSolicitacaoSelecionada(null);
                   setPerfilSelecionado("");
                 }}
-                className={
-                  temaDia
-                    ? "flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                    : "flex-1 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08]"
-                }
+                className="voxx-button-secondary flex-1 rounded-2xl px-4 py-2 text-sm font-semibold"
               >
                 Cancelar
               </button>
@@ -518,11 +348,7 @@ export default function SolicitacoesPage() {
                 type="button"
                 onClick={aprovarSolicitacao}
                 disabled={!perfilSelecionado}
-                className={
-                  temaDia
-                    ? "flex-1 rounded-2xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
-                    : "flex-1 rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
-                }
+                className="voxx-button-primary flex-1 rounded-2xl px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Confirmar
               </button>

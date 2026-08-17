@@ -145,7 +145,7 @@ async function localizarVinculos(supabase: SupabaseClient, busca: string) {
     if (corresponde(item.nome_saida, busca) || corresponde(item.matricula_saida, busca)) adicionarVinculo(mapa, { matricula: item.matricula_saida, nome: item.nome_saida, cargo: item.cargo_saida, statusAtual: "Registro de permuta" });
     if (corresponde(item.nome_entrada, busca) || corresponde(item.matricula_entrada, busca) || corresponde(item.cpf_entrada, busca)) adicionarVinculo(mapa, { matricula: item.matricula_entrada, nome: item.nome_entrada, cpf: item.cpf_entrada, cargo: item.cargo_entrada, cargaHoraria: item.carga_horaria_entrada, admissao: item.exercicio_entrada, statusAtual: "Registro de permuta" });
   }
-  for (const item of atestados) adicionarVinculo(mapa, { matricula: item.matricula, nome: item.nome, cargo: item.funcao, statusAtual: "Possui registros no VOXX" });
+  for (const item of atestados) adicionarVinculo(mapa, { matricula: item.matricula, nome: item.nome, cargo: item.funcao, statusAtual: "Possui registros no sistema" });
   for (const item of trocas) {
     if (corresponde(item.nome_solicitante, busca) || corresponde(item.matricula_solicitante, busca)) adicionarVinculo(mapa, { matricula: item.matricula_solicitante, nome: item.nome_solicitante, cargo: item.funcao_solicitante, statusAtual: "Memorando de troca de plantão" });
     if (corresponde(item.nome_solicitado, busca) || corresponde(item.matricula_solicitado, busca)) adicionarVinculo(mapa, { matricula: item.matricula_solicitado, nome: item.nome_solicitado, cargo: item.funcao_solicitado, statusAtual: "Memorando de troca de plantão" });

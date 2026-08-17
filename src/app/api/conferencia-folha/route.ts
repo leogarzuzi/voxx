@@ -1,5 +1,13 @@
   import { NextRequest } from "next/server";
-  import * as XLSX from "xlsx-js-style";
+import {
+  carregarWorkbook,
+  criarAbaEstilizada,
+  criarWorkbook,
+  escreverWorkbook,
+  nomesAbas,
+  sheetToJson,
+  type WorkbookSeguro,
+} from "@/lib/excelSeguro";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { PERMISSOES } from "@/lib/perfis";
 import { temPermissaoNoBanco } from "@/lib/perfisServer";
@@ -80,16 +88,6 @@ import { temPermissaoNoBanco } from "@/lib/perfisServer";
     return "";
   }
 
-  function sheetToJson(workbook: XLSX.WorkBook, sheetName: string) {
-    const sheet = workbook.Sheets[sheetName];
-    if (!sheet) return [];
-
-    return XLSX.utils.sheet_to_json<Record<string, any>>(sheet, {
-      defval: "",
-      raw: true,
-    });
-  }
-
   function normalizarColunas(rows: Record<string, any>[]) {
     return rows.map((row) => {
       const novo: Record<string, any> = {};
@@ -102,7 +100,7 @@ import { temPermissaoNoBanco } from "@/lib/perfisServer";
     });
   }
 
-  function carregarSetMatriculas(workbook: XLSX.WorkBook, aba: string) {
+  function carregarSetMatriculas(workbook: WorkbookSeguro, aba: string) {
     const rows = normalizarColunas(sheetToJson(workbook, aba));
 
     return new Set(
@@ -112,76 +110,14 @@ import { temPermissaoNoBanco } from "@/lib/perfisServer";
     );
   }
 
-  function acharAbaPrevia(workbook: XLSX.WorkBook) {
-    if (workbook.SheetNames.includes("PREVIA")) return "PREVIA";
-    if (workbook.SheetNames.includes("HMRG")) return "HMRG";
+  function acharAbaPrevia(workbook: WorkbookSeguro) {
+    const abas = nomesAbas(workbook);
+    if (abas.includes("PREVIA")) return "PREVIA";
+    if (abas.includes("HMRG")) return "HMRG";
 
     return (
-      workbook.SheetNames.find((nome) => nome.toUpperCase() !== "DINAMICA") ||
-      workbook.SheetNames[0]
+      abas.find((nome) => nome.toUpperCase() !== "DINAMICA") || abas[0]
     );
-  }
-
-  function estilizarPlanilha(sheet: XLSX.WorkSheet) {
-    if (!sheet["!ref"]) return;
-
-    const range = XLSX.utils.decode_range(sheet["!ref"]);
-
-    sheet["!rows"] = [];
-
-    for (let R = range.s.r; R <= range.e.r; R++) {
-      sheet["!rows"][R] = { hpx: 35 };
-
-      for (let C = range.s.c; C <= range.e.c; C++) {
-        const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
-        const cell = sheet[cellAddress];
-
-        if (!cell) continue;
-
-        const isHeader = R === 0;
-
-        cell.s = {
-          font: {
-            name: "Calibri",
-            sz: isHeader ? 14 : 11,
-            bold: isHeader,
-            color: { rgb: "000000" },
-          },
-          fill: isHeader
-            ? {
-                fgColor: { rgb: "D9EAF7" },
-              }
-            : undefined,
-          alignment: {
-            horizontal: "center",
-            vertical: "center",
-            wrapText: true,
-          },
-          border: {
-            top: { style: "thin", color: { rgb: "D9D9D9" } },
-            bottom: { style: "thin", color: { rgb: "D9D9D9" } },
-            left: { style: "thin", color: { rgb: "D9D9D9" } },
-            right: { style: "thin", color: { rgb: "D9D9D9" } },
-          },
-        };
-      }
-    }
-  }
-
-  function criarAbaEstilizada(
-    wb: XLSX.WorkBook,
-    dados: Record<string, any>[],
-    nomeAba: string
-  ) {
-    const ws = XLSX.utils.json_to_sheet(dados);
-
-    estilizarPlanilha(ws);
-
-    ws["!cols"] = Object.keys(dados[0] || {}).map(() => ({
-      wch: 24,
-    }));
-
-    XLSX.utils.book_append_sheet(wb, ws, nomeAba.substring(0, 31));
   }
 
   export async function POST(request: NextRequest) {
@@ -202,11 +138,11 @@ import { temPermissaoNoBanco } from "@/lib/perfisServer";
 
       const { data: usuario } = await supabase
         .from("usuarios")
-        .select("perfil")
+        .select("perfil, status")
         .eq("email", user.email.toLowerCase())
         .single();
 
-      if (!usuario || !(await temPermissaoNoBanco(supabase, usuario.perfil, PERMISSOES.CONFERENCIA_FOLHA))) {
+      if (!usuario || usuario.status !== "ativo" || !(await temPermissaoNoBanco(supabase, usuario.perfil, PERMISSOES.CONFERENCIA_FOLHA))) {
         return Response.json(
           { success: false, error: "Sem permissão." },
           { status: 403 }
@@ -226,18 +162,42 @@ import { temPermissaoNoBanco } from "@/lib/perfisServer";
         );
       }
 
+      const limiteArquivo = 15 * 1024 * 1024;
+      const extensaoValida = (arquivo: File) => /\.xlsx$/i.test(arquivo.name);
+
+      if (
+        fopagFile.size <= 0 ||
+        previaFile.size <= 0 ||
+        fopagFile.size > limiteArquivo ||
+        previaFile.size > limiteArquivo
+      ) {
+        return Response.json(
+          { success: false, error: "Cada planilha deve ter no máximo 15 MB." },
+          { status: 413 }
+        );
+      }
+
+      if (!extensaoValida(fopagFile) || !extensaoValida(previaFile)) {
+        return Response.json(
+          { success: false, error: "Envie somente planilhas XLSX." },
+          { status: 415 }
+        );
+      }
+
+      if (!/^\d{2}\/\d{4}$/.test(competencia)) {
+        return Response.json(
+          { success: false, error: "Competência inválida." },
+          { status: 400 }
+        );
+      }
+
       const fopagBuffer = Buffer.from(await fopagFile.arrayBuffer());
       const previaBuffer = Buffer.from(await previaFile.arrayBuffer());
 
-      const fopagWorkbook = XLSX.read(fopagBuffer, {
-        type: "buffer",
-        cellDates: true,
-      });
-
-      const previaWorkbook = XLSX.read(previaBuffer, {
-        type: "buffer",
-        cellDates: true,
-      });
+      const [fopagWorkbook, previaWorkbook] = await Promise.all([
+        carregarWorkbook(fopagBuffer),
+        carregarWorkbook(previaBuffer),
+      ]);
 
       const abaPrevia = acharAbaPrevia(previaWorkbook);
 
@@ -393,17 +353,14 @@ import { temPermissaoNoBanco } from "@/lib/perfisServer";
         { INDICADOR: "Total de divergências", TOTAL: erros.length },
       ];
 
-      const wb = XLSX.utils.book_new();
+      const wb = criarWorkbook();
 
       criarAbaEstilizada(wb, resumoGeral, "RESUMO_GERAL");
       criarAbaEstilizada(wb, resumoDetalhe, "RESUMO_DETALHE");
       criarAbaEstilizada(wb, resumoAba, "RESUMO_POR_ABA");
       criarAbaEstilizada(wb, erros, "ERROS_DETALHADOS");
 
-      const output = XLSX.write(wb, {
-        type: "buffer",
-        bookType: "xlsx",
-      });
+      const output = await escreverWorkbook(wb);
 
       await registrarAuditoria({
         usuarioEmail: user.email,

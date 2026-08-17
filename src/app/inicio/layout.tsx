@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
@@ -288,19 +289,25 @@ async function handleAlterarSenha() {
   
   if (verificando) {
     return (
-      <div className={temaDia ? "min-h-screen flex items-center justify-center bg-[#f4f7fb]" : "min-h-screen flex items-center justify-center bg-[#11141b]"}>
-        <img
-          src="/logo-simbolo.png"
-          alt="VOXX"
-          className="h-24 w-24 animate-pulse object-contain" // tamanho do logo
-        />
+      <div className="voxx-page flex min-h-screen items-center justify-center">
+        <div className="voxx-loading-card">
+          <Image
+            src="/logo-ronaldo-gazolla.png"
+            alt="Hospital Municipal Ronaldo Gazolla"
+            width={711}
+            height={230}
+            priority
+            className="voxx-brand-image h-auto w-64 animate-pulse object-contain"
+          />
+          <p className="voxx-loading-message">Preparando o sistema...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={temaDia ? "flex min-h-screen overflow-x-hidden bg-[#f4f7fb]" : "flex min-h-screen overflow-x-hidden bg-[#11141b]"}>
-      <div className="sticky top-0 h-screen shrink-0">
+    <div className="voxx-app-shell voxx-page flex min-h-screen items-stretch overflow-x-clip">
+      <div className="voxx-sidebar-rail sticky top-0 h-screen shrink-0 self-start overflow-hidden">
         <Sidebar
           perfil={perfil}
           permissoes={permissoesPerfil}
@@ -308,15 +315,20 @@ async function handleAlterarSenha() {
         />
       </div>
 
-      <div className={temaDia ? "relative min-h-screen min-w-0 flex-1 overflow-x-hidden bg-[#f4f7fb]" : "relative min-h-screen min-w-0 flex-1 overflow-x-hidden bg-[#11141b]"}>
+      <div className="relative min-h-screen min-w-0 flex-1 overflow-x-hidden bg-[var(--voxx-bg)]">
         {/* loading visual ao trocar de modulo */}
         {carregandoRota && (
-          <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-900/20 backdrop-blur-[1.5px]">
-            <img
-              src="/logo-simbolo.png"
-              alt="Carregando VOXX"
-              className="h-20 w-20 animate-pulse object-contain drop-shadow-2xl"
-            />
+          <div className="voxx-loading-overlay fixed inset-0 z-[80] flex items-center justify-center">
+            <div className="voxx-loading-card">
+              <Image
+                src="/logo-ronaldo-gazolla.png"
+                alt="Carregando"
+                width={711}
+                height={230}
+                className="voxx-brand-image h-auto w-64 animate-pulse object-contain"
+              />
+              <p className="voxx-loading-message">Carregando...</p>
+            </div>
           </div>
         )}
         <div className="fixed right-4 top-4 z-50">
@@ -324,11 +336,7 @@ async function handleAlterarSenha() {
             <button
               type="button"
               onClick={() => setMenuAberto(!menuAberto)}
-              className={
-                temaDia
-                  ? "group flex items-center gap-3 rounded-full border border-slate-200 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-800 shadow-[0_18px_45px_rgba(15,23,42,0.12)] backdrop-blur-xl transition hover:border-slate-300 hover:bg-white"
-                  : "group flex items-center gap-3 rounded-full border border-white/10 bg-[#171a23]/90 px-3 py-2 text-sm font-semibold text-slate-100 shadow-[0_18px_50px_rgba(0,0,0,0.32)] backdrop-blur-xl transition hover:border-white/20 hover:bg-[#202532]"
-              }
+              className="voxx-user-trigger group flex items-center gap-3 rounded-full px-3 py-2 text-sm font-semibold transition"
             >
               {avatar ? (
                 <img
@@ -336,16 +344,16 @@ async function handleAlterarSenha() {
                   alt="Avatar"
                   className={
                     temaDia
-                      ? "h-10 w-10 rounded-full object-cover ring-2 ring-slate-200"
-                      : "h-10 w-10 rounded-full object-cover ring-2 ring-white/10"
+                      ? "h-10 w-10 rounded-full object-cover ring-2 ring-cyan-600/20"
+                      : "h-10 w-10 rounded-full object-cover ring-2 ring-cyan-300/25"
                   }
                 />
               ) : (
                 <div
                   className={
                     temaDia
-                      ? "flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-700 ring-1 ring-slate-200"
-                      : "flex h-10 w-10 items-center justify-center rounded-full bg-blue-400/15 text-sm font-bold text-blue-100 ring-1 ring-blue-300/25"
+                      ? "flex h-10 w-10 items-center justify-center rounded-full bg-cyan-100 text-sm font-bold text-cyan-800 ring-1 ring-cyan-200"
+                      : "flex h-10 w-10 items-center justify-center rounded-full bg-cyan-300/15 text-sm font-bold text-cyan-100 ring-1 ring-cyan-200/25"
                   }
                 >
                   {nomeUsuario.charAt(0).toUpperCase()}
@@ -380,21 +388,19 @@ async function handleAlterarSenha() {
               <div
                 className={
                   temaDia
-                    ? "absolute right-0 mt-3 w-64 overflow-hidden rounded-[24px] border border-slate-200 bg-white/95 shadow-[0_24px_70px_rgba(15,23,42,0.16)] backdrop-blur-xl"
-                    : "absolute right-0 mt-3 w-64 overflow-hidden rounded-[24px] border border-white/10 bg-[#171a23]/95 shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+                    ? "voxx-user-menu absolute right-0 mt-3 w-64 overflow-hidden rounded-[24px]"
+                    : "voxx-user-menu absolute right-0 mt-3 w-64 overflow-hidden rounded-[24px]"
                 }
               >
                 <div
                   className={
-                    temaDia
-                      ? "border-b border-slate-200 bg-slate-50 px-4 py-4"
-                      : "border-b border-white/10 bg-white/[0.035] px-4 py-4"
+                    "voxx-user-menu-header border-b px-4 py-4"
                   }
                 >
-                  <p className={temaDia ? "text-sm font-semibold text-slate-950" : "text-sm font-semibold text-white"}>
+                  <p className="voxx-text-primary text-sm font-semibold">
                     {nomeUsuario}
                   </p>
-                  <p className={temaDia ? "mt-1 text-xs text-slate-500" : "mt-1 text-xs text-slate-400"}>{perfil}</p>
+                  <p className="voxx-text-muted mt-1 text-xs">{perfil}</p>
                 </div>
 
                 <button
@@ -404,16 +410,12 @@ async function handleAlterarSenha() {
                     router.push("/inicio/perfil");
                   }}
                   className={
-                    temaDia
-                      ? "flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
-                      : "flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-200 transition hover:bg-white/[0.07] hover:text-white"
+                    "voxx-user-menu-item flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium transition"
                   }
                 >
                   <span
                     className={
-                      temaDia
-                        ? "flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-slate-700 ring-1 ring-slate-200"
-                        : "flex h-8 w-8 items-center justify-center rounded-xl bg-blue-400/10 text-blue-200 ring-1 ring-blue-300/15"
+                      "voxx-user-menu-icon flex h-8 w-8 items-center justify-center rounded-xl"
                     }
                   >
                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
@@ -431,16 +433,12 @@ async function handleAlterarSenha() {
                     setModalSenhaAberto(true);
                   }}
                   className={
-                    temaDia
-                      ? "flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
-                      : "flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-200 transition hover:bg-white/[0.07] hover:text-white"
+                    "voxx-user-menu-item flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium transition"
                   }
                 >
                   <span
                     className={
-                      temaDia
-                        ? "flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-slate-700 ring-1 ring-slate-200"
-                        : "flex h-8 w-8 items-center justify-center rounded-xl bg-purple-400/10 text-purple-200 ring-1 ring-purple-300/15"
+                      "voxx-user-menu-icon flex h-8 w-8 items-center justify-center rounded-xl"
                     }
                   >
                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">

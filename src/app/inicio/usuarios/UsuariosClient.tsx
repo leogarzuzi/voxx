@@ -39,9 +39,7 @@ export default function UsuariosClient({
     {
       label: "Total",
       value: totalUsuarios,
-      tone: temaDia
-        ? "border-slate-200 bg-slate-950 text-white"
-        : "border-white/20 bg-white text-slate-950",
+      tone: "border-[var(--voxx-primary)] bg-[var(--voxx-primary)] text-[var(--voxx-primary-contrast)]",
     },
     {
       label: "Ativos",
@@ -67,28 +65,16 @@ export default function UsuariosClient({
   ];
 
   return (
-    <main
-      className={
-        temaDia
-          ? "min-h-screen bg-[#f4f7fb] p-8 text-slate-900"
-          : "min-h-screen bg-[#11141b] p-8 text-slate-100"
-      }
-    >
-      <section
-        className={
-          temaDia
-            ? "overflow-hidden rounded-[30px] border border-slate-200 bg-[radial-gradient(circle_at_14%_0%,rgba(59,130,246,0.14),transparent_32%),linear-gradient(135deg,#ffffff_0%,#f8fafc_58%,#edf2f7_100%)] p-7 shadow-[0_24px_70px_rgba(15,23,42,0.10)]"
-            : "overflow-hidden rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_14%_0%,rgba(59,130,246,0.24),transparent_32%),linear-gradient(135deg,#242833_0%,#171a23_58%,#10131a_100%)] p-7 shadow-[0_24px_80px_rgba(0,0,0,0.32)]"
-        }
-      >
+    <main className="voxx-usuarios voxx-page min-h-screen p-8">
+      <section className="voxx-surface-raised overflow-hidden rounded-[30px] p-7">
         <div>
-          <p className={temaDia ? "text-xs font-semibold uppercase tracking-[0.32em] text-slate-500" : "text-xs font-semibold uppercase tracking-[0.32em] text-slate-400"}>
+          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[var(--voxx-primary)]">
             Controle de acesso
           </p>
-          <h1 className={temaDia ? "mt-3 text-4xl font-semibold tracking-tight text-slate-950" : "mt-3 text-4xl font-semibold tracking-tight text-white"}>
+          <h1 className="voxx-text-primary mt-3 text-4xl font-semibold tracking-tight">
             Gestão de Usuários
           </h1>
-          <p className={temaDia ? "mt-2 max-w-2xl text-sm leading-6 text-slate-600" : "mt-2 max-w-2xl text-sm leading-6 text-slate-300"}>
+          <p className="voxx-text-muted mt-2 max-w-2xl text-sm leading-6">
             Gerencie perfis, status de acesso e contas autorizadas a usar o
             sistema.
           </p>
@@ -98,17 +84,13 @@ export default function UsuariosClient({
           {cards.map((card) => (
             <div
               key={card.label}
-              className={
-                temaDia
-                  ? "rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-[0_16px_34px_rgba(15,23,42,0.07)]"
-                  : "rounded-3xl border border-white/10 bg-white/[0.06] p-4 shadow-inner shadow-white/5"
-              }
+              className="rounded-3xl border border-[var(--voxx-border)] bg-[var(--voxx-surface-soft)] p-4 shadow-[var(--voxx-shadow-soft)]"
             >
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+              <p className="voxx-text-muted text-xs font-medium uppercase tracking-[0.2em]">
                 {card.label}
               </p>
               <div className="mt-3 flex items-center justify-between gap-3">
-                <span className={temaDia ? "text-3xl font-semibold text-slate-950" : "text-3xl font-semibold text-white"}>
+                <span className="voxx-text-primary text-3xl font-semibold">
                   {card.value}
                 </span>
                 <span className={`rounded-full border px-3 py-1 text-xs font-bold ${card.tone}`}>

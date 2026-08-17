@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  LabelList,
 } from "recharts";
 
 interface AtestadosMesChartProps {
@@ -30,9 +31,10 @@ export function AtestadosMesChart({
   return (
     <div className="h-[320px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data}>
+        <BarChart data={data} margin={{ top: 28, right: 12, left: 0, bottom: 4 }}>
           <CartesianGrid
-            stroke={temaDia ? "rgba(71,85,105,0.16)" : "rgba(148,163,184,0.16)"}
+            vertical={false}
+            stroke={temaDia ? "#d7e7ee" : "#315b76"}
             strokeDasharray="3 3"
           />
 
@@ -55,12 +57,10 @@ export function AtestadosMesChart({
           />
 
           <Tooltip
-            cursor={{ fill: temaDia ? "rgba(15,23,42,0.06)" : "rgba(148,163,184,0.08)" }}
+            cursor={{ fill: temaDia ? "rgba(217,158,28,0.08)" : "rgba(251,191,36,0.08)" }}
             contentStyle={{
-              background: temaDia ? "#ffffff" : "#171a23",
-              border: temaDia
-                ? "1px solid rgba(203,213,225,0.95)"
-                : "1px solid rgba(255,255,255,0.1)",
+              background: temaDia ? "#ffffff" : "#163b5c",
+              border: temaDia ? "1px solid #b9dbe8" : "1px solid #4381a7",
               borderRadius: 16,
               color: temaDia ? "#0f172a" : "#e2e8f0",
               boxShadow: temaDia ? "0 18px 45px rgba(15,23,42,0.12)" : "none",
@@ -82,17 +82,20 @@ export function AtestadosMesChart({
               if (mes) onSelectMes?.(String(mes));
             }}
           >
+            <LabelList
+              dataKey="total"
+              position="top"
+              fill={temaDia ? "#8a5a00" : "#fde68a"}
+              fontSize={12}
+              fontWeight={800}
+            />
             {data.map((item) => (
               <Cell
                 key={item.mes}
                 fill={
                   selectedMes === item.mes
-                    ? temaDia
-                      ? "#0f172a"
-                      : "#c084fc"
-                    : temaDia
-                      ? "rgba(71,85,105,0.72)"
-                      : "rgba(192,132,252,0.72)"
+                    ? "#fbbf24"
+                    : "#d99e1c"
                 }
               />
             ))}

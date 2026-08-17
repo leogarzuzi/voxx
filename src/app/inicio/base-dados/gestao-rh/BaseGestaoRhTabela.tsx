@@ -66,7 +66,7 @@ function gerarNomeArquivoExcel() {
   const hora = String(agora.getHours()).padStart(2, "0");
   const minuto = String(agora.getMinutes()).padStart(2, "0");
 
-  return `base-gestao-rh-voxx-${ano}-${mes}-${dia}-${hora}${minuto}.csv`;
+  return `base-gestao-rh-${ano}-${mes}-${dia}-${hora}${minuto}.csv`;
 }
 
 export default function BaseGestaoRhTabela() {
@@ -417,28 +417,24 @@ export default function BaseGestaoRhTabela() {
     buscarColaboradores(busca, false, novosFiltros);
   }
 
-  const campoBuscaClass = temaDia
-    ? "h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 lg:w-96"
-    : "h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/30 focus:bg-white/[0.08] focus:ring-2 focus:ring-blue-300/10 lg:w-96";
+  const campoBuscaClass = "voxx-field h-11 w-full rounded-2xl px-4 text-sm lg:w-96";
 
-  const inputModalClass = temaDia
-    ? "h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-    : "h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/30 focus:ring-2 focus:ring-blue-300/10";
+  const inputModalClass = "voxx-field h-11 w-full rounded-2xl px-4 text-sm";
 
   const selectModalClass = temaDia
     ? "mt-1 h-11 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 [color-scheme:light] [&>option]:bg-white [&>option]:text-slate-900"
     : "mt-1 h-11 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-3 text-sm text-slate-100 outline-none transition focus:border-white/30 focus:ring-2 focus:ring-blue-300/10 [color-scheme:dark] [&>option]:bg-[#171a23] [&>option]:text-slate-100";
   return (
-    <section className={temaDia ? "mt-6 overflow-hidden rounded-[26px] border border-slate-200 bg-white p-5 shadow-[0_22px_60px_rgba(15,23,42,0.08)]" : "mt-6 overflow-hidden rounded-[26px] border border-white/10 bg-[#171a23] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]"}>
+    <section className="voxx-base-module voxx-surface mt-6 overflow-hidden rounded-[26px] p-5">
       <div className="mb-5 flex flex-col gap-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <button
             type="button"
             onClick={abrirModalFiltro}
             disabled={loading}
-            className={temaDia ? "group inline-flex w-fit items-center gap-2 rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_14px_35px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0" : "group inline-flex w-fit items-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_14px_35px_rgba(0,0,0,0.24)] transition hover:-translate-y-0.5 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"}
+            className="voxx-button-primary group inline-flex w-fit items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <span className={temaDia ? "relative flex h-7 w-7 items-center justify-center rounded-xl bg-white text-slate-950" : "relative flex h-7 w-7 items-center justify-center rounded-xl bg-slate-950 text-white"}>
+            <span className="relative flex h-7 w-7 items-center justify-center rounded-xl bg-white text-[#0d2742]">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -466,14 +462,13 @@ export default function BaseGestaoRhTabela() {
               type="text"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
-              placeholder="Buscar por nome, matrícula, CPF ou cargo"
               className={campoBuscaClass}
             />
 
             <button
               type="submit"
               disabled={loading}
-              className={temaDia ? "h-11 rounded-2xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60" : "h-11 rounded-2xl bg-white px-5 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60"}
+              className="voxx-button-primary h-11 rounded-2xl px-5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
             >
               Buscar
             </button>
@@ -482,7 +477,7 @@ export default function BaseGestaoRhTabela() {
               type="button"
               onClick={limparBusca}
               disabled={loading}
-              className={temaDia ? "h-11 rounded-2xl border border-slate-200 bg-slate-50 px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60" : "h-11 rounded-2xl border border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"}
+              className="voxx-button-secondary h-11 rounded-2xl px-5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
             >
               Limpar
             </button>
@@ -608,14 +603,14 @@ export default function BaseGestaoRhTabela() {
                 type="button"
                 onClick={carregarTodosColaboradores}
                 disabled={loading}
-                className={temaDia ? "rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60" : "rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"}
+                className="voxx-button-secondary rounded-2xl px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Carregar todos
               </button>
             </div>
           </div>
 
-          <div className={temaDia ? "voxx-scrollbar overflow-x-auto rounded-[22px] border border-slate-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.08)]" : "voxx-scrollbar overflow-x-auto rounded-[22px] border border-white/10 bg-[#202532] shadow-[0_18px_45px_rgba(0,0,0,0.2)]"}>
+          <div className="voxx-scrollbar voxx-surface-raised overflow-x-auto rounded-[22px]">
             <table className="w-full min-w-[980px] table-fixed text-center text-xs">
               <colgroup>
                 {[
@@ -723,11 +718,11 @@ export default function BaseGestaoRhTabela() {
 
       {modalFiltroAberto && (
         <div
-          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/55 px-4 backdrop-blur-[2px]"
+          className="voxx-base-modal fixed inset-0 z-[90] flex items-center justify-center bg-[var(--voxx-overlay)] px-4 backdrop-blur-[2px]"
           onMouseDown={() => setModalFiltroAberto(false)}
         >
           <div
-            className={temaDia ? "w-full max-w-2xl rounded-3xl border border-slate-200 bg-white p-6 text-slate-900 shadow-2xl" : "w-full max-w-2xl rounded-3xl border border-white/10 bg-[#171a23] p-6 text-slate-100 shadow-2xl"}
+            className="voxx-surface-raised w-full max-w-2xl rounded-3xl p-6"
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between">
@@ -777,7 +772,6 @@ export default function BaseGestaoRhTabela() {
                     type="text"
                     value={buscaOpcoes}
                     onChange={(e) => setBuscaOpcoes(e.target.value)}
-                    placeholder="Buscar opção..."
                     className={inputModalClass}
                   />
 
@@ -861,7 +855,7 @@ export default function BaseGestaoRhTabela() {
               <button
                 type="button"
                 onClick={() => setModalFiltroAberto(false)}
-                className={temaDia ? "rounded-2xl border border-slate-200 bg-slate-50 px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100" : "rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08]"}
+                className="voxx-button-secondary rounded-2xl px-5 py-2 text-sm font-semibold"
               >
                 Cancelar
               </button>
@@ -869,7 +863,7 @@ export default function BaseGestaoRhTabela() {
               <button
                 type="button"
                 onClick={aplicarFiltro}
-                className={temaDia ? "rounded-2xl bg-slate-950 px-5 py-2 text-sm font-semibold text-white transition hover:bg-slate-800" : "rounded-2xl bg-white px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"}
+                className="voxx-button-primary rounded-2xl px-5 py-2 text-sm font-semibold"
               >
                 Aplicar filtro
               </button>

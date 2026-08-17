@@ -109,15 +109,14 @@ function CardIndicador({
   valor: string | number;
   subtitulo?: string;
 }) {
-  const { temaDia } = useTema();
-
   return (
-    <div className={temaDia ? "rounded-[24px] border border-slate-200 bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.08)]" : "rounded-[24px] border border-white/10 bg-[#171a23] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.22)]"}>
-      <p className={temaDia ? "text-sm font-medium text-slate-500" : "text-sm font-medium text-slate-400"}>{titulo}</p>
-      <p className={temaDia ? "mt-3 text-3xl font-bold tracking-tight text-slate-950" : "mt-3 text-3xl font-bold tracking-tight text-white"}>
+    <div className="voxx-dashboard-metric relative overflow-hidden rounded-[24px] border border-[var(--voxx-border)] bg-[var(--voxx-surface-raised)] p-5 shadow-[var(--voxx-shadow-soft)]">
+      <span className="absolute inset-y-0 left-0 w-1.5 bg-[var(--voxx-primary)]" />
+      <p className="voxx-text-muted text-xs font-bold uppercase tracking-[0.16em]">{titulo}</p>
+      <p className="voxx-text-primary mt-3 text-3xl font-bold tracking-tight">
         {valor}
       </p>
-      {subtitulo && <p className="mt-2 text-xs text-slate-500">{subtitulo}</p>}
+      {subtitulo && <p className="voxx-text-muted mt-2 text-xs">{subtitulo}</p>}
     </div>
   );
 }
@@ -188,15 +187,16 @@ const [mesSelecionado, setMesSelecionado] = useState<string | null>(null);
   }
 
   return (
-    <main className={temaDia ? "min-h-screen min-w-0 bg-[#f4f6fb] p-8 text-slate-950" : "min-h-screen min-w-0 bg-[#11141b] p-8 text-slate-100"}>
-      <section className={temaDia ? "overflow-hidden rounded-[30px] border border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#eef3fb_58%,#e8edf6_100%)] p-7 shadow-[0_24px_70px_rgba(15,23,42,0.08)]" : "overflow-hidden rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_14%_0%,rgba(59,130,246,0.24),transparent_32%),linear-gradient(135deg,#242833_0%,#171a23_58%,#10131a_100%)] p-7 shadow-[0_24px_80px_rgba(0,0,0,0.32)]"}>
-        <p className={temaDia ? "text-xs font-semibold uppercase tracking-[0.32em] text-slate-500" : "text-xs font-semibold uppercase tracking-[0.32em] text-slate-400"}>
+    <main className="voxx-dashboard-admissoes voxx-page min-h-screen min-w-0 p-8">
+      <section className="voxx-surface-raised relative overflow-hidden rounded-[30px] p-7">
+        <span className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[var(--voxx-focus)]" />
+        <p className="relative text-xs font-semibold uppercase tracking-[0.32em] text-[var(--voxx-primary)]">
           Dashboard RH
         </p>
-        <h1 className={temaDia ? "mt-3 text-4xl font-semibold tracking-tight text-slate-950" : "mt-3 text-4xl font-semibold tracking-tight text-white"}>
+        <h1 className="voxx-text-primary relative mt-3 text-4xl font-semibold tracking-tight">
           Dashboard de Admissões
         </h1>
-        <p className={temaDia ? "mt-2 max-w-2xl text-sm leading-6 text-slate-600" : "mt-2 max-w-2xl text-sm leading-6 text-slate-300"}>
+        <p className="voxx-text-muted relative mt-2 max-w-2xl text-sm leading-6">
           Acompanhe admissões por mês e divisão, com filtros rápidos clicando
           diretamente nos gráficos.
         </p>
@@ -209,24 +209,24 @@ const [mesSelecionado, setMesSelecionado] = useState<string | null>(null);
       )}
 
       {filtroAtivo && (
-        <div className={temaDia ? "mt-6 flex flex-wrap items-center gap-3 rounded-[22px] border border-slate-200 bg-white px-4 py-3 shadow-[0_18px_45px_rgba(15,23,42,0.08)]" : "mt-6 flex flex-wrap items-center gap-3 rounded-[22px] border border-blue-300/20 bg-blue-300/[0.07] px-4 py-3"}>
-          <span className={temaDia ? "text-sm font-semibold text-slate-700" : "text-sm font-semibold text-blue-100"}>
+        <div className="voxx-surface mt-6 flex flex-wrap items-center gap-3 rounded-[22px] px-4 py-3">
+          <span className="voxx-text-primary text-sm font-semibold">
             Seleção ativa:
           </span>
           {mesSelecionado && (
-            <span className={temaDia ? "rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-700" : "rounded-full border border-blue-300/25 bg-blue-300/10 px-3 py-1 text-xs font-bold text-blue-100"}>
+            <span className="rounded-full border border-emerald-500 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600">
               Mês {mesSelecionado}
             </span>
           )}
           {divisaoSelecionada && (
-            <span className={temaDia ? "rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-700" : "rounded-full border border-blue-300/25 bg-blue-300/10 px-3 py-1 text-xs font-bold text-blue-100"}>
+            <span className="rounded-full border border-emerald-500 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600">
               {divisaoSelecionada}
             </span>
           )}
           <button
             type="button"
             onClick={limparFiltros}
-            className={temaDia ? "ml-auto rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-bold text-slate-700 transition hover:bg-slate-100" : "ml-auto rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-bold text-slate-200 transition hover:bg-white/[0.1]"}
+            className="voxx-button-secondary ml-auto rounded-full px-3 py-1 text-xs font-bold"
           >
             Limpar seleção
           </button>
@@ -252,11 +252,12 @@ const [mesSelecionado, setMesSelecionado] = useState<string | null>(null);
       </section>
 
       <section className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <div className={temaDia ? "rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_22px_60px_rgba(15,23,42,0.08)]" : "rounded-[28px] border border-white/10 bg-[#171a23] p-6 shadow-[0_22px_70px_rgba(0,0,0,0.28)]"}>
-          <h2 className={temaDia ? "text-xl font-semibold text-slate-950" : "text-xl font-semibold text-white"}>
+        <div className="voxx-surface rounded-[28px] p-6">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-600">Evolução anual</p>
+          <h2 className="voxx-text-primary mt-2 text-xl font-semibold">
             Admissões por mês
           </h2>
-          <p className={temaDia ? "mt-1 text-sm text-slate-500" : "mt-1 text-sm text-slate-400"}>
+          <p className="voxx-text-muted mt-1 text-sm">
             Clique em um mês para filtrar a divisão e os indicadores.
           </p>
           <div className="mt-6">
@@ -264,15 +265,17 @@ const [mesSelecionado, setMesSelecionado] = useState<string | null>(null);
               data={dados.admissoesPorMes}
               selectedMes={mesSelecionado}
               onSelectMes={alternarMes}
+              temaDia={temaDia}
             />
           </div>
         </div>
 
-        <div className={temaDia ? "rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_22px_60px_rgba(15,23,42,0.08)]" : "rounded-[28px] border border-white/10 bg-[#171a23] p-6 shadow-[0_22px_70px_rgba(0,0,0,0.28)]"}>
-          <h2 className={temaDia ? "text-xl font-semibold text-slate-950" : "text-xl font-semibold text-white"}>
+        <div className="voxx-surface rounded-[28px] p-6">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-600">Composição da entrada</p>
+          <h2 className="voxx-text-primary mt-2 text-xl font-semibold">
             Admissões por divisão
           </h2>
-          <p className={temaDia ? "mt-1 text-sm text-slate-500" : "mt-1 text-sm text-slate-400"}>
+          <p className="voxx-text-muted mt-1 text-sm">
             Clique em uma divisão para recalcular o gráfico mensal.
           </p>
           <div className="mt-6">
@@ -280,24 +283,28 @@ const [mesSelecionado, setMesSelecionado] = useState<string | null>(null);
               data={dados.admissoesPorDivisao}
               selectedDivisao={divisaoSelecionada}
               onSelectDivisao={alternarDivisao}
+              temaDia={temaDia}
+              corBase="#2f965d"
+              corAtiva="#4ade80"
             />
           </div>
         </div>
       </section>
 
-      <section className={temaDia ? "mt-6 rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_22px_60px_rgba(15,23,42,0.08)]" : "mt-6 rounded-[28px] border border-white/10 bg-[#171a23] p-6 shadow-[0_22px_70px_rgba(0,0,0,0.28)]"}>
+      <section className="voxx-dashboard-admissoes-table voxx-surface mt-6 rounded-[28px] p-6">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className={temaDia ? "text-xl font-semibold text-slate-950" : "text-xl font-semibold text-white"}>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-600">Detalhamento</p>
+            <h2 className="voxx-text-primary mt-2 text-xl font-semibold">
               Resumo mensal
             </h2>
-            <p className={temaDia ? "mt-1 text-sm text-slate-500" : "mt-1 text-sm text-slate-400"}>
+            <p className="voxx-text-muted mt-1 text-sm">
               A tabela acompanha a seleção feita nos gráficos.
             </p>
           </div>
         </div>
 
-        <div className={temaDia ? "voxx-scrollbar mt-6 overflow-x-auto rounded-[22px] border border-slate-200 bg-white" : "voxx-scrollbar mt-6 overflow-x-auto rounded-[22px] border border-white/10 bg-[#202532]"}>
+        <div className="voxx-scrollbar voxx-surface-raised mt-6 overflow-x-auto rounded-[22px]">
           <table className="w-full min-w-[520px] text-left text-sm">
             <thead className={temaDia ? "bg-slate-100" : "bg-[#2a3040]"}>
               <tr className={temaDia ? "border-b border-slate-200 text-slate-600" : "border-b border-white/10 text-slate-300"}>

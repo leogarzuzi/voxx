@@ -58,24 +58,16 @@ export function BancoHorasModal({ onClose, modo = "criar", registro, onSaved }: 
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState<{ protocolo: string } | null>(null);
 
-  const overlayClass = temaDia
-    ? "fixed inset-0 z-50 flex items-center justify-center bg-slate-950/35 px-4 backdrop-blur-sm"
-    : "fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm";
-  const modalClass = temaDia
-    ? "max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-[30px] border border-slate-200 bg-white p-6 text-slate-950 shadow-[0_28px_90px_rgba(15,23,42,0.18)]"
-    : "max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-[30px] border border-white/10 bg-[#171a23] p-6 text-slate-100 shadow-[0_28px_90px_rgba(0,0,0,0.55)]";
-  const labelClass = temaDia ? "text-sm font-semibold text-slate-700" : "text-sm font-medium text-slate-300";
-  const inputClass = temaDia
-    ? "mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-    : "mt-1 w-full rounded-xl border border-white/10 bg-[#11141b] px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-blue-300/40 focus:ring-2 focus:ring-blue-300/15";
-  const readOnlyClass = temaDia
-    ? "mt-1 w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-500 outline-none"
-    : "mt-1 w-full cursor-not-allowed rounded-xl border border-white/10 bg-[#11141b]/80 px-3 py-2 text-sm text-slate-400 outline-none";
+  const overlayClass = "fixed inset-0 z-50 flex items-center justify-center bg-[var(--voxx-overlay)] px-4 backdrop-blur-sm";
+  const modalClass = "voxx-surface-raised voxx-scrollbar max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-[30px] p-6";
+  const labelClass = "voxx-text-primary text-sm font-semibold";
+  const inputClass = "voxx-field mt-1 w-full rounded-xl px-3 py-2 text-sm";
+  const readOnlyClass = "voxx-field mt-1 w-full cursor-not-allowed rounded-xl px-3 py-2 text-sm opacity-70";
   const errorClass = temaDia
     ? "rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
     : "rounded-xl border border-red-300/20 bg-red-400/10 px-4 py-3 text-sm font-medium text-red-100";
-  const titleText = temaDia ? "text-slate-950" : "text-white";
-  const mutedText = temaDia ? "text-slate-500" : "text-slate-400";
+  const titleText = "voxx-text-primary";
+  const mutedText = "voxx-text-muted";
 
   const formularioValido = useMemo(() => {
     return (
@@ -207,7 +199,7 @@ export function BancoHorasModal({ onClose, modo = "criar", registro, onSaved }: 
         </div>
 
         <form className="space-y-5">
-          <section className={temaDia ? "rounded-[24px] border border-slate-200 bg-slate-50/80 p-5" : "rounded-[24px] border border-white/10 bg-[#202532]/65 p-5"}>
+          <section className="voxx-surface rounded-[24px] p-5">
             <h3 className={`text-base font-semibold ${titleText}`}>Dados do solicitante</h3>
             <p className={`mt-1 text-xs ${mutedText}`}>Informe a matrícula para preencher nome e função pela base.</p>
 
@@ -231,7 +223,7 @@ export function BancoHorasModal({ onClose, modo = "criar", registro, onSaved }: 
                       type="button"
                       onClick={buscarColaborador}
                       disabled={buscando || enviando}
-                      className={temaDia ? "rounded-xl bg-slate-950 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50" : "rounded-xl bg-white px-3 py-2 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:opacity-50"}
+                      className="voxx-button-primary rounded-xl px-3 py-2 text-sm font-semibold disabled:opacity-50"
                     >
                       {buscando ? "Buscando..." : "Buscar"}
                     </button>
@@ -256,7 +248,7 @@ export function BancoHorasModal({ onClose, modo = "criar", registro, onSaved }: 
             </div>
           </section>
 
-          <section className={temaDia ? "rounded-[24px] border border-slate-200 bg-slate-50/80 p-5" : "rounded-[24px] border border-white/10 bg-[#202532]/65 p-5"}>
+          <section className="voxx-surface rounded-[24px] p-5">
             <h3 className={`text-base font-semibold ${titleText}`}>Plantão original</h3>
             <p className={`mt-1 text-xs ${mutedText}`}>Plantão que será compensado no banco de horas.</p>
 
@@ -277,7 +269,7 @@ export function BancoHorasModal({ onClose, modo = "criar", registro, onSaved }: 
             </div>
           </section>
 
-          <section className={temaDia ? "rounded-[24px] border border-slate-200 bg-slate-50/80 p-5" : "rounded-[24px] border border-white/10 bg-[#202532]/65 p-5"}>
+          <section className="voxx-surface rounded-[24px] p-5">
             <h3 className={`text-base font-semibold ${titleText}`}>Novo plantão</h3>
             <p className={`mt-1 text-xs ${mutedText}`}>Nova data em que o colaborador fará a compensação.</p>
 
@@ -300,10 +292,10 @@ export function BancoHorasModal({ onClose, modo = "criar", registro, onSaved }: 
           {erro && <div className={errorClass}>{erro}</div>}
 
           <div className="flex justify-end gap-3">
-            <button type="button" onClick={onClose} disabled={enviando} className={temaDia ? "rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50" : "rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-white/10 disabled:opacity-50"}>
+            <button type="button" onClick={onClose} disabled={enviando} className="voxx-button-secondary rounded-xl px-4 py-2 text-sm font-semibold disabled:opacity-50">
               Fechar
             </button>
-            <button type="button" onClick={confirmarSolicitacao} disabled={!formularioValido} className={temaDia ? "rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50" : "rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"}>
+            <button type="button" onClick={confirmarSolicitacao} disabled={!formularioValido} className="voxx-button-primary rounded-xl px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50">
               {enviando ? "Confirmando..." : modoEdicao ? "Salvar alteração" : "Confirmar solicitação"}
             </button>
           </div>

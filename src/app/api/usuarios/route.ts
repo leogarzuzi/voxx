@@ -64,6 +64,13 @@ export async function PATCH(request: Request) {
       );
     }
 
+    if (novoPerfil === "Admin" && usuarioLogado.perfil !== "Admin") {
+      return Response.json(
+        { success: false, error: "Somente um Admin pode conceder o perfil Admin." },
+        { status: 403 }
+      );
+    }
+
     // usa service role apenas no backend para alterar usuários
     const supabaseAdmin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -98,6 +105,13 @@ export async function PATCH(request: Request) {
       return Response.json(
         { success: false, error: "Usuário não encontrado." },
         { status: 404 }
+      );
+    }
+
+    if (usuarioAlvo.perfil === "Admin" && usuarioLogado.perfil !== "Admin") {
+      return Response.json(
+        { success: false, error: "Somente um Admin pode alterar outro Admin." },
+        { status: 403 }
       );
     }
 

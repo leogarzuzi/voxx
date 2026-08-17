@@ -135,8 +135,8 @@ export default function PerfilPage() {
       <div
         className={
           temaDia
-            ? "flex min-h-screen items-center justify-center bg-[#f4f6fb] text-slate-500"
-            : "flex min-h-screen items-center justify-center bg-[#11141b] text-slate-400"
+            ? "flex min-h-screen items-center justify-center bg-[var(--voxx-bg)] text-slate-500"
+            : "flex min-h-screen items-center justify-center bg-[var(--voxx-bg)] text-slate-400"
         }
       >
         Carregando perfil...
@@ -149,8 +149,8 @@ export default function PerfilPage() {
       <div
         className={
           temaDia
-            ? "flex min-h-screen items-center justify-center bg-[#f4f6fb] text-red-600"
-            : "flex min-h-screen items-center justify-center bg-[#11141b] text-red-200"
+            ? "flex min-h-screen items-center justify-center bg-[var(--voxx-bg)] text-red-600"
+            : "flex min-h-screen items-center justify-center bg-[var(--voxx-bg)] text-red-200"
         }
       >
         Nao foi possivel carregar o perfil.
@@ -162,8 +162,8 @@ export default function PerfilPage() {
     <main
       className={
         temaDia
-          ? "min-h-screen bg-[#f4f6fb] px-6 py-10 text-slate-950"
-          : "min-h-screen bg-[#11141b] px-6 py-10 text-slate-100"
+          ? "min-h-screen bg-[var(--voxx-bg)] px-6 py-10 text-slate-950"
+          : "min-h-screen bg-[var(--voxx-bg)] px-6 py-10 text-slate-100"
       }
     >
       <div className="mx-auto max-w-5xl">

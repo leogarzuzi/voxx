@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { TemaToggle } from "@/components/TemaToggle";
@@ -66,37 +67,15 @@ function RequisitoSenha({
 }
 
 function TelaBase({ children }: { children: React.ReactNode }) {
-  const { tema, temaDia, alternarTema } = useTema();
+  const { tema, alternarTema } = useTema();
 
   return (
     <div
-      className={
-        temaDia
-          ? "relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f5f7fb] px-4 py-10 pb-24 text-slate-900"
-          : "relative flex min-h-screen items-center justify-center overflow-hidden bg-[#11141b] px-4 py-10 pb-24 text-slate-100"
-      }
+      className="voxx-auth-page px-4 py-10 pb-24"
     >
-      <div
-        className={
-          temaDia
-            ? "pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.15),transparent_34%),linear-gradient(180deg,#ffffff_0%,#f5f7fb_52%,#e9eef6_100%)]"
-            : "pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.14),transparent_34%),linear-gradient(180deg,#151923_0%,#11141b_52%,#0d1016_100%)]"
-        }
-      />
-      <div
-        className={
-          temaDia
-            ? "pointer-events-none absolute -left-24 top-16 h-72 w-72 rounded-full bg-blue-100/70 blur-3xl"
-            : "pointer-events-none absolute -left-24 top-16 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl"
-        }
-      />
-      <div
-        className={
-          temaDia
-            ? "pointer-events-none absolute -right-20 bottom-16 h-80 w-80 rounded-full bg-slate-200/80 blur-3xl"
-            : "pointer-events-none absolute -right-20 bottom-16 h-80 w-80 rounded-full bg-slate-700/20 blur-3xl"
-        }
-      />
+      <div className="voxx-auth-backdrop" />
+      <div className="voxx-auth-glow-left" />
+      <div className="voxx-auth-glow-right" />
 
       <div className="relative z-10 w-full max-w-[430px]">{children}</div>
       <TemaToggle tema={tema} onToggle={alternarTema} variant="login" />
@@ -105,15 +84,9 @@ function TelaBase({ children }: { children: React.ReactNode }) {
 }
 
 function CardSenha({ children }: { children: React.ReactNode }) {
-  const { temaDia } = useTema();
-
   return (
     <div
-      className={
-        temaDia
-          ? "rounded-[30px] border border-white bg-white/92 p-8 text-slate-900 shadow-[0_28px_80px_rgba(15,23,42,0.14)] backdrop-blur-xl"
-          : "rounded-[30px] border border-white/10 bg-[#171a23]/95 p-8 text-slate-100 shadow-[0_28px_90px_rgba(0,0,0,0.46)] backdrop-blur-xl"
-      }
+      className="voxx-auth-card rounded-[30px] p-8"
     >
       {children}
     </div>
@@ -121,17 +94,11 @@ function CardSenha({ children }: { children: React.ReactNode }) {
 }
 
 function LogoTopo() {
-  const { temaDia } = useTema();
-
   return (
     <div
-      className={
-        temaDia
-          ? "flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-slate-950 shadow-[0_18px_38px_rgba(15,23,42,0.22)]"
-          : "flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] shadow-inner shadow-white/5"
-      }
+      className="voxx-auth-logo"
     >
-      <img src="/logo-simbolo.png" alt="VOXX" className="h-12 w-12 object-contain" />
+      <Image src="/logo-ronaldo-gazolla.png" alt="Hospital Municipal Ronaldo Gazolla" width={711} height={230} priority className="voxx-brand-image h-auto w-full object-contain" />
     </div>
   );
 }
@@ -305,10 +272,12 @@ export default function DefinirSenhaPage() {
       <TelaBase>
         <CardSenha>
           <div className="flex flex-col items-center text-center">
-            <img
-              src="/logo-simbolo.png"
-              alt="VOXX"
-              className="h-20 w-20 animate-pulse object-contain"
+            <Image
+              src="/logo-ronaldo-gazolla.png"
+              alt="Hospital Municipal Ronaldo Gazolla"
+              width={711}
+              height={230}
+              className="voxx-brand-image h-auto w-64 animate-pulse object-contain"
             />
             <p className={temaDia ? "mt-5 text-sm font-medium text-slate-500" : "mt-5 text-sm font-medium text-slate-400"}>
               Verificando acesso...
@@ -336,11 +305,7 @@ export default function DefinirSenhaPage() {
             <button
               type="button"
               onClick={() => router.push("/login")}
-              className={
-                temaDia
-                  ? "mt-6 h-11 w-full rounded-xl bg-slate-950 text-sm font-bold text-white shadow-[0_16px_40px_rgba(15,23,42,0.18)] transition hover:bg-slate-800 active:scale-[0.98]"
-                  : "mt-6 h-11 w-full rounded-xl bg-white text-sm font-bold text-slate-950 shadow-[0_16px_40px_rgba(255,255,255,0.08)] transition hover:bg-slate-200 active:scale-[0.98]"
-              }
+              className="voxx-button-primary mt-6 h-11 w-full rounded-xl text-sm font-bold transition active:scale-[0.98]"
             >
               Voltar para o login
             </button>
@@ -368,11 +333,7 @@ export default function DefinirSenhaPage() {
               type="button"
               onClick={handleConfirmarLink}
               disabled={loading}
-              className={
-                temaDia
-                  ? "mt-6 h-11 w-full rounded-xl bg-slate-950 text-sm font-bold text-white shadow-[0_16px_40px_rgba(15,23,42,0.18)] transition hover:bg-slate-800 active:scale-[0.98] disabled:opacity-60"
-                  : "mt-6 h-11 w-full rounded-xl bg-white text-sm font-bold text-slate-950 shadow-[0_16px_40px_rgba(255,255,255,0.08)] transition hover:bg-slate-200 active:scale-[0.98] disabled:opacity-60"
-              }
+              className="voxx-button-primary mt-6 h-11 w-full rounded-xl text-sm font-bold transition active:scale-[0.98]"
             >
               {loading ? "Validando..." : "Continuar com a redefinicao"}
             </button>
@@ -406,12 +367,8 @@ export default function DefinirSenhaPage() {
               <input
                 required
                 type={mostrarSenha ? "text" : "password"}
-                placeholder="Digite sua nova senha"
-                className={
-                  temaDia
-                    ? "h-11 w-full rounded-xl border border-slate-200 bg-white px-4 pr-12 text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.06)] outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-                    : "h-11 w-full rounded-xl border border-white/10 bg-[#202532] px-4 pr-12 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-blue-300/40 focus:ring-2 focus:ring-blue-300/15"
-                }
+                placeholder=""
+                className="voxx-field h-11 w-full rounded-xl px-4 pr-12 transition"
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
               />
@@ -446,12 +403,8 @@ export default function DefinirSenhaPage() {
               <input
                 required
                 type={mostrarConfirmarSenha ? "text" : "password"}
-                placeholder="Digite novamente sua senha"
-                className={
-                  temaDia
-                    ? "h-11 w-full rounded-xl border border-slate-200 bg-white px-4 pr-12 text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.06)] outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-                    : "h-11 w-full rounded-xl border border-white/10 bg-[#202532] px-4 pr-12 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-blue-300/40 focus:ring-2 focus:ring-blue-300/15"
-                }
+                placeholder=""
+                className="voxx-field h-11 w-full rounded-xl px-4 pr-12 transition"
                 value={confirmarSenha}
                 onChange={(e) => setConfirmarSenha(e.target.value)}
               />
@@ -473,11 +426,7 @@ export default function DefinirSenhaPage() {
           <button
             type="submit"
             disabled={loading}
-            className={
-              temaDia
-                ? "h-11 w-full rounded-xl bg-slate-950 text-sm font-bold text-white shadow-[0_16px_40px_rgba(15,23,42,0.18)] transition hover:bg-slate-800 active:scale-[0.98] disabled:opacity-60"
-                : "h-11 w-full rounded-xl bg-white text-sm font-bold text-slate-950 shadow-[0_16px_40px_rgba(255,255,255,0.08)] transition hover:bg-slate-200 active:scale-[0.98] disabled:opacity-60"
-            }
+            className="voxx-button-primary h-11 w-full rounded-xl text-sm font-bold transition active:scale-[0.98]"
           >
             {loading ? "Salvando..." : "Salvar senha"}
           </button>
@@ -500,11 +449,13 @@ export default function DefinirSenhaPage() {
         )}
 
         {loading && (
-          <div className={temaDia ? "fixed inset-0 z-50 flex items-center justify-center bg-white/45 backdrop-blur-[1.5px]" : "fixed inset-0 z-50 flex items-center justify-center bg-black/35 backdrop-blur-[1.5px]"}>
-            <img
-              src="/logo-simbolo.png"
+          <div className="voxx-auth-loading fixed inset-0 z-50 flex items-center justify-center">
+            <Image
+              src="/logo-ronaldo-gazolla.png"
               alt="Carregando"
-              className="h-20 w-20 animate-pulse object-contain drop-shadow-2xl"
+              width={711}
+              height={230}
+              className="voxx-brand-image h-auto w-64 animate-pulse object-contain drop-shadow-2xl"
             />
           </div>
         )}
