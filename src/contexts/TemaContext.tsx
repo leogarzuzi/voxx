@@ -21,10 +21,10 @@ type TemaContextValue = {
 const TemaContext = createContext<TemaContextValue | null>(null);
 
 export function TemaProvider({ children }: { children: ReactNode }) {
-  const [tema, setTema] = useState<TemaInterface>("noite");
+  const [tema, setTema] = useState<TemaInterface>("dia");
 
   useEffect(() => {
-    const temaSalvo = window.localStorage.getItem("voxx-tema");
+    const temaSalvo = window.localStorage.getItem("voxx-tema-v2");
 
     if (temaSalvo === "dia" || temaSalvo === "noite") {
       setTema(temaSalvo);
@@ -35,7 +35,7 @@ export function TemaProvider({ children }: { children: ReactNode }) {
     document.documentElement.dataset.tema = tema;
     document.documentElement.classList.toggle("tema-dia", tema === "dia");
     document.documentElement.classList.toggle("tema-noite", tema === "noite");
-    window.localStorage.setItem("voxx-tema", tema);
+    window.localStorage.setItem("voxx-tema-v2", tema);
   }, [tema]);
 
   function definirTema(proximoTema: TemaInterface) {

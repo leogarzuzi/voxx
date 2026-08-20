@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { TemaToggle } from "@/components/TemaToggle";
@@ -169,6 +170,19 @@ async function handleLogin(e: React.FormEvent) {
       <div className="voxx-auth-backdrop" />
       <div className="voxx-auth-glow-left" />
       <div className="voxx-auth-glow-right" />
+
+      <Link
+        href="/area-medica"
+        className="voxx-medical-access absolute right-4 top-4 z-20 flex h-11 items-center gap-2 rounded-lg px-4 text-sm font-bold sm:right-8 sm:top-8"
+        aria-label="Acessar a Área Médica"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 3v5a4 4 0 0 0 8 0V3M4 3h4M12 3h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M10 12v2a5 5 0 0 0 10 0v-1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          <circle cx="20" cy="10.5" r="2" stroke="currentColor" strokeWidth="1.8" />
+        </svg>
+        <span>Área Médica</span>
+      </Link>
 
       <div className="relative z-10 w-full max-w-[430px]">
         <div

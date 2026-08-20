@@ -72,9 +72,11 @@ export default function TrocaPlantaoTabela() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [busca, setBusca] = useState("");
+  const [status, setStatus] = useState("");
+  const [competencia, setCompetencia] = useState("");
   const [total, setTotal] = useState(0);
   const [registroEdicao, setRegistroEdicao] = useState<TrocaPlantao | null>(
-    null
+    null,
   );
   const [registroCancelamento, setRegistroCancelamento] =
     useState<TrocaPlantao | null>(null);
@@ -90,7 +92,7 @@ export default function TrocaPlantaoTabela() {
         else acc.recebidos += 1;
         return acc;
       },
-      { total: 0, recebidos: 0, alterados: 0, cancelados: 0 }
+      { total: 0, recebidos: 0, alterados: 0, cancelados: 0 },
     );
   }, [registros]);
 
@@ -101,9 +103,11 @@ export default function TrocaPlantaoTabela() {
 
       const params = new URLSearchParams({ page: "1", pageSize: "100" });
       if (busca.trim()) params.set("busca", busca.trim());
+      if (status) params.set("status", status);
+      if (competencia) params.set("competencia", competencia);
 
       const resposta = await fetch(
-        `/api/central-memorandos/troca-plantao?${params.toString()}`
+        `/api/central-memorandos/troca-plantao?${params.toString()}`,
       );
 
       const dados = await resposta.json();
@@ -118,7 +122,7 @@ export default function TrocaPlantaoTabela() {
       setErro(
         error instanceof Error
           ? error.message
-          : "Nao foi possivel carregar a tabela."
+          : "Nao foi possivel carregar a tabela.",
       );
     } finally {
       setCarregando(false);
@@ -135,15 +139,11 @@ export default function TrocaPlantaoTabela() {
     }, 350);
 
     return () => window.clearTimeout(timeout);
-  }, [busca]);
+  }, [busca, status, competencia]);
 
   function pesquisar(event: FormEvent) {
     event.preventDefault();
     carregarRegistros();
-  }
-
-  function limparFiltros() {
-    setBusca("");
   }
 
   async function confirmarCancelamento() {
@@ -173,7 +173,7 @@ export default function TrocaPlantaoTabela() {
       setErro(
         error instanceof Error
           ? error.message
-          : "Nao foi possivel cancelar a troca."
+          : "Nao foi possivel cancelar a troca.",
       );
     } finally {
       setCancelando(false);
@@ -226,7 +226,8 @@ export default function TrocaPlantaoTabela() {
 
   function badgeStatus(statusAtual: string) {
     const normalizado = statusAtual?.toLowerCase();
-    const base = "inline-flex min-w-[92px] justify-center rounded-full px-3 py-1 text-xs font-bold";
+    const base =
+      "inline-flex min-w-[92px] justify-center rounded-full px-3 py-1 text-xs font-bold";
     if (normalizado === "cancelado") {
       return `${base} ${
         temaDia
@@ -276,10 +277,19 @@ export default function TrocaPlantaoTabela() {
           ["Alterados", resumo.alterados],
           ["Cancelados", resumo.cancelados],
         ].map(([titulo, valor]) => (
-          <div key={String(titulo)} className={`${cardClass} voxx-dashboard-metric relative overflow-hidden p-5`}>
+          <div
+            key={String(titulo)}
+            className={`${cardClass} voxx-dashboard-metric relative overflow-hidden p-5`}
+          >
             <span className="absolute inset-y-0 left-0 w-1.5 bg-[var(--voxx-primary)]" />
-            <p className={`text-xs font-bold uppercase tracking-[0.16em] ${mutedText}`}>{titulo}</p>
-            <p className={`mt-3 text-3xl font-bold tracking-tight ${strongText}`}>
+            <p
+              className={`text-xs font-bold uppercase tracking-[0.16em] ${mutedText}`}
+            >
+              {titulo}
+            </p>
+            <p
+              className={`mt-3 text-3xl font-bold tracking-tight ${strongText}`}
+            >
               {valor}
             </p>
           </div>
@@ -298,26 +308,53 @@ export default function TrocaPlantaoTabela() {
               </p>
             </div>
 
-            <form onSubmit={pesquisar} className="flex w-full flex-col items-end gap-2 lg:w-auto">
+            <form
+              onSubmit={pesquisar}
+              className="flex w-full flex-col items-end gap-2 lg:w-auto"
+            >
               <div className="flex w-full flex-wrap justify-end gap-2">
                 <input
-                  value={busca}
-                  onChange={(event) => setBusca(event.target.value)}
-                  placeholder="Pesquisar nome, protocolo ou matricula..."
-                  className={`${inputClass} w-full lg:w-96`}
+                  type="month"
+                  value={competencia}
+                  onChange={(event) => setCompetencia(event.target.value)}
+                  className={`${inputClass} w-full sm:w-auto`}
+                  aria-label="Competência"
                 />
+                <select
+                  value={status}
+                  onChange={(event) => setStatus(event.target.value)}
+                  className={`${inputClass} w-full sm:w-auto`}
+                  aria-label="Status"
+                >
+                  <option value="">Todos os status</option>
+                  <option value="recebido">Recebidos</option>
+                  <option value="alterado">Alterados</option>
+                  <option value="cancelado">Cancelados</option>
+                </select>
+                <div className="relative w-full lg:w-96">
+                  <input
+                    value={busca}
+                    onChange={(event) => setBusca(event.target.value)}
+                    placeholder="Pesquisar nome, protocolo ou matricula..."
+                    className={`${inputClass} w-full pr-10`}
+                  />
+                  {busca && (
+                    <button
+                      type="button"
+                      onClick={() => setBusca("")}
+                      aria-label="Limpar pesquisa"
+                      title="Limpar pesquisa"
+                      className="voxx-text-primary absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--voxx-surface-soft)] text-2xl font-semibold leading-none shadow-sm transition hover:bg-[var(--voxx-focus)] hover:text-[var(--voxx-primary)]"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
                 <button
                   type="submit"
                   className="voxx-button-primary h-10 rounded-xl px-4 text-sm font-semibold"
                 >
                   Buscar
-                </button>
-                <button
-                  type="button"
-                  onClick={limparFiltros}
-                  className="voxx-button-secondary h-10 rounded-xl px-4 text-sm font-semibold"
-                >
-                  Limpar
                 </button>
               </div>
 
@@ -358,11 +395,19 @@ export default function TrocaPlantaoTabela() {
         </div>
 
         {carregando && (
-          <div className={`p-5 text-sm ${mutedText}`}>Carregando registros...</div>
+          <div className={`p-5 text-sm ${mutedText}`}>
+            Carregando registros...
+          </div>
         )}
 
         {erro && (
-          <div className={temaDia ? "m-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700" : "m-4 rounded-xl border border-red-300/20 bg-red-400/10 px-4 py-3 text-sm font-medium text-red-100"}>
+          <div
+            className={
+              temaDia
+                ? "m-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+                : "m-4 rounded-xl border border-red-300/20 bg-red-400/10 px-4 py-3 text-sm font-medium text-red-100"
+            }
+          >
             {erro}
           </div>
         )}
@@ -397,7 +442,10 @@ export default function TrocaPlantaoTabela() {
                   const podeAlterar = statusAtual === "recebido";
 
                   return (
-                    <tr key={item.id} className="voxx-text-muted transition hover:bg-[var(--voxx-surface-soft)]">
+                    <tr
+                      key={item.id}
+                      className="voxx-text-muted transition hover:bg-[var(--voxx-surface-soft)]"
+                    >
                       <td className="whitespace-nowrap px-4 py-3">
                         <span className={badgeStatus(item.status)}>
                           {labelStatus(item.status)}
@@ -438,26 +486,40 @@ export default function TrocaPlantaoTabela() {
                       </td>
 
                       <td className="px-4 py-3">
-                        <div className={`font-semibold ${strongText}`}>{item.nome_solicitante}</div>
-                        <div className={`text-xs ${mutedText}`}>{item.matricula_solicitante}</div>
+                        <div className={`font-semibold ${strongText}`}>
+                          {item.nome_solicitante}
+                        </div>
+                        <div className={`text-xs ${mutedText}`}>
+                          {item.matricula_solicitante}
+                        </div>
                       </td>
 
                       <td className="whitespace-nowrap px-4 py-3">
-                        {formatarData(item.data_plantao_solicitante)} | {labelTipoPlantao(item.tipo_plantao_solicitante)}
+                        {formatarData(item.data_plantao_solicitante)} |{" "}
+                        {labelTipoPlantao(item.tipo_plantao_solicitante)}
                       </td>
 
                       <td className="px-4 py-3">
-                        <div className={`font-semibold ${strongText}`}>{item.nome_solicitado}</div>
-                        <div className={`text-xs ${mutedText}`}>{item.matricula_solicitado}</div>
+                        <div className={`font-semibold ${strongText}`}>
+                          {item.nome_solicitado}
+                        </div>
+                        <div className={`text-xs ${mutedText}`}>
+                          {item.matricula_solicitado}
+                        </div>
                       </td>
 
                       <td className="whitespace-nowrap px-4 py-3">
-                        {formatarData(item.data_plantao_solicitado)} | {labelTipoPlantao(item.tipo_plantao_solicitado)}
+                        {formatarData(item.data_plantao_solicitado)} |{" "}
+                        {labelTipoPlantao(item.tipo_plantao_solicitado)}
                       </td>
 
                       <td className="px-4 py-3">{item.funcao_solicitante}</td>
-                      <td className="px-4 py-3">{item.criado_por_nome || "-"}</td>
-                      <td className={`whitespace-nowrap px-4 py-3 font-semibold ${strongText}`}>
+                      <td className="px-4 py-3">
+                        {item.criado_por_nome || "-"}
+                      </td>
+                      <td
+                        className={`whitespace-nowrap px-4 py-3 font-semibold ${strongText}`}
+                      >
                         {item.protocolo}
                       </td>
                     </tr>
@@ -514,7 +576,10 @@ export default function TrocaPlantaoTabela() {
             </h3>
             <p className={`mt-2 text-center text-sm leading-6 ${mutedText}`}>
               Tem certeza que deseja cancelar o protocolo{" "}
-              <span className={strongText}>{registroCancelamento.protocolo}</span>?
+              <span className={strongText}>
+                {registroCancelamento.protocolo}
+              </span>
+              ?
             </p>
 
             <div className="mt-6 flex justify-center gap-3">
@@ -549,4 +614,3 @@ export default function TrocaPlantaoTabela() {
     </main>
   );
 }
-

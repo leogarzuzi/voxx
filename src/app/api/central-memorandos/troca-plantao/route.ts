@@ -13,7 +13,9 @@ export const dynamic = "force-dynamic";
 type TipoPlantao = "SD" | "SN" | "24";
 
 function somenteDigitos(valor: unknown) {
-  return String(valor || "").replace(/\D/g, "").slice(0, 8);
+  return String(valor || "")
+    .replace(/\D/g, "")
+    .slice(0, 8);
 }
 
 function texto(valor: unknown) {
@@ -67,7 +69,7 @@ function mesmoDiaMesmoTipo(
   dataA: string,
   tipoA: string,
   dataB: string,
-  tipoB: string
+  tipoB: string,
 ) {
   if (!dataA || !dataB || !tipoA || !tipoB) return false;
   return dataA === dataB && tipoA === tipoB;
@@ -90,6 +92,18 @@ function limparBusca(valor: string | null) {
     .replace(/\s+/g, " ");
 }
 
+function competenciaValida(valor: string | null) {
+  const textoCompetencia = texto(valor);
+  return /^\d{4}-\d{2}$/.test(textoCompetencia) ? textoCompetencia : "";
+}
+
+function proximaCompetencia(competencia: string) {
+  const [ano, mes] = competencia.split("-").map(Number);
+  return mes === 12
+    ? `${ano + 1}-01`
+    : `${ano}-${String(mes + 1).padStart(2, "0")}`;
+}
+
 async function obterUsuarioAtivo(supabase: any) {
   const {
     data: { user },
@@ -100,7 +114,7 @@ async function obterUsuarioAtivo(supabase: any) {
       usuario: null,
       erro: Response.json(
         { success: false, error: "Não autenticado." },
-        { status: 401 }
+        { status: 401 },
       ),
     };
   }
@@ -116,15 +130,24 @@ async function obterUsuarioAtivo(supabase: any) {
       usuario: null,
       erro: Response.json(
         { success: false, error: "Usuário sem acesso ativo." },
-        { status: 403 }
+        { status: 403 },
       ),
     };
   }
 
-  if (!(await temPermissaoNoBanco(supabase, usuarioLogado.perfil, PERMISSOES.CENTRAL_MEMORANDOS))) {
+  if (
+    !(await temPermissaoNoBanco(
+      supabase,
+      usuarioLogado.perfil,
+      PERMISSOES.CENTRAL_MEMORANDOS,
+    ))
+  ) {
     return {
       usuario: null,
-      erro: Response.json({ success: false, error: "Sem permissão." }, { status: 403 }),
+      erro: Response.json(
+        { success: false, error: "Sem permissão." },
+        { status: 403 },
+      ),
     };
   }
 
@@ -152,22 +175,21 @@ export async function GET(request: NextRequest) {
     const pagina = Math.max(Number(searchParams.get("page") || "1"), 1);
     const limite = Math.min(
       Math.max(Number(searchParams.get("pageSize") || "50"), 1),
-      100
+      100,
     );
 
     const busca = limparBusca(searchParams.get("busca"));
     const nome = limparBusca(searchParams.get("nome"));
     const status = texto(searchParams.get("status"));
     const mesReferencia = texto(searchParams.get("mes"));
+    const competencia = competenciaValida(searchParams.get("competencia"));
     const dataPlantao = texto(searchParams.get("data"));
 
     const inicio = (pagina - 1) * limite;
     const fim = inicio + limite - 1;
 
-    let query = supabase
-      .from("trocas_plantao")
-      .select(
-        `
+    let query = supabase.from("trocas_plantao").select(
+      `
         id,
         protocolo,
         mes_referencia,
@@ -195,8 +217,8 @@ export async function GET(request: NextRequest) {
         criado_em,
         atualizado_em
       `,
-        { count: "exact" }
-      );
+      { count: "exact" },
+    );
 
     if (status) {
       query = query.eq("status", status);
@@ -206,15 +228,24 @@ export async function GET(request: NextRequest) {
       query = query.eq("mes_referencia", mesReferencia);
     }
 
+    if (competencia) {
+      query = query
+        .gte("data_plantao_solicitante", `${competencia}-01`)
+        .lt(
+          "data_plantao_solicitante",
+          `${proximaCompetencia(competencia)}-01`,
+        );
+    }
+
     if (dataPlantao) {
       query = query.or(
-        `data_plantao_solicitante.eq.${dataPlantao},data_plantao_solicitado.eq.${dataPlantao}`
+        `data_plantao_solicitante.eq.${dataPlantao},data_plantao_solicitado.eq.${dataPlantao}`,
       );
     }
 
     if (nome.length >= 2) {
       query = query.or(
-        `nome_solicitante.ilike.*${nome}*,nome_solicitado.ilike.*${nome}*`
+        `nome_solicitante.ilike.*${nome}*,nome_solicitado.ilike.*${nome}*`,
       );
     }
 
@@ -227,15 +258,11 @@ export async function GET(request: NextRequest) {
           `nome_solicitante.ilike.*${busca}*`,
           `nome_solicitado.ilike.*${busca}*`,
           `criado_por_nome.ilike.*${busca}*`,
-          digitos.length >= 3
-            ? `matricula_solicitante.ilike.*${digitos}*`
-            : "",
-          digitos.length >= 3
-            ? `matricula_solicitado.ilike.*${digitos}*`
-            : "",
+          digitos.length >= 3 ? `matricula_solicitante.ilike.*${digitos}*` : "",
+          digitos.length >= 3 ? `matricula_solicitado.ilike.*${digitos}*` : "",
         ]
           .filter(Boolean)
-          .join(",")
+          .join(","),
       );
     }
 
@@ -250,7 +277,7 @@ export async function GET(request: NextRequest) {
           error: "Não foi possível carregar as trocas de plantão.",
           details: error.message,
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -265,7 +292,7 @@ export async function GET(request: NextRequest) {
   } catch {
     return Response.json(
       { success: false, error: "Não foi possível consultar as trocas." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -288,7 +315,9 @@ export async function POST(request: NextRequest) {
     const matriculaSolicitante = somenteDigitos(body.matricula_solicitante);
     const matriculaSolicitado = somenteDigitos(body.matricula_solicitado);
 
-    const tipoSolicitante = normalizarTipoPlantao(body.tipo_plantao_solicitante);
+    const tipoSolicitante = normalizarTipoPlantao(
+      body.tipo_plantao_solicitante,
+    );
     const tipoSolicitado = normalizarTipoPlantao(body.tipo_plantao_solicitado);
 
     const dataSolicitante = texto(body.data_plantao_solicitante);
@@ -297,7 +326,7 @@ export async function POST(request: NextRequest) {
     if (matriculaSolicitante.length !== 8 || matriculaSolicitado.length !== 8) {
       return Response.json(
         { success: false, error: "As matrículas devem conter 8 dígitos." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -307,14 +336,14 @@ export async function POST(request: NextRequest) {
           success: false,
           error: "Solicitante e solicitado não podem ter a mesma matrícula.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!tipoValido(tipoSolicitante) || !tipoValido(tipoSolicitado)) {
       return Response.json(
         { success: false, error: "Tipo de plantão inválido." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -325,14 +354,14 @@ export async function POST(request: NextRequest) {
           error:
             "A troca precisa respeitar a equivalência de carga horária: SD/SN com SD/SN, ou 24 com 24.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!dataSolicitante || !dataSolicitado) {
       return Response.json(
         { success: false, error: "As datas dos plantões são obrigatórias." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -340,10 +369,9 @@ export async function POST(request: NextRequest) {
       return Response.json(
         {
           success: false,
-          error:
-            "A troca precisa acontecer dentro do mesmo mes de referencia.",
+          error: "A troca precisa acontecer dentro do mesmo mes de referencia.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -352,7 +380,7 @@ export async function POST(request: NextRequest) {
         dataSolicitante,
         tipoSolicitante,
         dataSolicitado,
-        tipoSolicitado
+        tipoSolicitado,
       )
     ) {
       return Response.json(
@@ -360,7 +388,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: "No mesmo dia, o tipo de plantao precisa ser diferente.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -377,7 +405,7 @@ export async function POST(request: NextRequest) {
           error:
             "As datas dos plantões precisam estar dentro do mês e ano atual.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -389,16 +417,16 @@ export async function POST(request: NextRequest) {
     if (erroColaboradores) {
       return Response.json(
         { success: false, error: "Não foi possível validar os colaboradores." },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     const solicitante = colaboradores?.find(
-      (item: any) => item.matricula === matriculaSolicitante
+      (item: any) => item.matricula === matriculaSolicitante,
     );
 
     const solicitado = colaboradores?.find(
-      (item: any) => item.matricula === matriculaSolicitado
+      (item: any) => item.matricula === matriculaSolicitado,
     );
 
     if (!solicitante || !solicitado) {
@@ -408,7 +436,7 @@ export async function POST(request: NextRequest) {
           error:
             "Uma das matrículas não se encontra ativa na base de colaboradores.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -424,7 +452,7 @@ export async function POST(request: NextRequest) {
           error:
             "A troca não pode ser solicitada entre colaboradores de funções diferentes.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -465,7 +493,7 @@ export async function POST(request: NextRequest) {
             erroInsert.message || "Não foi possível salvar a troca de plantão.",
           details: erroInsert,
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -495,7 +523,7 @@ export async function POST(request: NextRequest) {
   } catch {
     return Response.json(
       { success: false, error: "Não foi possível registrar a troca." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -515,7 +543,9 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
 
     const id = texto(body.id);
-    const tipoSolicitante = normalizarTipoPlantao(body.tipo_plantao_solicitante);
+    const tipoSolicitante = normalizarTipoPlantao(
+      body.tipo_plantao_solicitante,
+    );
     const tipoSolicitado = normalizarTipoPlantao(body.tipo_plantao_solicitado);
     const dataSolicitante = texto(body.data_plantao_solicitante);
     const dataSolicitado = texto(body.data_plantao_solicitado);
@@ -524,21 +554,21 @@ export async function PUT(request: NextRequest) {
     if (!id) {
       return Response.json(
         { success: false, error: "ID da troca obrigatorio." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!dataSolicitante || !dataSolicitado) {
       return Response.json(
         { success: false, error: "As datas dos plantoes sao obrigatorias." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!tipoValido(tipoSolicitante) || !tipoValido(tipoSolicitado)) {
       return Response.json(
         { success: false, error: "Tipo de plantao invalido." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -549,7 +579,7 @@ export async function PUT(request: NextRequest) {
           error:
             "A troca precisa respeitar a equivalencia de carga horaria: SD/SN com SD/SN, ou 24 com 24.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -571,7 +601,7 @@ export async function PUT(request: NextRequest) {
         funcao_solicitado,
         data_plantao_solicitado,
         tipo_plantao_solicitado
-      `
+      `,
       )
       .eq("id", id)
       .single();
@@ -579,7 +609,7 @@ export async function PUT(request: NextRequest) {
     if (erroBusca || !trocaAtual) {
       return Response.json(
         { success: false, error: "Troca de plantao nao encontrada." },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -589,7 +619,7 @@ export async function PUT(request: NextRequest) {
           success: false,
           error: "Apenas trocas recebidas podem ser alteradas.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -597,10 +627,9 @@ export async function PUT(request: NextRequest) {
       return Response.json(
         {
           success: false,
-          error:
-            "A troca precisa acontecer dentro do mesmo mes de referencia.",
+          error: "A troca precisa acontecer dentro do mesmo mes de referencia.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -609,7 +638,7 @@ export async function PUT(request: NextRequest) {
         dataSolicitante,
         tipoSolicitante,
         dataSolicitado,
-        tipoSolicitado
+        tipoSolicitado,
       )
     ) {
       return Response.json(
@@ -617,7 +646,7 @@ export async function PUT(request: NextRequest) {
           success: false,
           error: "No mesmo dia, o tipo de plantao precisa ser diferente.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -634,7 +663,7 @@ export async function PUT(request: NextRequest) {
           error:
             "As datas dos plantoes precisam estar dentro do mes e ano atual.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -680,7 +709,7 @@ export async function PUT(request: NextRequest) {
     if (error) {
       return Response.json(
         { success: false, error: "Nao foi possivel alterar a troca." },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -709,7 +738,7 @@ export async function PUT(request: NextRequest) {
   } catch {
     return Response.json(
       { success: false, error: "Nao foi possivel alterar a troca." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -734,21 +763,21 @@ export async function PATCH(request: NextRequest) {
     if (!id) {
       return Response.json(
         { success: false, error: "ID da troca obrigatorio." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (statusNovo !== "cancelado") {
       return Response.json(
         { success: false, error: "Status invalido." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const { data: trocaAtual, error: erroBusca } = await supabase
       .from("trocas_plantao")
       .select(
-        "id, protocolo, status, matricula_solicitante, matricula_solicitado"
+        "id, protocolo, status, matricula_solicitante, matricula_solicitado",
       )
       .eq("id", id)
       .single();
@@ -756,7 +785,7 @@ export async function PATCH(request: NextRequest) {
     if (erroBusca || !trocaAtual) {
       return Response.json(
         { success: false, error: "Troca de plantao nao encontrada." },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -766,7 +795,7 @@ export async function PATCH(request: NextRequest) {
           success: false,
           error: "Apenas trocas recebidas podem ser canceladas.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -792,7 +821,7 @@ export async function PATCH(request: NextRequest) {
     if (error) {
       return Response.json(
         { success: false, error: "Nao foi possivel atualizar a troca." },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -820,13 +849,7 @@ export async function PATCH(request: NextRequest) {
   } catch {
     return Response.json(
       { success: false, error: "Nao foi possivel atualizar a troca." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-
-
-
-
-
-

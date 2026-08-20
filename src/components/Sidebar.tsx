@@ -26,16 +26,16 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
   const { tema, temaDia, alternarTema } = useTema();
 
   const [baseDadosOpen, setBaseDadosOpen] = useState(
-    pathname.startsWith("/inicio/base-dados")
+    pathname.startsWith("/inicio/base-dados"),
   );
   const [admissaoOpen, setAdmissaoOpen] = useState(
-    pathname.startsWith("/inicio/admissao")
+    pathname.startsWith("/inicio/admissao"),
   );
   const [dashboardOpen, setDashboardOpen] = useState(
-    pathname.startsWith("/inicio/dashboard")
+    pathname.startsWith("/inicio/dashboard"),
   );
   const [centralMemorandosOpen, setCentralMemorandosOpen] = useState(
-    pathname.startsWith("/inicio/central-memorandos")
+    pathname.startsWith("/inicio/central-memorandos"),
   );
 
   const pode = (permissao: (typeof PERMISSOES)[keyof typeof PERMISSOES]) =>
@@ -56,8 +56,6 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
     pode(PERMISSOES.ATESTADOS);
   const podeVerAnaliseFopag = pode(PERMISSOES.CONFERENCIA_FOLHA);
   const podeVerCentralMemorandos = pode(PERMISSOES.CENTRAL_MEMORANDOS);
-
-
 
   useEffect(() => {
     if (pathname.startsWith("/inicio/base-dados")) {
@@ -93,8 +91,6 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
     }
   }
 
-
-
   function itemMenuClass(ativo: boolean) {
     const estado = ativo
       ? "bg-[var(--rs-cyan-500)] text-[#071522] shadow-[0_14px_34px_rgba(4,30,50,0.24)] ring-1 ring-cyan-200/40 [&_svg]:!text-[#071522]"
@@ -121,18 +117,17 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
 
   const baseDadosAtivo = pathname.startsWith("/inicio/base-dados");
   const centralMemorandosAtivo = pathname.startsWith(
-    "/inicio/central-memorandos"
+    "/inicio/central-memorandos",
   );
   const admissaoAtivo = pathname.startsWith("/inicio/admissao");
   const dashboardAtivo = pathname.startsWith("/inicio/dashboard");
   const iconClass = "h-5 w-5 text-[#9fc2d7]";
-  const chevronClass = "inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-[#b9dbea] transition group-hover:border-cyan-200/30 group-hover:text-[var(--rs-cyan-300)]";
+  const chevronClass =
+    "inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-[#b9dbea] transition group-hover:border-cyan-200/30 group-hover:text-[var(--rs-cyan-300)]";
   const subMenuClass = "ml-8 mt-1 space-y-1 border-l border-cyan-300/30 pl-3";
 
   return (
-    <aside
-      className="voxx-sidebar flex h-full w-64 shrink-0 flex-col overflow-hidden"
-    >
+    <aside className="voxx-sidebar flex h-full w-64 shrink-0 flex-col overflow-hidden">
       <div className="flex min-h-0 flex-1 flex-col">
         <div className="px-4 pb-3 pt-5">
           <Link
@@ -164,15 +159,43 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
               >
                 <span className="flex items-center gap-3">
                   <svg className={iconClass} viewBox="0 0 24 24" fill="none">
-                    <ellipse cx="12" cy="5" rx="8" ry="3" stroke="currentColor" strokeWidth="2" />
-                    <path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5" stroke="currentColor" strokeWidth="2" />
-                    <path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6" stroke="currentColor" strokeWidth="2" />
+                    <ellipse
+                      cx="12"
+                      cy="5"
+                      rx="8"
+                      ry="3"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    />
+                    <path
+                      d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    />
+                    <path
+                      d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    />
                   </svg>
                   Base de Dados
                 </span>
-                <span className={`${chevronClass} ${baseDadosOpen ? "rotate-90" : ""}`}>
-                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="m9 6 6 6-6 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <span
+                  className={`${chevronClass} ${baseDadosOpen ? "rotate-90" : ""}`}
+                >
+                  <svg
+                    className="h-3.5 w-3.5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="m9 6 6 6-6 6"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 </span>
               </button>
@@ -183,10 +206,12 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
                     <Link
                       prefetch={false}
                       className={subItemMenuClass(
-                        rotaAtiva("/inicio/base-dados/colaboradores")
+                        rotaAtiva("/inicio/base-dados/colaboradores"),
                       )}
                       href="/inicio/base-dados/colaboradores"
-                      onClick={() => iniciarNavegacao("/inicio/base-dados/colaboradores")}
+                      onClick={() =>
+                        iniciarNavegacao("/inicio/base-dados/colaboradores")
+                      }
                     >
                       Colaboradores
                     </Link>
@@ -196,10 +221,12 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
                     <Link
                       prefetch={false}
                       className={subItemMenuClass(
-                        rotaAtiva("/inicio/base-dados/gestao-rh")
+                        rotaAtiva("/inicio/base-dados/gestao-rh"),
                       )}
                       href="/inicio/base-dados/gestao-rh"
-                      onClick={() => iniciarNavegacao("/inicio/base-dados/gestao-rh")}
+                      onClick={() =>
+                        iniciarNavegacao("/inicio/base-dados/gestao-rh")
+                      }
                     >
                       Gestão e RH
                     </Link>
@@ -218,16 +245,48 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
               >
                 <span className="flex items-center gap-3">
                   <svg className={iconClass} viewBox="0 0 24 24" fill="none">
-                    <path d="M8 7a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" stroke="currentColor" strokeWidth="2" />
-                    <path d="M4 21a8 8 0 0 1 16 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    <path d="M19 8v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    <path d="M22 11h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    <path
+                      d="M8 7a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    />
+                    <path
+                      d="M4 21a8 8 0 0 1 16 0"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M19 8v6"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M22 11h-6"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
                   </svg>
                   Admissão
                 </span>
-                <span className={`${chevronClass} ${admissaoOpen ? "rotate-90" : ""}`}>
-                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="m9 6 6 6-6 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <span
+                  className={`${chevronClass} ${admissaoOpen ? "rotate-90" : ""}`}
+                >
+                  <svg
+                    className="h-3.5 w-3.5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="m9 6 6 6-6 6"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 </span>
               </button>
@@ -237,9 +296,13 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
                   {pode(PERMISSOES.ADMISSOES_VISUALIZAR) && (
                     <Link
                       prefetch={false}
-                      className={subItemMenuClass(rotaAtiva("/inicio/admissao/controle"))}
+                      className={subItemMenuClass(
+                        rotaAtiva("/inicio/admissao/controle"),
+                      )}
                       href="/inicio/admissao/controle"
-                      onClick={() => iniciarNavegacao("/inicio/admissao/controle")}
+                      onClick={() =>
+                        iniciarNavegacao("/inicio/admissao/controle")
+                      }
                     >
                       Controle de Admissões
                     </Link>
@@ -249,10 +312,12 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
                     <Link
                       prefetch={false}
                       className={subItemMenuClass(
-                        rotaAtiva("/inicio/admissao/novos-admitidos")
+                        rotaAtiva("/inicio/admissao/novos-admitidos"),
                       )}
                       href="/inicio/admissao/novos-admitidos"
-                      onClick={() => iniciarNavegacao("/inicio/admissao/novos-admitidos")}
+                      onClick={() =>
+                        iniciarNavegacao("/inicio/admissao/novos-admitidos")
+                      }
                     >
                       Novos Admitidos
                     </Link>
@@ -264,14 +329,30 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
 
           {podeVerDesligamento && (
             <Link
-              className={itemMenuClass(rotaAtiva("/inicio/desligamento/controle"))}
+              className={itemMenuClass(
+                rotaAtiva("/inicio/desligamento/controle"),
+              )}
               href="/inicio/desligamento/controle"
               onClick={() => iniciarNavegacao("/inicio/desligamento/controle")}
             >
               <svg className={iconClass} viewBox="0 0 24 24" fill="none">
-                <path d="M8 7a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" stroke="currentColor" strokeWidth="2" />
-                <path d="M4 21a8 8 0 0 1 16 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <path d="M18 11h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path
+                  d="M8 7a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M4 21a8 8 0 0 1 16 0"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M18 11h5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
               </svg>
               Desligamento
             </Link>
@@ -279,16 +360,48 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
 
           {podeVerTransferencia && (
             <Link
-              className={itemMenuClass(rotaAtiva("/inicio/transferencia/controle"))}
+              className={itemMenuClass(
+                rotaAtiva("/inicio/transferencia/controle"),
+              )}
               href="/inicio/transferencia/controle"
               onClick={() => iniciarNavegacao("/inicio/transferencia/controle")}
             >
               <svg className={iconClass} viewBox="0 0 24 24" fill="none">
-                <path d="M7 7h11l-3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M18 7l-3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M17 17H6l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M6 17l3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="12" cy="12" r="2.5" stroke="currentColor" strokeWidth="2" />
+                <path
+                  d="M7 7h11l-3-3"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M18 7l-3 3"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M17 17H6l3 3"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M6 17l3-3"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="2.5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
               </svg>
               Transferência
             </Link>
@@ -301,12 +414,45 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
               onClick={() => iniciarNavegacao("/inicio/permuta/controle")}
             >
               <svg className={iconClass} viewBox="0 0 24 24" fill="none">
-                <path d="M7 7a3 3 0 1 1 6 0 3 3 0 0 1-6 0Z" stroke="currentColor" strokeWidth="2" />
-                <path d="M3.5 20a6.5 6.5 0 0 1 13 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <path d="M17 7h4l-2-2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="m19 9 2-2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M21 15h-4l2 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="m19 13-2 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M7 7a3 3 0 1 1 6 0 3 3 0 0 1-6 0Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M3.5 20a6.5 6.5 0 0 1 13 0"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M17 7h4l-2-2"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="m19 9 2-2"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M21 15h-4l2 2"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="m19 13-2 2"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
               Permuta
             </Link>
@@ -321,15 +467,43 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
               >
                 <span className="flex items-center gap-3">
                   <svg className={iconClass} viewBox="0 0 24 24" fill="none">
-                    <path d="M4 13h4v7H4v-7Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-                    <path d="M10 4h4v16h-4V4Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-                    <path d="M16 9h4v11h-4V9Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                    <path
+                      d="M4 13h4v7H4v-7Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M10 4h4v16h-4V4Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M16 9h4v11h-4V9Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                   Dashboard
                 </span>
-                <span className={`${chevronClass} ${dashboardOpen ? "rotate-90" : ""}`}>
-                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="m9 6 6 6-6 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <span
+                  className={`${chevronClass} ${dashboardOpen ? "rotate-90" : ""}`}
+                >
+                  <svg
+                    className="h-3.5 w-3.5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="m9 6 6 6-6 6"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 </span>
               </button>
@@ -338,9 +512,13 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
                 <div className={subMenuClass}>
                   {pode(PERMISSOES.DASHBOARD) && (
                     <Link
-                      className={subItemMenuClass(rotaAtiva("/inicio/dashboard/visao-geral"))}
+                      className={subItemMenuClass(
+                        rotaAtiva("/inicio/dashboard/visao-geral"),
+                      )}
                       href="/inicio/dashboard/visao-geral"
-                      onClick={() => iniciarNavegacao("/inicio/dashboard/visao-geral")}
+                      onClick={() =>
+                        iniciarNavegacao("/inicio/dashboard/visao-geral")
+                      }
                     >
                       Visão Geral
                     </Link>
@@ -348,9 +526,13 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
 
                   {pode(PERMISSOES.ADMISSOES_DASHBOARD) && (
                     <Link
-                      className={subItemMenuClass(rotaAtiva("/inicio/dashboard/admissoes"))}
+                      className={subItemMenuClass(
+                        rotaAtiva("/inicio/dashboard/admissoes"),
+                      )}
                       href="/inicio/dashboard/admissoes"
-                      onClick={() => iniciarNavegacao("/inicio/dashboard/admissoes")}
+                      onClick={() =>
+                        iniciarNavegacao("/inicio/dashboard/admissoes")
+                      }
                     >
                       Admissões
                     </Link>
@@ -358,9 +540,13 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
 
                   {pode(PERMISSOES.DESLIGAMENTOS_DASHBOARD) && (
                     <Link
-                      className={subItemMenuClass(rotaAtiva("/inicio/dashboard/desligamentos"))}
+                      className={subItemMenuClass(
+                        rotaAtiva("/inicio/dashboard/desligamentos"),
+                      )}
                       href="/inicio/dashboard/desligamentos"
-                      onClick={() => iniciarNavegacao("/inicio/dashboard/desligamentos")}
+                      onClick={() =>
+                        iniciarNavegacao("/inicio/dashboard/desligamentos")
+                      }
                     >
                       Desligamentos
                     </Link>
@@ -368,9 +554,13 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
 
                   {pode(PERMISSOES.ATESTADOS) && (
                     <Link
-                      className={subItemMenuClass(rotaAtiva("/inicio/dashboard/atestados"))}
+                      className={subItemMenuClass(
+                        rotaAtiva("/inicio/dashboard/atestados"),
+                      )}
                       href="/inicio/dashboard/atestados"
-                      onClick={() => iniciarNavegacao("/inicio/dashboard/atestados")}
+                      onClick={() =>
+                        iniciarNavegacao("/inicio/dashboard/atestados")
+                      }
                     >
                       Atestados
                     </Link>
@@ -389,10 +579,30 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
               >
                 <span className="flex items-center gap-3">
                   <svg className={iconClass} viewBox="0 0 24 24" fill="none">
-                    <path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-                    <path d="M8.5 8h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    <path d="M8.5 12h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    <path d="M8.5 16h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    <path
+                      d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M8.5 8h7"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M8.5 12h7"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M8.5 16h4"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
                   </svg>
                   Memorandos
                 </span>
@@ -401,8 +611,19 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
                     centralMemorandosOpen ? "rotate-90" : ""
                   }`}
                 >
-                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="m9 6 6 6-6 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <svg
+                    className="h-3.5 w-3.5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="m9 6 6 6-6 6"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 </span>
               </button>
@@ -411,9 +632,13 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
                 <div className={subMenuClass}>
                   <Link
                     prefetch={false}
-                    className={subItemMenuClass(pathname === "/inicio/central-memorandos")}
+                    className={subItemMenuClass(
+                      pathname === "/inicio/central-memorandos",
+                    )}
                     href="/inicio/central-memorandos"
-                    onClick={() => iniciarNavegacao("/inicio/central-memorandos")}
+                    onClick={() =>
+                      iniciarNavegacao("/inicio/central-memorandos")
+                    }
                   >
                     Nova solicitação
                   </Link>
@@ -421,11 +646,13 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
                   <Link
                     prefetch={false}
                     className={subItemMenuClass(
-                      rotaAtiva("/inicio/central-memorandos/troca-plantao")
+                      rotaAtiva("/inicio/central-memorandos/troca-plantao"),
                     )}
                     href="/inicio/central-memorandos/troca-plantao"
                     onClick={() =>
-                      iniciarNavegacao("/inicio/central-memorandos/troca-plantao")
+                      iniciarNavegacao(
+                        "/inicio/central-memorandos/troca-plantao",
+                      )
                     }
                   >
                     Troca de plantão
@@ -433,7 +660,7 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
                   <Link
                     prefetch={false}
                     className={subItemMenuClass(
-                      rotaAtiva("/inicio/central-memorandos/banco-horas")
+                      rotaAtiva("/inicio/central-memorandos/banco-horas"),
                     )}
                     href="/inicio/central-memorandos/banco-horas"
                     onClick={() =>
@@ -441,6 +668,36 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
                     }
                   >
                     Banco de horas
+                  </Link>
+                  <Link
+                    prefetch={false}
+                    className={subItemMenuClass(
+                      rotaAtiva(
+                        "/inicio/central-memorandos/substituicoes-medicas",
+                      ),
+                    )}
+                    href="/inicio/central-memorandos/substituicoes-medicas"
+                    onClick={() =>
+                      iniciarNavegacao(
+                        "/inicio/central-memorandos/substituicoes-medicas",
+                      )
+                    }
+                  >
+                    Substituições médicas
+                  </Link>
+                  <Link
+                    prefetch={false}
+                    className={subItemMenuClass(
+                      rotaAtiva("/inicio/central-memorandos/trocas-medicas"),
+                    )}
+                    href="/inicio/central-memorandos/trocas-medicas"
+                    onClick={() =>
+                      iniciarNavegacao(
+                        "/inicio/central-memorandos/trocas-medicas",
+                      )
+                    }
+                  >
+                    Trocas médicas
                   </Link>
                 </div>
               )}
@@ -454,10 +711,30 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
               onClick={() => iniciarNavegacao("/inicio/conferencia-folha")}
             >
               <svg className={iconClass} viewBox="0 0 24 24" fill="none">
-                <path d="M6 3h9l3 3v15H6V3Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-                <path d="M15 3v4h4" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-                <path d="M8.5 12h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <path d="M8.5 16h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path
+                  d="M6 3h9l3 3v15H6V3Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M15 3v4h4"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M8.5 12h7"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M8.5 16h5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
               </svg>
               Análise FOPAG
             </Link>
@@ -470,10 +747,32 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
               onClick={() => iniciarNavegacao("/inicio/solicitacoes")}
             >
               <svg className={iconClass} viewBox="0 0 24 24" fill="none">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2" />
-                <path d="M19 8v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <path d="M22 11h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path
+                  d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <circle
+                  cx="9"
+                  cy="7"
+                  r="4"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M19 8v6"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M22 11h-6"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
               </svg>
               Solicitações
             </Link>
@@ -486,10 +785,34 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
               onClick={() => iniciarNavegacao("/inicio/usuarios")}
             >
               <svg className={iconClass} viewBox="0 0 24 24" fill="none">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <circle
+                  cx="9"
+                  cy="7"
+                  r="4"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M23 21v-2a4 4 0 0 0-3-3.87"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M16 3.13a4 4 0 0 1 0 7.75"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
               Usuários
             </Link>
@@ -502,9 +825,24 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
               onClick={() => iniciarNavegacao("/inicio/perfis")}
             >
               <svg className={iconClass} viewBox="0 0 24 24" fill="none">
-                <path d="M4 6h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <path d="M4 12h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <path d="M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path
+                  d="M4 6h16"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M4 12h16"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M4 18h16"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
                 <circle cx="9" cy="6" r="2" fill="currentColor" />
                 <circle cx="15" cy="12" r="2" fill="currentColor" />
                 <circle cx="11" cy="18" r="2" fill="currentColor" />
@@ -520,23 +858,29 @@ export function Sidebar({ perfil, permissoes, onNavigate }: SidebarProps) {
               onClick={() => iniciarNavegacao("/inicio/auditoria")}
             >
               <svg className={iconClass} viewBox="0 0 24 24" fill="none">
-                <path d="M9 11l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                <path
+                  d="M9 11l2 2 4-4"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
               </svg>
               Auditoria
             </Link>
           )}
-
         </nav>
       </div>
 
-      <div
-        className="border-t border-white/10 px-4 pb-4 pt-3"
-      >
+      <div className="border-t border-white/10 px-4 pb-4 pt-3">
         <TemaToggle tema={tema} onToggle={alternarTema} />
-        <p
-          className="mt-2 text-center text-[11px] font-semibold text-[#a8bbcb]"
-        >
+        <p className="mt-2 text-center text-[11px] font-semibold text-[#a8bbcb]">
           {temaDia ? "Modo dia ativo" : "Modo noite ativo"}
         </p>
       </div>

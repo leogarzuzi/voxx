@@ -1,7 +1,8 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
+@source "../";
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
   /* Identidade RioSaúde */
   --rs-navy-950: #071522;
@@ -15,28 +16,28 @@
   --rs-cyan-400: #45c2ef;
   --rs-cyan-300: #6dd0f3;
 
-  /* Tema noturno (padrão, evitando clarão antes da hidratação) */
-  --background: #0d2742;
-  --foreground: #f4f8fb;
-  --voxx-bg: #0d2742;
-  --voxx-bg-subtle: #123553;
-  --voxx-surface: #163b5c;
-  --voxx-surface-raised: #1b486d;
-  --voxx-surface-soft: #102f4b;
-  --voxx-border: #2f6285;
-  --voxx-border-strong: #4381a7;
-  --voxx-text: #f4f8fb;
-  --voxx-text-muted: #bfd0dc;
-  --voxx-text-subtle: #a5bdcd;
-  --voxx-primary: #45c2ef;
-  --voxx-primary-hover: #6dd0f3;
-  --voxx-primary-contrast: #071522;
-  --voxx-focus: rgba(69, 194, 239, 0.28);
-  --voxx-overlay: rgba(5, 22, 38, 0.68);
-  --voxx-shadow: 0 24px 70px rgba(3, 18, 32, 0.30);
-  --voxx-shadow-soft: 0 14px 34px rgba(3, 18, 32, 0.20);
-  --voxx-scroll-track: #102f4b;
-  --voxx-scroll-thumb: #4381a7;
+  /* Tema diurno padrão, inclusive antes da hidratação */
+  --background: #eef8fc;
+  --foreground: #102a43;
+  --voxx-bg: #eef8fc;
+  --voxx-bg-subtle: #dff2f9;
+  --voxx-surface: #ffffff;
+  --voxx-surface-raised: #ffffff;
+  --voxx-surface-soft: #f4fbfe;
+  --voxx-border: #b9dbe8;
+  --voxx-border-strong: #7fc4dc;
+  --voxx-text: #102a43;
+  --voxx-text-muted: #60758a;
+  --voxx-text-subtle: #8294a5;
+  --voxx-primary: #159dce;
+  --voxx-primary-hover: #0d84b0;
+  --voxx-primary-contrast: #ffffff;
+  --voxx-focus: rgba(53, 181, 229, 0.30);
+  --voxx-overlay: rgba(16, 42, 67, 0.38);
+  --voxx-shadow: 0 24px 70px rgba(21, 120, 164, 0.14);
+  --voxx-shadow-soft: 0 14px 34px rgba(21, 120, 164, 0.10);
+  --voxx-scroll-track: #dff2f9;
+  --voxx-scroll-thumb: #65b8d5;
 }
 
 html.tema-dia {
@@ -62,6 +63,31 @@ html.tema-dia {
   --voxx-shadow-soft: 0 14px 34px rgba(21, 120, 164, 0.10);
   --voxx-scroll-track: #dff2f9;
   --voxx-scroll-thumb: #65b8d5;
+}
+
+html.tema-noite {
+  color-scheme: dark;
+  --background: #0d2742;
+  --foreground: #f4f8fb;
+  --voxx-bg: #0d2742;
+  --voxx-bg-subtle: #123553;
+  --voxx-surface: #163b5c;
+  --voxx-surface-raised: #1b486d;
+  --voxx-surface-soft: #102f4b;
+  --voxx-border: #2f6285;
+  --voxx-border-strong: #4381a7;
+  --voxx-text: #f4f8fb;
+  --voxx-text-muted: #bfd0dc;
+  --voxx-text-subtle: #a5bdcd;
+  --voxx-primary: #45c2ef;
+  --voxx-primary-hover: #6dd0f3;
+  --voxx-primary-contrast: #071522;
+  --voxx-focus: rgba(69, 194, 239, 0.28);
+  --voxx-overlay: rgba(5, 22, 38, 0.68);
+  --voxx-shadow: 0 24px 70px rgba(3, 18, 32, 0.30);
+  --voxx-shadow-soft: 0 14px 34px rgba(3, 18, 32, 0.20);
+  --voxx-scroll-track: #102f4b;
+  --voxx-scroll-thumb: #4381a7;
 }
 
 @theme inline {
@@ -618,6 +644,39 @@ body {
 .voxx-button-secondary:disabled {
   cursor: not-allowed;
   opacity: 0.58;
+}
+
+/* Atalho externo da Divisão Médica */
+.voxx-medical-access {
+  border: 1px solid color-mix(in srgb, var(--rs-cyan-500) 24%, transparent);
+  background: color-mix(in srgb, var(--rs-cyan-500) 9%, #f7fbfe);
+  color: var(--rs-cyan-600);
+  box-shadow: 0 8px 24px rgba(21, 157, 206, 0.08);
+  transition: background-color 180ms ease, color 180ms ease,
+    box-shadow 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.voxx-medical-access:hover {
+  border-color: var(--rs-cyan-500);
+  background: var(--rs-cyan-600);
+  color: #ffffff;
+  box-shadow: 0 0 0 5px rgba(53, 181, 229, 0.24),
+    0 12px 28px rgba(21, 157, 206, 0.24);
+  transform: translateY(-1px);
+}
+
+.voxx-medical-access:active { transform: scale(0.98); }
+
+html.tema-noite .voxx-medical-access {
+  border-color: rgba(109, 208, 243, 0.28);
+  background: rgba(53, 181, 229, 0.11);
+  color: var(--rs-cyan-300);
+}
+
+html.tema-noite .voxx-medical-access:hover {
+  border-color: var(--rs-cyan-400);
+  background: var(--rs-cyan-600);
+  color: #ffffff;
 }
 
 /* Área externa: login, solicitação e recuperação de acesso */

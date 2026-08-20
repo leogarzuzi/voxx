@@ -17,7 +17,9 @@ function texto(valor: unknown) {
 }
 
 function somenteDigitos(valor: unknown) {
-  return String(valor || "").replace(/\D/g, "").slice(0, 8);
+  return String(valor || "")
+    .replace(/\D/g, "")
+    .slice(0, 8);
 }
 
 function limparBusca(valor: string | null) {
@@ -25,6 +27,18 @@ function limparBusca(valor: string | null) {
     .trim()
     .replace(/[,%*()]/g, " ")
     .replace(/\s+/g, " ");
+}
+
+function competenciaValida(valor: string | null) {
+  const valorNormalizado = texto(valor);
+  return /^\d{4}-\d{2}$/.test(valorNormalizado) ? valorNormalizado : "";
+}
+
+function proximaCompetencia(competencia: string) {
+  const [ano, mes] = competencia.split("-").map(Number);
+  return mes === 12
+    ? `${ano + 1}-01`
+    : `${ano}-${String(mes + 1).padStart(2, "0")}`;
 }
 
 function normalizarTipoPlantao(valor: unknown) {
@@ -51,9 +65,11 @@ function mesmoDiaMesmoTipo(
   dataA: string,
   tipoA: string,
   dataB: string,
-  tipoB: string
+  tipoB: string,
 ) {
-  return Boolean(dataA && dataB && tipoA && tipoB && dataA === dataB && tipoA === tipoB);
+  return Boolean(
+    dataA && dataB && tipoA && tipoB && dataA === dataB && tipoA === tipoB,
+  );
 }
 
 async function gerarProtocolo(supabase: any) {
@@ -85,7 +101,7 @@ async function obterUsuarioAtivo(supabase: any) {
       usuario: null,
       erro: Response.json(
         { success: false, error: "Não autenticado." },
-        { status: 401 }
+        { status: 401 },
       ),
     };
   }
@@ -101,15 +117,24 @@ async function obterUsuarioAtivo(supabase: any) {
       usuario: null,
       erro: Response.json(
         { success: false, error: "Usuário sem acesso ativo." },
-        { status: 403 }
+        { status: 403 },
       ),
     };
   }
 
-  if (!(await temPermissaoNoBanco(supabase, usuarioLogado.perfil, PERMISSOES.CENTRAL_MEMORANDOS))) {
+  if (
+    !(await temPermissaoNoBanco(
+      supabase,
+      usuarioLogado.perfil,
+      PERMISSOES.CENTRAL_MEMORANDOS,
+    ))
+  ) {
     return {
       usuario: null,
-      erro: Response.json({ success: false, error: "Sem permissão." }, { status: 403 }),
+      erro: Response.json(
+        { success: false, error: "Sem permissão." },
+        { status: 403 },
+      ),
     };
   }
 
@@ -133,17 +158,16 @@ export async function GET(request: NextRequest) {
     const pagina = Math.max(Number(searchParams.get("page") || "1"), 1);
     const limite = Math.min(
       Math.max(Number(searchParams.get("pageSize") || "100"), 1),
-      150
+      150,
     );
     const busca = limparBusca(searchParams.get("busca"));
     const status = texto(searchParams.get("status"));
+    const competencia = competenciaValida(searchParams.get("competencia"));
     const inicio = (pagina - 1) * limite;
     const fim = inicio + limite - 1;
 
-    let query = supabase
-      .from("banco_horas_controle")
-      .select(
-        `
+    let query = supabase.from("banco_horas_controle").select(
+      `
         id,
         protocolo,
         status,
@@ -162,10 +186,16 @@ export async function GET(request: NextRequest) {
         criado_em,
         atualizado_em
       `,
-        { count: "exact" }
-      );
+      { count: "exact" },
+    );
 
     if (status) query = query.eq("status", status);
+
+    if (competencia) {
+      query = query
+        .gte("data_plantao_original", `${competencia}-01`)
+        .lt("data_plantao_original", `${proximaCompetencia(competencia)}-01`);
+    }
 
     if (busca.length >= 2) {
       const digitos = busca.replace(/\D/g, "");
@@ -178,7 +208,7 @@ export async function GET(request: NextRequest) {
           digitos.length >= 3 ? `matricula.ilike.*${digitos}*` : "",
         ]
           .filter(Boolean)
-          .join(",")
+          .join(","),
       );
     }
 
@@ -193,7 +223,7 @@ export async function GET(request: NextRequest) {
           error: "Não foi possível carregar o banco de horas.",
           details: error.message,
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -208,7 +238,7 @@ export async function GET(request: NextRequest) {
   } catch {
     return Response.json(
       { success: false, error: "Não foi possível consultar o banco de horas." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -234,40 +264,48 @@ export async function POST(request: NextRequest) {
     if (matricula.length !== 8) {
       return Response.json(
         { success: false, error: "A matrícula deve conter 8 dígitos." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!dataOriginal || !dataNovoPlantao) {
       return Response.json(
         { success: false, error: "As datas dos plantões são obrigatórias." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!tipoValido(tipoOriginal) || !tipoValido(tipoNovoPlantao)) {
       return Response.json(
         { success: false, error: "Tipo de plantão inválido." },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (!dataNoMesAtual(dataOriginal) || !dataNoMesAtual(dataNovoPlantao)) {
       return Response.json(
         {
           success: false,
-          error: "O banco de horas só pode ser solicitado para plantões do mês atual.",
+          error:
+            "O banco de horas só pode ser solicitado para plantões do mês atual.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    if (mesmoDiaMesmoTipo(dataOriginal, tipoOriginal, dataNovoPlantao, tipoNovoPlantao)) {
+    if (
+      mesmoDiaMesmoTipo(
+        dataOriginal,
+        tipoOriginal,
+        dataNovoPlantao,
+        tipoNovoPlantao,
+      )
+    ) {
       return Response.json(
         {
           success: false,
           error: "No mesmo dia, o tipo do plantão precisa ser diferente.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -280,7 +318,7 @@ export async function POST(request: NextRequest) {
     if (erroColaborador) {
       return Response.json(
         { success: false, error: "Não foi possível validar o colaborador." },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -288,9 +326,10 @@ export async function POST(request: NextRequest) {
       return Response.json(
         {
           success: false,
-          error: "Esta matrícula não se encontra ativa na base de colaboradores.",
+          error:
+            "Esta matrícula não se encontra ativa na base de colaboradores.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -322,9 +361,10 @@ export async function POST(request: NextRequest) {
       return Response.json(
         {
           success: false,
-          error: erroInsert.message || "Não foi possível salvar o banco de horas.",
+          error:
+            erroInsert.message || "Não foi possível salvar o banco de horas.",
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -355,7 +395,7 @@ export async function POST(request: NextRequest) {
   } catch {
     return Response.json(
       { success: false, error: "Não foi possível registrar o banco de horas." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -381,21 +421,21 @@ export async function PUT(request: NextRequest) {
     if (!id) {
       return Response.json(
         { success: false, error: "ID do banco de horas obrigatório." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!dataOriginal || !dataNovoPlantao) {
       return Response.json(
         { success: false, error: "As datas dos plantões são obrigatórias." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!tipoValido(tipoOriginal) || !tipoValido(tipoNovoPlantao)) {
       return Response.json(
         { success: false, error: "Tipo de plantão inválido." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -403,26 +443,34 @@ export async function PUT(request: NextRequest) {
       return Response.json(
         {
           success: false,
-          error: "O banco de horas só pode ser solicitado para plantões do mês atual.",
+          error:
+            "O banco de horas só pode ser solicitado para plantões do mês atual.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    if (mesmoDiaMesmoTipo(dataOriginal, tipoOriginal, dataNovoPlantao, tipoNovoPlantao)) {
+    if (
+      mesmoDiaMesmoTipo(
+        dataOriginal,
+        tipoOriginal,
+        dataNovoPlantao,
+        tipoNovoPlantao,
+      )
+    ) {
       return Response.json(
         {
           success: false,
           error: "No mesmo dia, o tipo do plantão precisa ser diferente.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const { data: atual, error: erroBusca } = await supabase
       .from("banco_horas_controle")
       .select(
-        "id, protocolo, status, matricula, nome, funcao, email, data_plantao_original, tipo_plantao_original, data_novo_plantao, tipo_novo_plantao"
+        "id, protocolo, status, matricula, nome, funcao, email, data_plantao_original, tipo_plantao_original, data_novo_plantao, tipo_novo_plantao",
       )
       .eq("id", id)
       .single();
@@ -430,14 +478,17 @@ export async function PUT(request: NextRequest) {
     if (erroBusca || !atual) {
       return Response.json(
         { success: false, error: "Banco de horas não encontrado." },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     if (atual.status !== "recebido") {
       return Response.json(
-        { success: false, error: "Apenas solicitações recebidas podem ser alteradas." },
-        { status: 400 }
+        {
+          success: false,
+          error: "Apenas solicitações recebidas podem ser alteradas.",
+        },
+        { status: 400 },
       );
     }
 
@@ -482,7 +533,7 @@ export async function PUT(request: NextRequest) {
     if (error) {
       return Response.json(
         { success: false, error: "Não foi possível alterar o banco de horas." },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -511,7 +562,7 @@ export async function PUT(request: NextRequest) {
   } catch {
     return Response.json(
       { success: false, error: "Não foi possível alterar o banco de horas." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -531,14 +582,14 @@ export async function PATCH(request: NextRequest) {
     if (!id) {
       return Response.json(
         { success: false, error: "ID do banco de horas obrigatório." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (statusNovo !== "cancelado") {
       return Response.json(
         { success: false, error: "Status inválido." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -551,14 +602,17 @@ export async function PATCH(request: NextRequest) {
     if (erroBusca || !atual) {
       return Response.json(
         { success: false, error: "Banco de horas não encontrado." },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     if (atual.status !== "recebido") {
       return Response.json(
-        { success: false, error: "Apenas solicitações recebidas podem ser canceladas." },
-        { status: 400 }
+        {
+          success: false,
+          error: "Apenas solicitações recebidas podem ser canceladas.",
+        },
+        { status: 400 },
       );
     }
 
@@ -581,8 +635,11 @@ export async function PATCH(request: NextRequest) {
 
     if (error) {
       return Response.json(
-        { success: false, error: "Não foi possível cancelar o banco de horas." },
-        { status: 500 }
+        {
+          success: false,
+          error: "Não foi possível cancelar o banco de horas.",
+        },
+        { status: 500 },
       );
     }
 
@@ -609,10 +666,7 @@ export async function PATCH(request: NextRequest) {
   } catch {
     return Response.json(
       { success: false, error: "Não foi possível cancelar o banco de horas." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-
-
-
