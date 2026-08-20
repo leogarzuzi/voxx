@@ -12,6 +12,8 @@ const MODULOS_VALIDOS = [
   "atestados",
   "trocasPlantao",
   "bancoHoras",
+  "substituicoesMedicas",
+  "trocasMedicas",
 ] as const;
 type ModuloHistorico = (typeof MODULOS_VALIDOS)[number];
 
@@ -118,7 +120,7 @@ function adicionarVinculo(mapa: Map<string, Vinculo>, dados: Record<string, unkn
 }
 
 async function localizarVinculos(supabase: SupabaseClient, busca: string) {
-  const [colaboradores, gestao, admissoes, desligamentos, transferencias, permutas, atestados, trocas, bancoHoras] = await Promise.all([
+  const [colaboradores, gestao, admissoes, desligamentos, transferencias, permutas, atestados, trocas, bancoHoras, substituicoesMedicas, trocasMedicas] = await Promise.all([
     buscarCandidatos(supabase, "colaboradores", "matricula,nome,cpf,cargo,carga_horaria,exercicio", ["nome", "matricula", "cpf"], busca),
     buscarCandidatos(supabase, "colaboradores_gestao_rh", "matricula,nome,cpf,cargo,carga_horaria,exercicio", ["nome", "matricula", "cpf"], busca),
     buscarCandidatos(supabase, "admissoes_controle", "matricula,nome,cpf,cargo,ch_final,exercicio", ["nome", "matricula", "cpf"], busca),
@@ -128,6 +130,8 @@ async function localizarVinculos(supabase: SupabaseClient, busca: string) {
     buscarCandidatos(supabase, "atestados", "matricula,nome,funcao", ["nome", "matricula"], busca),
     buscarCandidatos(supabase, "trocas_plantao", "matricula_solicitante,nome_solicitante,funcao_solicitante,matricula_solicitado,nome_solicitado,funcao_solicitado", ["nome_solicitante", "matricula_solicitante", "nome_solicitado", "matricula_solicitado"], busca),
     buscarCandidatos(supabase, "banco_horas_controle", "matricula,nome,funcao", ["nome", "matricula"], busca),
+    buscarCandidatos(supabase, "substituicoes_medicas", "matricula_solicitante,nome_solicitante,funcao_solicitante,matricula_substituto,nome_substituto,funcao_substituto", ["nome_solicitante", "matricula_solicitante", "nome_substituto", "matricula_substituto"], busca),
+    buscarCandidatos(supabase, "trocas_plantao_medicas", "matricula_solicitante,nome_solicitante,funcao_solicitante,matricula_solicitado,nome_solicitado,funcao_solicitado", ["nome_solicitante", "matricula_solicitante", "nome_solicitado", "matricula_solicitado"], busca),
   ]);
 
   const mapa = new Map<string, Vinculo>();
@@ -151,6 +155,14 @@ async function localizarVinculos(supabase: SupabaseClient, busca: string) {
     if (corresponde(item.nome_solicitado, busca) || corresponde(item.matricula_solicitado, busca)) adicionarVinculo(mapa, { matricula: item.matricula_solicitado, nome: item.nome_solicitado, cargo: item.funcao_solicitado, statusAtual: "Memorando de troca de plantão" });
   }
   for (const item of bancoHoras) adicionarVinculo(mapa, { matricula: item.matricula, nome: item.nome, cargo: item.funcao, statusAtual: "Memorando de banco de horas" });
+  for (const item of substituicoesMedicas) {
+    if (corresponde(item.nome_solicitante, busca) || corresponde(item.matricula_solicitante, busca)) adicionarVinculo(mapa, { matricula: item.matricula_solicitante, nome: item.nome_solicitante, cargo: item.funcao_solicitante, statusAtual: "Substituição médica" });
+    if (corresponde(item.nome_substituto, busca) || corresponde(item.matricula_substituto, busca)) adicionarVinculo(mapa, { matricula: item.matricula_substituto, nome: item.nome_substituto, cargo: item.funcao_substituto, statusAtual: "Substituição médica" });
+  }
+  for (const item of trocasMedicas) {
+    if (corresponde(item.nome_solicitante, busca) || corresponde(item.matricula_solicitante, busca)) adicionarVinculo(mapa, { matricula: item.matricula_solicitante, nome: item.nome_solicitante, cargo: item.funcao_solicitante, statusAtual: "Troca médica" });
+    if (corresponde(item.nome_solicitado, busca) || corresponde(item.matricula_solicitado, busca)) adicionarVinculo(mapa, { matricula: item.matricula_solicitado, nome: item.nome_solicitado, cargo: item.funcao_solicitado, statusAtual: "Troca médica" });
+  }
 
   return [...mapa.values()].sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "pt-BR"));
 }
@@ -225,6 +237,45 @@ async function carregarModulo(supabase: SupabaseClient, modulo: ModuloHistorico,
     const resultado = await consultarPorMatricula(supabase, "banco_horas_controle", "id,protocolo,matricula,nome,data_plantao_original,tipo_plantao_original,data_novo_plantao,tipo_novo_plantao,status,recebido_em,criado_em", ["matricula"], matricula, quantidade, "recebido_em");
     total = resultado.count;
     registros = resultado.data.map((item) => ({ id: `banco-horas-${item.id}`, modulo, titulo: texto(item.protocolo) || "Banco de horas", descricao: `Plantão original: ${dataExibicao(item.data_plantao_original) || "não informado"}${texto(item.tipo_plantao_original) ? ` (${texto(item.tipo_plantao_original)})` : ""} · Novo plantão: ${dataExibicao(item.data_novo_plantao) || "não informado"}${texto(item.tipo_novo_plantao) ? ` (${texto(item.tipo_novo_plantao)})` : ""}`, data: texto(item.recebido_em) || dataRegistro(item), status: texto(item.status) }));
+  }
+
+  if (modulo === "substituicoesMedicas") {
+    const resultado = await consultarPorMatricula(supabase, "substituicoes_medicas", "id,protocolo,matricula_solicitante,nome_solicitante,matricula_substituto,nome_substituto,data_plantao,tipo_plantao,status,criado_em,cancelado_em", ["matricula_solicitante", "matricula_substituto"], matricula, quantidade, "criado_em");
+    total = resultado.count;
+    registros = resultado.data.map((item) => {
+      const solicitante = somenteDigitos(item.matricula_solicitante) === matricula;
+      const outraPessoa = solicitante ? texto(item.nome_substituto) : texto(item.nome_solicitante);
+      const papel = solicitante ? "solicitante" : "substituto";
+      return {
+        id: `substituicao-medica-${item.id}`,
+        modulo,
+        titulo: texto(item.protocolo) || "Substituição médica",
+        descricao: `Participação como ${papel} · Plantão: ${dataExibicao(item.data_plantao) || "não informado"}${texto(item.tipo_plantao) ? ` (${texto(item.tipo_plantao)})` : ""} · Com ${outraPessoa || "médico não informado"}`,
+        data: texto(item.criado_em) || texto(item.data_plantao),
+        status: texto(item.status),
+      };
+    });
+  }
+
+  if (modulo === "trocasMedicas") {
+    const resultado = await consultarPorMatricula(supabase, "trocas_plantao_medicas", "id,protocolo,matricula_solicitante,nome_solicitante,data_plantao_solicitante,tipo_plantao_solicitante,matricula_solicitado,nome_solicitado,data_plantao_solicitado,tipo_plantao_solicitado,status,criado_em,cancelado_em", ["matricula_solicitante", "matricula_solicitado"], matricula, quantidade, "criado_em");
+    total = resultado.count;
+    registros = resultado.data.map((item) => {
+      const solicitante = somenteDigitos(item.matricula_solicitante) === matricula;
+      const outraPessoa = solicitante ? texto(item.nome_solicitado) : texto(item.nome_solicitante);
+      const dataOriginal = solicitante ? item.data_plantao_solicitante : item.data_plantao_solicitado;
+      const tipoOriginal = solicitante ? item.tipo_plantao_solicitante : item.tipo_plantao_solicitado;
+      const dataRecebida = solicitante ? item.data_plantao_solicitado : item.data_plantao_solicitante;
+      const tipoRecebido = solicitante ? item.tipo_plantao_solicitado : item.tipo_plantao_solicitante;
+      return {
+        id: `troca-medica-${item.id}`,
+        modulo,
+        titulo: texto(item.protocolo) || "Troca médica",
+        descricao: `Plantão original: ${dataExibicao(dataOriginal) || "não informado"}${texto(tipoOriginal) ? ` (${texto(tipoOriginal)})` : ""} · Plantão recebido: ${dataExibicao(dataRecebida) || "não informado"}${texto(tipoRecebido) ? ` (${texto(tipoRecebido)})` : ""} · Com ${outraPessoa || "médico não informado"}`,
+        data: texto(item.criado_em) || texto(dataOriginal),
+        status: texto(item.status),
+      };
+    });
   }
 
   registros.sort((a, b) => (b.data ? new Date(b.data).getTime() : 0) - (a.data ? new Date(a.data).getTime() : 0));

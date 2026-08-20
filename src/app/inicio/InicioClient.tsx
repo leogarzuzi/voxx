@@ -45,9 +45,13 @@ const NOMES_MODULOS: Record<string, string> = {
   atestados: "Atestados",
   trocasPlantao: "Trocas de plantão",
   bancoHoras: "Banco de horas",
+  substituicoesMedicas: "Substituições médicas",
+  trocasMedicas: "Trocas médicas",
 };
 
 const ORDEM_MODULOS = [
+  "substituicoesMedicas",
+  "trocasMedicas",
   "trocasPlantao",
   "bancoHoras",
   "atestados",
