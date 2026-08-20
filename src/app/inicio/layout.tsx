@@ -215,7 +215,7 @@ function RequisitoSenha({
           : "text-slate-500"
       }`}
     >
-      {ok ? "ok" : "-"} {texto}
+      {texto}
     </div>
   );
 }

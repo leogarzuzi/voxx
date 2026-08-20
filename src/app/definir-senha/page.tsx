@@ -38,7 +38,7 @@ function RequisitoSenha({
 }) {
   return (
     <div
-      className={`flex items-center gap-2 text-xs ${
+      className={`text-xs ${
         ok
           ? temaDia
             ? "text-emerald-700"
@@ -48,19 +48,6 @@ function RequisitoSenha({
             : "text-slate-500"
       }`}
     >
-      <span
-        className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${
-          ok
-            ? temaDia
-              ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
-              : "bg-emerald-400/15 text-emerald-300 ring-1 ring-emerald-300/25"
-            : temaDia
-              ? "bg-slate-100 text-slate-500 ring-1 ring-slate-200"
-              : "bg-white/[0.05] text-slate-500 ring-1 ring-white/10"
-        }`}
-      >
-        {ok ? "ok" : "-"}
-      </span>
       {texto}
     </div>
   );

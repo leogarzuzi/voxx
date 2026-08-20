@@ -912,6 +912,39 @@ html.tema-noite * {
     transition-duration: 0ms;
   }
 }
+
+/* Mantém o efeito do botão médico acima da transição global de tema. */
+html.tema-dia .voxx-medical-access,
+html.tema-noite .voxx-medical-access {
+  transition-property: background-color, border-color, color, box-shadow,
+    transform;
+  transition-duration: 180ms;
+  transition-timing-function: ease;
+  will-change: transform, box-shadow;
+}
+
+.voxx-medical-access:focus-visible {
+  border-color: var(--rs-cyan-500);
+  background: var(--rs-cyan-600);
+  color: #ffffff;
+  box-shadow: 0 0 0 5px rgba(53, 181, 229, 0.24),
+    0 12px 28px rgba(21, 157, 206, 0.24);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.voxx-medical-access:active {
+  box-shadow: 0 0 0 4px rgba(53, 181, 229, 0.2),
+    0 8px 20px rgba(21, 157, 206, 0.2);
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.tema-dia .voxx-medical-access,
+  html.tema-noite .voxx-medical-access {
+    transition-duration: 0ms;
+  }
+}
 .voxx-export-button {
   display: inline-flex;
   height: 2.75rem;
