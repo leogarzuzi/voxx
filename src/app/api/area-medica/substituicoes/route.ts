@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { notificarSolicitacaoMedica } from "@/lib/notificacoesMedicas";
+import { emailTemFormatoValido, normalizarEmail } from "@/lib/emailSeguro";
 
 export const dynamic = "force-dynamic";
 const TIPOS = new Set(["SD", "SN", "24H", "ROTINA", "AMBULATÓRIO"]);
@@ -51,10 +52,8 @@ function competenciaSaoPaulo() {
   return `${partes.find((p) => p.type === "year")?.value}-${partes.find((p) => p.type === "month")?.value}`;
 }
 function validarEmail(valor: unknown) {
-  const email = String(valor ?? "")
-    .trim()
-    .toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))
+  const email = normalizarEmail(valor);
+  if (!emailTemFormatoValido(email))
     return { email, erro: "Informe um e-mail válido." };
   const dominio = email.split("@")[1];
   const sugestao = DOMINIOS_COM_ERRO[dominio];
@@ -67,9 +66,7 @@ function validarEmail(valor: unknown) {
 }
 
 function validarEmailOpcional(valor: unknown) {
-  const email = String(valor ?? "")
-    .trim()
-    .toLowerCase();
+  const email = normalizarEmail(valor);
   return email ? validarEmail(email) : { email: "", erro: "" };
 }
 

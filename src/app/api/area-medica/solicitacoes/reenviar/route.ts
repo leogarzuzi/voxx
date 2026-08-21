@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { notificarSolicitacaoMedica } from "@/lib/notificacoesMedicas";
+import { emailTemFormatoValido, normalizarEmail } from "@/lib/emailSeguro";
 
 export const dynamic = "force-dynamic";
 
@@ -42,14 +43,12 @@ function cpfFormatado(cpf: string) {
   return cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.$2.$3-$4");
 }
 function validarEmail(valor: unknown, obrigatorio: boolean) {
-  const email = String(valor ?? "")
-    .trim()
-    .toLowerCase();
+  const email = normalizarEmail(valor);
   if (!email)
     return obrigatorio
       ? { email, erro: "Informe o e-mail." }
       : { email, erro: "" };
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))
+  if (!emailTemFormatoValido(email))
     return { email, erro: "Informe um e-mail válido." };
   const sugestao = ERROS_DOMINIO[email.split("@")[1]];
   return sugestao

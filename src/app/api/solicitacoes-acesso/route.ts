@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { createSupabaseAdminClient, usuarioAtualTemPermissao } from "@/lib/perfisServer";
 import { PERMISSOES } from "@/lib/perfis";
 import { registrarAuditoria } from "@/lib/auditoria";
+import { emailTemFormatoValido } from "@/lib/emailSeguro";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +26,7 @@ function excedeuLimite(chave: string) {
 }
 
 function emailValido(email: string) {
-  return email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return emailTemFormatoValido(email);
 }
 
 async function usuarioAutorizado() {

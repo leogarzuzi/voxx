@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { TemaToggle } from "@/components/TemaToggle";
 import { BotaoVoltar } from "@/components/BotaoVoltar";
 import { useTema } from "@/contexts/TemaContext";
+import { emailTemFormatoValido, normalizarEmail } from "@/lib/emailSeguro";
 
 type Vinculo = {
   id: number;
@@ -41,10 +42,9 @@ const DOMINIOS_COM_ERRO: Record<string, string> = {
 };
 
 function validarEmail(valor: string) {
-  const email = valor.trim().toLowerCase();
+  const email = normalizarEmail(valor);
   if (!email) return "O e-mail é obrigatório.";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))
-    return "Informe um e-mail válido.";
+  if (!emailTemFormatoValido(email)) return "Informe um e-mail válido.";
   const dominio = email.split("@")[1];
   return DOMINIOS_COM_ERRO[dominio]
     ? `O domínio “${dominio}” parece incorreto. Você quis dizer “${DOMINIOS_COM_ERRO[dominio]}”?`
