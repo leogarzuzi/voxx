@@ -25,6 +25,12 @@ function badgeStatus(status: string, temaDia: boolean) {
       : "border-red-300/30 bg-red-400/12 text-red-200";
   }
 
+  if (status === "Processando") {
+    return temaDia
+      ? "border-sky-200 bg-sky-50 text-sky-700"
+      : "border-sky-300/30 bg-sky-400/12 text-sky-200";
+  }
+
   return temaDia
     ? "border-emerald-200 bg-emerald-50 text-emerald-700"
     : "border-emerald-300/30 bg-emerald-300/12 text-emerald-200";
@@ -38,6 +44,8 @@ export default function SolicitacoesPage() {
     useState<number | null>(null);
   const [perfilSelecionado, setPerfilSelecionado] = useState("");
   const [perfisDisponiveis, setPerfisDisponiveis] = useState(["Admin", "Gerente"]);
+  const [aprovando, setAprovando] = useState(false);
+  const [erroAprovacao, setErroAprovacao] = useState("");
 
   async function carregarSolicitacoes() {
     try {
@@ -76,26 +84,41 @@ export default function SolicitacoesPage() {
   }
 
   async function aprovarSolicitacao() {
-    if (!solicitacaoSelecionada || !perfilSelecionado) return;
+    if (!solicitacaoSelecionada || !perfilSelecionado || aprovando) return;
 
-    const response = await fetch("/api/aprovar-solicitacao", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        solicitacaoId: solicitacaoSelecionada,
-        perfil: perfilSelecionado,
-      }),
-    });
+    try {
+      setAprovando(true);
+      setErroAprovacao("");
 
-    const resultado = await response.json();
+      const response = await fetch("/api/aprovar-solicitacao", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          solicitacaoId: solicitacaoSelecionada,
+          perfil: perfilSelecionado,
+        }),
+      });
 
-    alert(JSON.stringify(resultado));
+      const resultado = await response.json();
+      if (!response.ok || !resultado.sucesso) {
+        throw new Error(resultado.mensagem || "Não foi possível aprovar a solicitação.");
+      }
 
-    setSolicitacaoSelecionada(null);
-    setPerfilSelecionado("");
-    carregarSolicitacoes();
+      setSolicitacaoSelecionada(null);
+      setPerfilSelecionado("");
+      await carregarSolicitacoes();
+      alert(resultado.mensagem || "Solicitação aprovada com sucesso.");
+    } catch (error) {
+      setErroAprovacao(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível aprovar a solicitação."
+      );
+    } finally {
+      setAprovando(false);
+    }
   }
 
   useEffect(() => {
@@ -104,7 +127,7 @@ export default function SolicitacoesPage() {
 
   const totalSolicitacoes = solicitacoes.length;
   const pendentes = solicitacoes.filter(
-    (item) => item.status === "Pendente"
+    (item) => item.status === "Pendente" || item.status === "Processando"
   ).length;
   const aprovadas = solicitacoes.filter(
     (item) => item.status === "Aprovada"
@@ -273,6 +296,7 @@ export default function SolicitacoesPage() {
                         onClick={() => {
                           setSolicitacaoSelecionada(item.id);
                           setPerfilSelecionado("");
+                          setErroAprovacao("");
                         }}
                         className="voxx-button-primary rounded-xl px-3 py-2 text-xs font-semibold"
                       >
@@ -290,7 +314,7 @@ export default function SolicitacoesPage() {
                     <span
                       className="voxx-text-muted rounded-full border border-[var(--voxx-border)] bg-[var(--voxx-surface-soft)] px-3 py-1 text-xs font-medium"
                     >
-                      Finalizada
+                      {item.status === "Processando" ? "Em processamento" : "Finalizada"}
                     </span>
                   )}
                 </div>
@@ -323,6 +347,7 @@ export default function SolicitacoesPage() {
               <select
                 value={perfilSelecionado}
                 onChange={(e) => setPerfilSelecionado(e.target.value)}
+                disabled={aprovando}
                 className="voxx-field h-11 w-full rounded-2xl px-3"
               >
                 <option value="">Selecione...</option>
@@ -332,14 +357,28 @@ export default function SolicitacoesPage() {
               </select>
             </div>
 
+            {erroAprovacao && (
+              <div
+                className={
+                  temaDia
+                    ? "mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+                    : "mt-4 rounded-2xl border border-red-300/30 bg-red-400/10 px-4 py-3 text-sm font-medium text-red-200"
+                }
+              >
+                {erroAprovacao}
+              </div>
+            )}
+
             <div className="mt-6 flex gap-3">
               <button
                 type="button"
                 onClick={() => {
                   setSolicitacaoSelecionada(null);
                   setPerfilSelecionado("");
+                  setErroAprovacao("");
                 }}
-                className="voxx-button-secondary flex-1 rounded-2xl px-4 py-2 text-sm font-semibold"
+                disabled={aprovando}
+                className="voxx-button-secondary flex-1 rounded-2xl px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Cancelar
               </button>
@@ -347,10 +386,16 @@ export default function SolicitacoesPage() {
               <button
                 type="button"
                 onClick={aprovarSolicitacao}
-                disabled={!perfilSelecionado}
-                className="voxx-button-primary flex-1 rounded-2xl px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={!perfilSelecionado || aprovando}
+                className="voxx-button-primary inline-flex flex-1 items-center justify-center gap-2 rounded-2xl px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Confirmar
+                {aprovando && (
+                  <span
+                    aria-hidden="true"
+                    className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+                  />
+                )}
+                {aprovando ? "Aprovando..." : "Confirmar"}
               </button>
             </div>
           </div>

@@ -82,27 +82,42 @@ export async function POST(request: Request) {
 
     const { data: solicitacao, error: erroSolicitacao } = await supabaseAdmin
       .from("solicitacoes_acesso")
-      .select("id, nome, email, status")
+      .update({ status: "Processando", perfil })
       .eq("id", solicitacaoId)
-      .single();
+      .eq("status", "Pendente")
+      .select("id, nome, email, status")
+      .maybeSingle();
 
-    if (erroSolicitacao || !solicitacao) {
+    if (erroSolicitacao) {
       return NextResponse.json(
-        { sucesso: false, mensagem: "Solicitação não encontrada." },
-        { status: 404 }
+        { sucesso: false, mensagem: "Não foi possível iniciar a aprovação." },
+        { status: 500 }
       );
     }
 
-    if (solicitacao.status !== "Pendente") {
+    if (!solicitacao) {
       return NextResponse.json(
-        { sucesso: false, mensagem: "Esta solicitação já foi finalizada." },
-        { status: 400 }
+        {
+          sucesso: false,
+          mensagem: "Esta solicitação já está sendo processada ou foi finalizada.",
+        },
+        { status: 409 }
       );
+    }
+
+    async function liberarSolicitacao() {
+      const { error } = await supabaseAdmin
+        .from("solicitacoes_acesso")
+        .update({ status: "Pendente", perfil: null })
+        .eq("id", solicitacaoId)
+        .eq("status", "Processando");
+
+      if (error) console.error("Não foi possível liberar a solicitação:", error);
     }
 
     const emailNormalizado = solicitacao.email.trim().toLowerCase();
 
-    const { error: erroConvite } =
+    const { data: convite, error: erroConvite } =
       await supabaseAdmin.auth.admin.inviteUserByEmail(emailNormalizado, {
         data: {
           nome: solicitacao.nome,
@@ -112,6 +127,7 @@ export async function POST(request: Request) {
       });
 
     if (erroConvite) {
+      await liberarSolicitacao();
       return NextResponse.json(
         { sucesso: false, mensagem: erroConvite.message },
         { status: 500 }
@@ -125,6 +141,15 @@ export async function POST(request: Request) {
     });
 
     if (erroUsuario) {
+      if (convite.user?.id) {
+        const { error: erroRollbackAuth } = await supabaseAdmin.auth.admin.deleteUser(
+          convite.user.id
+        );
+        if (erroRollbackAuth) {
+          console.error("Não foi possível desfazer o convite:", erroRollbackAuth);
+        }
+      }
+      await liberarSolicitacao();
       return NextResponse.json(
         { sucesso: false, mensagem: erroUsuario.message },
         { status: 500 }
@@ -137,7 +162,8 @@ export async function POST(request: Request) {
         status: "Aprovada",
         perfil,
       })
-      .eq("id", solicitacaoId);
+      .eq("id", solicitacaoId)
+      .eq("status", "Processando");
 
     if (erroUpdate) {
       return NextResponse.json(

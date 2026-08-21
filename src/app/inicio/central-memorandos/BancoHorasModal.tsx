@@ -71,6 +71,10 @@ export function BancoHorasModal({ onClose, modo = "criar", registro, onSaved }: 
     : "rounded-xl border border-red-300/20 bg-red-400/10 px-4 py-3 text-sm font-medium text-red-100";
   const titleText = "voxx-text-primary";
   const mutedText = "voxx-text-muted";
+  const cargaHorariaDiferente =
+    tipoOriginal !== "" &&
+    tipoReposicao !== "" &&
+    (tipoOriginal === "24") !== (tipoReposicao === "24");
 
   const formularioValido = useMemo(() => {
     return (
@@ -82,9 +86,10 @@ export function BancoHorasModal({ onClose, modo = "criar", registro, onSaved }: 
       dataReposicao !== "" &&
       tipoReposicao !== "" &&
       email.trim() !== "" &&
+      !cargaHorariaDiferente &&
       !enviando
     );
-  }, [matricula, nome, funcao, dataOriginal, tipoOriginal, dataReposicao, tipoReposicao, email, enviando]);
+  }, [matricula, nome, funcao, dataOriginal, tipoOriginal, dataReposicao, tipoReposicao, email, cargaHorariaDiferente, enviando]);
 
   function limparColaborador() {
     setNome("");
@@ -288,13 +293,18 @@ export function BancoHorasModal({ onClose, modo = "criar", registro, onSaved }: 
                 <label className={labelClass}>Novo tipo</label>
                 <select value={tipoReposicao} onChange={(e) => setTipoReposicao(e.target.value as TipoPlantao)} className={inputClass}>
                   <option value="">Selecione</option>
-                  <option value="SD">SD</option>
-                  <option value="SN">SN</option>
-                  <option value="24">24</option>
+                  <option value="SD" disabled={tipoOriginal === "24"}>SD</option>
+                  <option value="SN" disabled={tipoOriginal === "24"}>SN</option>
+                  <option value="24" disabled={tipoOriginal === "SD" || tipoOriginal === "SN"}>24</option>
                 </select>
               </div>
             </div>
           </section>
+          {cargaHorariaDiferente && (
+            <div className={errorClass}>
+              O banco de horas precisa respeitar a equivalência: SD/SN com SD/SN, ou 24 com 24.
+            </div>
+          )}
           {erro && <div className={errorClass}>{erro}</div>}
 
           <div className="flex justify-end gap-3">

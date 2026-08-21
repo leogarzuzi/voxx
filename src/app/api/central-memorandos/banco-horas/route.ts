@@ -57,6 +57,10 @@ function tipoValido(valor: string): valor is TipoPlantao {
   return valor === "SD" || valor === "SN" || valor === "24";
 }
 
+function mesmaCargaHoraria(tipoA: TipoPlantao, tipoB: TipoPlantao) {
+  return (tipoA === "24") === (tipoB === "24");
+}
+
 function competenciaAtual() {
   const agora = new Date();
   const ano = agora.getFullYear();
@@ -343,6 +347,18 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
+
+    if (!mesmaCargaHoraria(tipoOriginal, tipoNovoPlantao)) {
+      return Response.json(
+        {
+          success: false,
+          error:
+            "O banco de horas precisa respeitar a equivalência: SD/SN com SD/SN, ou 24 com 24.",
+        },
+        { status: 400 },
+      );
+    }
+
     if (!dataNoMesAtual(dataOriginal) || !dataNoMesAtual(dataNovoPlantao)) {
       return Response.json(
         {
@@ -528,6 +544,17 @@ export async function PUT(request: NextRequest) {
     if (!tipoValido(tipoOriginal) || !tipoValido(tipoNovoPlantao)) {
       return Response.json(
         { success: false, error: "Tipo de plantão inválido." },
+        { status: 400 },
+      );
+    }
+
+    if (!mesmaCargaHoraria(tipoOriginal, tipoNovoPlantao)) {
+      return Response.json(
+        {
+          success: false,
+          error:
+            "O banco de horas precisa respeitar a equivalência: SD/SN com SD/SN, ou 24 com 24.",
+        },
         { status: 400 },
       );
     }
