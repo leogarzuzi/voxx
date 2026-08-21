@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  serverExternalPackages: ["pdfkit"],
+  outputFileTracingIncludes: {
+    "/api/area-medica/**/*": ["./node_modules/pdfkit/js/data/**/*"],
+  },
   async headers() {
     return [
       {
