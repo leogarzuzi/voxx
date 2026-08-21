@@ -131,6 +131,31 @@ export default function BancoHorasTabela() {
     carregarRegistros();
   }
 
+  async function baixarComprovante(item: BancoHoras) {
+    try {
+      setErro("");
+      const resposta = await fetch(
+        `/api/central-memorandos/banco-horas?comprovante=${encodeURIComponent(item.id)}`,
+      );
+      if (!resposta.ok) {
+        const dados = await resposta.json().catch(() => ({}));
+        throw new Error(dados.error || "Não foi possível gerar o comprovante.");
+      }
+      const url = URL.createObjectURL(await resposta.blob());
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `comprovante-${item.protocolo.replace(/[^A-Za-z0-9-]/g, "-")}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      setErro(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível gerar o comprovante.",
+      );
+    }
+  }
+
   async function confirmarCancelamento() {
     if (!registroCancelamento) return;
 
@@ -431,6 +456,17 @@ export default function BancoHorasTabela() {
                       </td>
                       <td className="whitespace-nowrap px-4 py-3">
                         <div className="flex justify-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => baixarComprovante(item)}
+                            className={
+                              temaDia
+                                ? "rounded-lg border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-bold text-sky-700 transition hover:bg-sky-100"
+                                : "rounded-lg border border-sky-300/20 bg-sky-400/10 px-2.5 py-1 text-xs font-bold text-sky-100 transition hover:bg-sky-400/15"
+                            }
+                          >
+                            PDF
+                          </button>
                           <button
                             type="button"
                             onClick={() => setRegistroEdicao(item)}

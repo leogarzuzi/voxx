@@ -7,6 +7,13 @@ import {
   MODULOS_AUDITORIA,
   registrarAuditoria,
 } from "@/lib/auditoria";
+import {
+  gerarComprovanteMemorandoPdf,
+  nomeArquivoComprovante,
+  type DadosComprovanteMemorando,
+} from "@/lib/comprovanteMemorandoPdf";
+import { emailTemFormatoValido, normalizarEmail } from "@/lib/emailSeguro";
+import { notificarMemorandoCriado } from "@/lib/notificacoesMemorandos";
 
 export const dynamic = "force-dynamic";
 
@@ -70,6 +77,33 @@ function mesmoDiaMesmoTipo(
   return Boolean(
     dataA && dataB && tipoA && tipoB && dataA === dataB && tipoA === tipoB,
   );
+}
+
+function dadosComprovanteBancoHoras(registro: any): DadosComprovanteMemorando {
+  return {
+    modalidade: "banco_horas",
+    protocolo: texto(registro.protocolo),
+    status: texto(registro.status) || "recebido",
+    participantes: [
+      {
+        papel: "Funcionário solicitante",
+        nome: texto(registro.nome),
+        matricula: texto(registro.matricula),
+      },
+    ],
+    plantoes: [
+      {
+        papel: "Plantão original",
+        data: texto(registro.data_plantao_original),
+        tipo: normalizarTipoPlantao(registro.tipo_plantao_original),
+      },
+      {
+        papel: "Novo plantão",
+        data: texto(registro.data_novo_plantao),
+        tipo: normalizarTipoPlantao(registro.tipo_novo_plantao),
+      },
+    ],
+  };
 }
 
 async function gerarProtocolo(supabase: any) {
@@ -155,6 +189,34 @@ export async function GET(request: NextRequest) {
     if (erro) return erro;
 
     const { searchParams } = new URL(request.url);
+    const comprovanteId = texto(searchParams.get("comprovante"));
+    if (comprovanteId) {
+      const { data: registro, error } = await supabase
+        .from("banco_horas_controle")
+        .select(
+          "protocolo, status, matricula, nome, data_plantao_original, tipo_plantao_original, data_novo_plantao, tipo_novo_plantao",
+        )
+        .eq("id", comprovanteId)
+        .single();
+
+      if (error || !registro) {
+        return Response.json(
+          { success: false, error: "Banco de horas não encontrado." },
+          { status: 404 },
+        );
+      }
+
+      const pdf = await gerarComprovanteMemorandoPdf(
+        dadosComprovanteBancoHoras(registro),
+      );
+      return new Response(new Uint8Array(pdf), {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="${nomeArquivoComprovante(registro.protocolo)}"`,
+          "Cache-Control": "private, no-store",
+        },
+      });
+    }
     const pagina = Math.max(Number(searchParams.get("page") || "1"), 1);
     const limite = Math.min(
       Math.max(Number(searchParams.get("pageSize") || "100"), 1),
@@ -335,7 +397,14 @@ export async function POST(request: NextRequest) {
 
     const protocolo = await gerarProtocolo(supabase);
     const nomeUsuario = texto(usuarioLogado.nome) || texto(user.email);
-    const email = emailInformado || texto(colaborador.email).toLowerCase();
+    const email = normalizarEmail(emailInformado || colaborador.email);
+
+    if (!emailTemFormatoValido(email)) {
+      return Response.json(
+        { success: false, error: "Informe um e-mail válido para o funcionário." },
+        { status: 400 },
+      );
+    }
 
     const { data: bancoHoras, error: erroInsert } = await supabase
       .from("banco_horas_controle")
@@ -387,9 +456,33 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    let emailEnviado = true;
+    try {
+      await notificarMemorandoCriado({
+        destinatarios: [email],
+        dados: dadosComprovanteBancoHoras({
+          protocolo: bancoHoras.protocolo,
+          status: "recebido",
+          matricula,
+          nome: colaborador.nome,
+          data_plantao_original: dataOriginal,
+          tipo_plantao_original: tipoOriginal,
+          data_novo_plantao: dataNovoPlantao,
+          tipo_novo_plantao: tipoNovoPlantao,
+        }),
+      });
+    } catch (erroEmail) {
+      emailEnviado = false;
+      console.error("Banco de horas registrado, mas o e-mail falhou:", erroEmail);
+    }
+
     return Response.json({
       success: true,
       bancoHoras,
+      emailEnviado,
+      avisoEmail: emailEnviado
+        ? null
+        : "O banco de horas foi registrado, mas não foi possível enviar a confirmação por e-mail.",
       message: `Banco de horas registrado com sucesso. Protocolo: ${bancoHoras.protocolo}`,
     });
   } catch {

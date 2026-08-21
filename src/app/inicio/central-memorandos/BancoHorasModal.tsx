@@ -56,7 +56,10 @@ export function BancoHorasModal({ onClose, modo = "criar", registro, onSaved }: 
   const [buscando, setBuscando] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState("");
-  const [sucesso, setSucesso] = useState<{ protocolo: string } | null>(null);
+  const [sucesso, setSucesso] = useState<{
+    protocolo: string;
+    aviso?: string | null;
+  } | null>(null);
 
   const overlayClass = "fixed inset-0 z-50 flex items-center justify-center bg-[var(--voxx-overlay)] px-4 backdrop-blur-sm";
   const modalClass = "voxx-surface-raised voxx-scrollbar max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-[30px] p-6";
@@ -148,7 +151,10 @@ export function BancoHorasModal({ onClose, modo = "criar", registro, onSaved }: 
         throw new Error(dados.error || "Não foi possível confirmar a solicitação.");
       }
 
-      setSucesso({ protocolo: dados.bancoHoras?.protocolo || registro?.protocolo || "-" });
+      setSucesso({
+        protocolo: dados.bancoHoras?.protocolo || registro?.protocolo || "-",
+        aviso: dados.avisoEmail,
+      });
     } catch (error) {
       setErro(error instanceof Error ? error.message : "Não foi possível confirmar a solicitação.");
     } finally {
@@ -308,6 +314,7 @@ export function BancoHorasModal({ onClose, modo = "criar", registro, onSaved }: 
             <div className={temaDia ? "mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-xl font-bold text-emerald-700" : "mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-400/10 text-xl font-bold text-emerald-100"}>✓</div>
             <h3 className={`mt-4 text-xl font-bold ${titleText}`}>{modoEdicao ? "Alteração salva" : "Solicitação confirmada"}</h3>
             <p className={`mt-2 text-sm ${mutedText}`}>Protocolo <span className={titleText}>{sucesso.protocolo}</span></p>
+            {sucesso.aviso && <p className={`mt-3 ${errorClass}`}>{sucesso.aviso}</p>}
             <button type="button" onClick={async () => { if (onSaved) await onSaved(); else onClose(); }} className={temaDia ? "mt-6 rounded-xl bg-slate-950 px-5 py-2 text-sm font-semibold text-white transition hover:bg-slate-800" : "mt-6 rounded-xl bg-white px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"}>
               OK
             </button>

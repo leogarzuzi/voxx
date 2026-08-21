@@ -7,6 +7,13 @@ import {
   MODULOS_AUDITORIA,
   registrarAuditoria,
 } from "@/lib/auditoria";
+import {
+  gerarComprovanteMemorandoPdf,
+  nomeArquivoComprovante,
+  type DadosComprovanteMemorando,
+} from "@/lib/comprovanteMemorandoPdf";
+import { emailTemFormatoValido, normalizarEmail } from "@/lib/emailSeguro";
+import { notificarMemorandoCriado } from "@/lib/notificacoesMemorandos";
 
 export const dynamic = "force-dynamic";
 
@@ -104,6 +111,38 @@ function proximaCompetencia(competencia: string) {
     : `${ano}-${String(mes + 1).padStart(2, "0")}`;
 }
 
+function dadosComprovanteTroca(registro: any): DadosComprovanteMemorando {
+  return {
+    modalidade: "troca_plantao",
+    protocolo: texto(registro.protocolo),
+    status: texto(registro.status) || "recebido",
+    participantes: [
+      {
+        papel: "Solicitante",
+        nome: texto(registro.nome_solicitante),
+        matricula: texto(registro.matricula_solicitante),
+      },
+      {
+        papel: "Solicitado",
+        nome: texto(registro.nome_solicitado),
+        matricula: texto(registro.matricula_solicitado),
+      },
+    ],
+    plantoes: [
+      {
+        papel: "Plantão do solicitante",
+        data: texto(registro.data_plantao_solicitante),
+        tipo: normalizarTipoPlantao(registro.tipo_plantao_solicitante),
+      },
+      {
+        papel: "Plantão do solicitado",
+        data: texto(registro.data_plantao_solicitado),
+        tipo: normalizarTipoPlantao(registro.tipo_plantao_solicitado),
+      },
+    ],
+  };
+}
+
 async function obterUsuarioAtivo(supabase: any) {
   const {
     data: { user },
@@ -171,6 +210,35 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
+
+    const comprovanteId = texto(searchParams.get("comprovante"));
+    if (comprovanteId) {
+      const { data: registro, error } = await supabase
+        .from("trocas_plantao")
+        .select(
+          "protocolo, status, matricula_solicitante, nome_solicitante, data_plantao_solicitante, tipo_plantao_solicitante, matricula_solicitado, nome_solicitado, data_plantao_solicitado, tipo_plantao_solicitado",
+        )
+        .eq("id", comprovanteId)
+        .single();
+
+      if (error || !registro) {
+        return Response.json(
+          { success: false, error: "Troca de plantão não encontrada." },
+          { status: 404 },
+        );
+      }
+
+      const pdf = await gerarComprovanteMemorandoPdf(
+        dadosComprovanteTroca(registro),
+      );
+      return new Response(new Uint8Array(pdf), {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="${nomeArquivoComprovante(registro.protocolo)}"`,
+          "Cache-Control": "private, no-store",
+        },
+      });
+    }
 
     const pagina = Math.max(Number(searchParams.get("page") || "1"), 1);
     const limite = Math.min(
@@ -456,8 +524,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const emailSolicitante =
-      texto(body.email_solicitante) || texto(solicitante.email);
+    const emailSolicitante = normalizarEmail(
+      body.email_solicitante || solicitante.email,
+    );
+    const emailSolicitado = normalizarEmail(body.email_solicitado);
+
+    if (!emailTemFormatoValido(emailSolicitante)) {
+      return Response.json(
+        { success: false, error: "Informe um e-mail válido para o solicitante." },
+        { status: 400 },
+      );
+    }
+    if (emailSolicitado && !emailTemFormatoValido(emailSolicitado)) {
+      return Response.json(
+        { success: false, error: "O e-mail opcional do solicitado é inválido." },
+        { status: 400 },
+      );
+    }
 
     const { data: troca, error: erroInsert } = await supabase
       .from("trocas_plantao")
@@ -515,9 +598,35 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    let emailEnviado = true;
+    try {
+      await notificarMemorandoCriado({
+        destinatarios: [emailSolicitante, emailSolicitado],
+        dados: dadosComprovanteTroca({
+          protocolo: troca.protocolo,
+          status: "recebido",
+          matricula_solicitante: matriculaSolicitante,
+          nome_solicitante: solicitante.nome,
+          data_plantao_solicitante: dataSolicitante,
+          tipo_plantao_solicitante: tipoSolicitante,
+          matricula_solicitado: matriculaSolicitado,
+          nome_solicitado: solicitado.nome,
+          data_plantao_solicitado: dataSolicitado,
+          tipo_plantao_solicitado: tipoSolicitado,
+        }),
+      });
+    } catch (erroEmail) {
+      emailEnviado = false;
+      console.error("Troca registrada, mas o e-mail falhou:", erroEmail);
+    }
+
     return Response.json({
       success: true,
       troca,
+      emailEnviado,
+      avisoEmail: emailEnviado
+        ? null
+        : "A troca foi registrada, mas não foi possível enviar a confirmação por e-mail.",
       message: `Troca de plantão registrada com sucesso. Protocolo: ${troca.protocolo}`,
     });
   } catch {

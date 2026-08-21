@@ -24,6 +24,7 @@ type TrocaPlantaoEdicao = {
   matricula_solicitado: string;
   nome_solicitado: string;
   funcao_solicitado?: string | null;
+  email_solicitado?: string | null;
   data_plantao_solicitado: string;
   tipo_plantao_solicitado: string;
 };
@@ -98,6 +99,7 @@ export function TrocaPlantaoModal({
   const [matriculaSolicitado, setMatriculaSolicitado] = useState("");
   const [nomeSolicitado, setNomeSolicitado] = useState("");
   const [funcaoSolicitado, setFuncaoSolicitado] = useState("");
+  const [emailSolicitado, setEmailSolicitado] = useState("");
   const [dataSolicitado, setDataSolicitado] = useState("");
   const [tipoSolicitado, setTipoSolicitado] = useState<TipoPlantao>("");
   const [erroSolicitado, setErroSolicitado] = useState("");
@@ -105,7 +107,11 @@ export function TrocaPlantaoModal({
 
   const [enviando, setEnviando] = useState(false);
   const [erroEnvio, setErroEnvio] = useState("");
-  const [sucesso, setSucesso] = useState<{ titulo: string; protocolo?: string } | null>(null);
+  const [sucesso, setSucesso] = useState<{
+    titulo: string;
+    protocolo?: string;
+    aviso?: string | null;
+  } | null>(null);
 
   const pageOverlay = "fixed inset-0 z-50 flex items-center justify-center bg-[var(--voxx-overlay)] px-4 backdrop-blur-sm";
   const modalClass = "voxx-surface-raised voxx-scrollbar max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-[30px] p-6";
@@ -128,6 +134,7 @@ export function TrocaPlantaoModal({
   function limparSolicitado() {
     setNomeSolicitado("");
     setFuncaoSolicitado("");
+    setEmailSolicitado("");
   }
 
   async function buscarColaborador(matricula: string) {
@@ -184,6 +191,7 @@ export function TrocaPlantaoModal({
       const colaborador = await buscarColaborador(matriculaSolicitado);
       setNomeSolicitado(colaborador.nome);
       setFuncaoSolicitado(colaborador.funcao);
+      setEmailSolicitado(colaborador.email || "");
     } catch (error) {
       setErroSolicitado(error instanceof Error ? error.message : "Não foi possível consultar a matrícula.");
     } finally {
@@ -273,6 +281,7 @@ export function TrocaPlantaoModal({
           data_plantao_solicitante: dataSolicitante,
           tipo_plantao_solicitante: tipoSolicitante,
           matricula_solicitado: matriculaSolicitado,
+          email_solicitado: emailSolicitado,
           data_plantao_solicitado: dataSolicitado,
           tipo_plantao_solicitado: tipoSolicitado,
         }),
@@ -287,6 +296,7 @@ export function TrocaPlantaoModal({
       setSucesso({
         titulo: modoEdicao ? "Troca alterada com sucesso" : "Solicitação enviada com sucesso",
         protocolo: dados.troca?.protocolo || registro?.protocolo,
+        aviso: dados.avisoEmail,
       });
     } catch (error) {
       setErroEnvio(error instanceof Error ? error.message : "Não foi possível enviar a solicitação.");
@@ -311,6 +321,7 @@ export function TrocaPlantaoModal({
     setMatriculaSolicitado(registro.matricula_solicitado || "");
     setNomeSolicitado(registro.nome_solicitado || "");
     setFuncaoSolicitado(registro.funcao_solicitado || "");
+    setEmailSolicitado(registro.email_solicitado || "");
     setDataSolicitado(registro.data_plantao_solicitado || "");
     setTipoSolicitado(tipoPlantao(registro.tipo_plantao_solicitado));
   }, [modoEdicao, registro]);
@@ -467,6 +478,19 @@ export function TrocaPlantaoModal({
                     </select>
                   </div>
                 </div>
+
+                {!modoEdicao && (
+                  <div>
+                    <label className={labelClass}>E-mail do solicitado (opcional)</label>
+                    <input
+                      type="email"
+                      value={emailSolicitado}
+                      onChange={(e) => setEmailSolicitado(e.target.value.toLowerCase())}
+                      placeholder="Deixe vazio para não enviar"
+                      className={inputClass}
+                    />
+                  </div>
+                )}
               </div>
             </section>
           </div>
@@ -495,6 +519,7 @@ export function TrocaPlantaoModal({
             <div className={temaDia ? "mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-xl font-bold text-emerald-700" : "mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-400/10 text-xl font-bold text-emerald-100"}>✓</div>
             <h3 className={`mt-4 text-xl font-bold ${titleText}`}>{sucesso.titulo}</h3>
             {sucesso.protocolo && <p className={`mt-2 text-sm ${mutedText}`}>Protocolo <span className={titleText}>{sucesso.protocolo}</span></p>}
+            {sucesso.aviso && <p className={`mt-3 ${errorClass}`}>{sucesso.aviso}</p>}
             <button type="button" onClick={fecharSucesso} className={temaDia ? "mt-6 rounded-xl bg-slate-950 px-5 py-2 text-sm font-semibold text-white transition hover:bg-slate-800" : "mt-6 rounded-xl bg-white px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"}>
               OK
             </button>
