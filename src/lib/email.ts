@@ -9,8 +9,10 @@ type EnviarEmailOpcoes = {
   responderPara?: string;
   anexos?: Array<{
     filename: string;
-    path: string;
-    cid: string;
+    path?: string;
+    content?: Buffer;
+    cid?: string;
+    contentType?: string;
   }>;
 };
 

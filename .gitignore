@@ -37,3 +37,7 @@ next-env.d.ts
 # instrucoes locais para assistentes de desenvolvimento
 AGENTS.md
 CLAUDE.md
+
+# artefatos locais de criação e revisão
+/tmp/
+/output/
