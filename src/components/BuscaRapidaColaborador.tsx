@@ -17,7 +17,9 @@ export function BuscaRapidaColaborador({ tema = "noite" }: BuscaRapidaColaborado
     if (termo.length < 2) return;
 
     setBusca("");
-    router.push(`/inicio?busca=${encodeURIComponent(termo)}`);
+    router.push(
+      `/inicio?busca=${encodeURIComponent(termo)}&consulta=${Date.now()}`,
+    );
   }
 
   return (

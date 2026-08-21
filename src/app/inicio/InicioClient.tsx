@@ -81,6 +81,28 @@ function statusVinculoClass(status: string | null | undefined) {
     : "border-emerald-300/30 bg-emerald-400/10 text-emerald-500";
 }
 
+function statusRegistroClass(
+  status: string | null | undefined,
+  temaDia: boolean,
+) {
+  const normalizado = String(status || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR");
+
+  if (normalizado.includes("cancelad")) {
+    return temaDia
+      ? "border-red-200 bg-red-50 text-red-700"
+      : "border-red-300/20 bg-red-400/10 text-red-100";
+  }
+  if (normalizado.includes("recebid")) {
+    return temaDia
+      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+      : "border-emerald-300/20 bg-emerald-400/10 text-emerald-100";
+  }
+  return "border-[var(--voxx-border)] bg-[var(--voxx-surface-soft)] text-[var(--voxx-text-muted)]";
+}
+
 export default function InicioClient({ buscaInicial }: { buscaInicial: string }) {
   const router = useRouter();
   const { temaDia } = useTema();
@@ -297,7 +319,7 @@ export default function InicioClient({ buscaInicial }: { buscaInicial: string })
                 <section key={modulo} className={`overflow-hidden rounded-[26px] border ${painel}`}>
                   <div className="border-b border-[var(--voxx-border)] bg-[var(--voxx-surface-soft)] px-5 py-4"><h3 className="font-bold text-[var(--voxx-primary)]">{NOMES_MODULOS[modulo]}</h3></div>
                   <div className="divide-y divide-[var(--voxx-border)] px-5">
-                    {grupo.registros.map((registro) => <article key={registro.id} className="py-4"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-bold">{registro.titulo}</p><p className={`mt-1 text-sm leading-6 ${secundario}`}>{registro.descricao}</p></div><div className="shrink-0 text-right"><p className={`text-xs ${secundario}`}>{formatarData(registro.data)}</p>{registro.status && <span className="mt-2 inline-flex rounded-full border border-[var(--voxx-border)] bg-[var(--voxx-surface-soft)] px-2 py-1 text-[11px] font-bold text-[var(--voxx-text-muted)]">{registro.status}</span>}</div></div></article>)}
+                    {grupo.registros.map((registro) => <article key={registro.id} className="py-4"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-bold">{registro.titulo}</p><p className={`mt-1 text-sm leading-6 ${secundario}`}>{registro.descricao}</p></div><div className="shrink-0 text-right"><p className={`text-xs ${secundario}`}>{formatarData(registro.data)}</p>{registro.status && <span className={`mt-2 inline-flex rounded-full border px-2 py-1 text-[11px] font-bold ${statusRegistroClass(registro.status, temaDia)}`}>{registro.status}</span>}</div></div></article>)}
                   </div>
                   {(grupo.temMais || grupo.registros.length > 4) && <div className="flex gap-2 border-t border-[var(--voxx-border)] p-4">{grupo.temMais && <button type="button" disabled={carregandoMais === modulo} onClick={() => verMais(modulo)} className="voxx-button-primary flex-1 rounded-xl px-4 py-2 text-sm font-bold">{carregandoMais === modulo ? "Carregando..." : `Ver mais (${grupo.total - grupo.registros.length})`}</button>}{grupo.registros.length > 4 && <button type="button" onClick={() => recolher(modulo)} className="voxx-button-secondary rounded-xl px-4 py-2 text-sm font-semibold">Recolher</button>}</div>}
                 </section>

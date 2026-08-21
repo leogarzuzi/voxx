@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
@@ -308,6 +308,15 @@ export async function GET(request: NextRequest) {
       .single();
     if (usuario?.status !== "ativo") return Response.json({ success: false, error: "Usuário sem acesso ativo." }, { status: 403 });
 
+    // A ficha só chega até aqui após autenticação e validação do usuário.
+    // A consulta administrativa é necessária para os memorandos médicos,
+    // cujas tabelas não expõem registros diretamente às sessões do navegador.
+    const supabaseConsulta = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { persistSession: false, autoRefreshToken: false } },
+    );
+
     const { searchParams } = new URL(request.url);
     const matricula = somenteDigitos(searchParams.get("matricula"));
     const moduloParam = searchParams.get("modulo");
@@ -318,7 +327,7 @@ export async function GET(request: NextRequest) {
       if (matricula.length !== 8) {
         return Response.json({ success: false, error: "Matrícula inválida." }, { status: 400 });
       }
-      const ficha = await carregarFicha(supabase, matricula, modulo, offset);
+      const ficha = await carregarFicha(supabaseConsulta, matricula, modulo, offset);
       return Response.json({ success: true, matricula, ...ficha });
     }
 
@@ -327,7 +336,7 @@ export async function GET(request: NextRequest) {
       return Response.json({ success: false, error: "Informe uma busca entre 2 e 100 caracteres." }, { status: 400 });
     }
 
-    const vinculos = await localizarVinculos(supabase, busca);
+    const vinculos = await localizarVinculos(supabaseConsulta, busca);
     return Response.json({
       success: true,
       encontrado: vinculos.length > 0,

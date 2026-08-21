@@ -33,3 +33,7 @@ scripts/credentials.json
 next-env.d.ts
 .vercel
 .env*
+
+# instrucoes locais para assistentes de desenvolvimento
+AGENTS.md
+CLAUDE.md
